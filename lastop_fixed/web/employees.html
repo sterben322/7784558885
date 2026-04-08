@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Сотрудники компании</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto p-8">
+        <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-6 border-b flex justify-between items-center"><h1 class="text-2xl font-bold">Сотрудники компании</h1><button onclick="showInviteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-user-plus mr-2"></i>Пригласить</button></div>
+            <div class="p-6"><div id="employeesList" class="space-y-4"></div></div>
+        </div>
+    </div>
+    <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"><div class="bg-white rounded-xl w-full max-w-md p-6"><h3 class="text-xl font-bold mb-4">Пригласить сотрудника</h3><div class="space-y-4"><select id="inviteUser" class="w-full px-3 py-2 border rounded-lg"><option value="">Выберите пользователя</option></select><input type="text" id="invitePosition" placeholder="Должность" class="w-full px-3 py-2 border rounded-lg"><input type="text" id="inviteDepartment" placeholder="Отдел" class="w-full px-3 py-2 border rounded-lg"></div><div class="flex justify-end space-x-3 mt-6"><button onclick="closeInviteModal()" class="px-4 py-2 border rounded-lg">Отмена</button><button onclick="sendInvite()" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Отправить</button></div></div></div>
+    <script>
+        const API_URL = '/api';
+        const companyId = new URLSearchParams(location.search).get('id');
+        async function loadEmployees() {
+            try {
+                const response = await fetch(`${API_URL}/companies/${companyId}/employees`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const data = await response.json();
+                document.getElementById('employeesList').innerHTML = data.employees.map(emp => `<div class="flex items-center justify-between p-4 border rounded-lg"><div class="flex items-center space-x-4"><div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">${emp.user_name?.charAt(0) || 'U'}</div><div><p class="font-semibold">${emp.user_name}</p><p class="text-sm text-gray-600">${emp.position_name}</p>${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}</div></div><button onclick="removeEmployee('${emp.user_id}')" class="text-red-600"><i class="fas fa-trash"></i></button></div>`).join('');
+            } catch (error) { console.error(error); }
+        }
+        async function loadFriends() {
+            const response = await fetch(`${API_URL}/friends`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+            const data = await response.json();
+            document.getElementById('inviteUser').innerHTML = '<option value="">Выберите из друзей</option>' + data.friends.map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`).join('');
+        }
+        async function sendInvite() {
+            const userId = document.getElementById('inviteUser').value, position = document.getElementById('invitePosition').value, department = document.getElementById('inviteDepartment').value;
+            if (!userId || !position) { alert('Заполните поля'); return; }
+            const response = await fetch(`${API_URL}/companies/${companyId}/invite`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ user_id: userId, position_name: position, department: department || null }) });
+            if (response.ok) { alert('Приглашение отправлено!'); closeInviteModal(); loadEmployees(); } else { alert('Ошибка'); }
+        }
+        async function removeEmployee(userId) {
+            if (!confirm('Уволить сотрудника?')) return;
+            await fetch(`${API_URL}/companies/${companyId}/employees/${userId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+            loadEmployees();
+        }
+        function showInviteModal() { loadFriends(); document.getElementById('inviteModal').style.display = 'flex'; }
+        function closeInviteModal() { document.getElementById('inviteModal').style.display = 'none'; }
+        loadEmployees();
+    </script>
+</body>
+</html>

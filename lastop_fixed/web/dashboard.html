@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Дашборд</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .sidebar-item:hover { background-color: #f3f4f6; transform: translateX(4px); }
+        .sidebar-item.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .stat-card { background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); border: 1px solid #e5e7eb; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .dropdown-menu { animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white shadow-xl flex flex-col">
+            <div class="p-6 border-b"><h1 class="text-2xl font-bold gradient-text">LASTOP</h1><p class="text-xs text-gray-500">Платформа для бизнеса</p></div>
+            <nav class="flex-1 p-4 space-y-1">
+                <div class="sidebar-item active p-3 rounded-lg flex items-center space-x-3" data-page="dashboard"><i class="fas fa-tachometer-alt w-5"></i><span>Дашборд</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="communities"><i class="fas fa-users w-5"></i><span>Сообщества</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="companies"><i class="fas fa-building w-5"></i><span>Компании</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="forum"><i class="fas fa-comments w-5"></i><span>Форум</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="chat"><i class="fas fa-comment-dots w-5"></i><span>Чат</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="friends"><i class="fas fa-user-friends w-5"></i><span>Друзья</span></div>
+            </nav>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="bg-white shadow-sm sticky top-0 z-10 px-8 py-4 flex justify-between items-center">
+                <h2 class="text-2xl font-bold" id="pageTitle">Дашборд</h2>
+                <div class="relative">
+                    <button id="profileBtn" class="flex items-center space-x-3">
+                        <div class="text-right hidden sm:block"><p class="text-sm font-semibold" id="userName"></p><p class="text-xs text-gray-500" id="userEmail"></p></div>
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold" id="userAvatar"></div>
+                        <i class="fas fa-chevron-down text-gray-400 text-sm" id="dropdownArrow"></i>
+                    </button>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border overflow-hidden z-20 dropdown-menu">
+                        <div class="py-2">
+                            <a href="/profile.html" class="dropdown-item w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3"><i class="fas fa-user w-5"></i><span>Мой профиль</span></a>
+                            <a href="/create-community.html" class="dropdown-item w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3"><i class="fas fa-plus-circle w-5"></i><span>Создать сообщество</span></a>
+                            <a href="/create-company.html" class="dropdown-item w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3"><i class="fas fa-building w-5"></i><span>Создать компанию</span></a>
+                            <a href="/settings.html" class="dropdown-item w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3"><i class="fas fa-cog w-5"></i><span>Настройки</span></a>
+                            <div class="border-t my-2"></div>
+                            <button id="logoutBtn" class="dropdown-item w-full px-4 py-3 text-left hover:bg-red-50 flex items-center space-x-3"><i class="fas fa-sign-out-alt text-red-500 w-5"></i><span class="text-red-600">Выйти</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pageContent" class="p-8"></div>
+        </main>
+    </div>
+    
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg hidden transition-all z-50 bg-gray-800 text-white"></div>
+
+    <script>
+        const API_URL = '/api';
+        let currentUser = null;
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all z-50 ${colors[type]}`;
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+        
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            if (!token || !user) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            currentUser = JSON.parse(user);
+            document.getElementById('userName').textContent = currentUser.full_name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userAvatar').textContent = currentUser.full_name?.charAt(0) || 'U';
+            return true;
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        // Dashboard
+        async function renderDashboard() {
+            const container = document.getElementById('pageContent');
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="stat-card rounded-xl p-6 card-hover"><div class="flex items-center justify-between"><div><p class="text-gray-500">Проекты</p><p class="text-3xl font-bold">3</p></div><div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-project-diagram text-blue-600 text-xl"></i></div></div></div>
+                        <div class="stat-card rounded-xl p-6 card-hover"><div class="flex items-center justify-between"><div><p class="text-gray-500">Сообщества</p><p class="text-3xl font-bold" id="communitiesCount">0</p></div><div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><i class="fas fa-users text-purple-600 text-xl"></i></div></div></div>
+                        <div class="stat-card rounded-xl p-6 card-hover"><div class="flex items-center justify-between"><div><p class="text-gray-500">Друзья</p><p class="text-3xl font-bold" id="friendsCount">0</p></div><div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-user-friends text-green-600 text-xl"></i></div></div></div>
+                        <div class="stat-card rounded-xl p-6 card-hover"><div class="flex items-center justify-between"><div><p class="text-gray-500">Уведомления</p><p class="text-3xl font-bold">5</p></div><div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"><i class="fas fa-bell text-orange-600 text-xl"></i></div></div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm"><h3 class="text-xl font-bold mb-4">Быстрый доступ</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><a href="/create-community.html" class="text-center p-4 border rounded-lg hover:shadow-md transition"><i class="fas fa-plus-circle text-2xl text-blue-600"></i><p class="mt-2 text-sm">Создать сообщество</p></a><a href="/create-company.html" class="text-center p-4 border rounded-lg hover:shadow-md transition"><i class="fas fa-building text-2xl text-green-600"></i><p class="mt-2 text-sm">Создать компанию</p></a><a href="/forum.html" class="text-center p-4 border rounded-lg hover:shadow-md transition"><i class="fas fa-comments text-2xl text-purple-600"></i><p class="mt-2 text-sm">Форум</p></a><a href="/chat.html" class="text-center p-4 border rounded-lg hover:shadow-md transition"><i class="fas fa-comment-dots text-2xl text-orange-600"></i><p class="mt-2 text-sm">Чат</p></a></div></div>
+                </div>
+            `;
+            
+            // Загрузка статистики
+            try {
+                const response = await fetch(`${API_URL}/dashboard/stats`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+                document.getElementById('communitiesCount').textContent = data.stats.communities_joined || 0;
+            } catch (error) { console.error(error); }
+            
+            try {
+                const response = await fetch(`${API_URL}/friends`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+                document.getElementById('friendsCount').textContent = data.friends?.length || 0;
+            } catch (error) { console.error(error); }
+        }
+        
+        // Страница сообществ
+        async function renderCommunities() {
+            const container = document.getElementById('pageContent');
+            container.innerHTML = `<div class="text-center py-12">Загрузка...</div>`;
+            try {
+                const response = await fetch(`${API_URL}/communities`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-center"><h2 class="text-2xl font-bold">Все сообщества</h2><a href="/create-community.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-plus mr-2"></i>Создать</a></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${data.communities.map(c => `
+                                <div class="border rounded-xl p-6 hover:shadow-md transition">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-16 h-16 bg-${c.color}-100 rounded-xl flex items-center justify-center"><i class="fas ${c.icon} text-${c.color}-600 text-2xl"></i></div>
+                                            <div><h3 class="font-bold text-lg">${c.name}</h3><p class="text-sm text-gray-500">${c.members_count} участников</p></div>
+                                        </div>
+                                        <a href="/community.html?id=${c.id}" class="px-4 py-2 rounded-lg ${c.joined ? 'bg-gray-100 text-gray-700' : 'bg-blue-600 text-white'} hover:opacity-90">${c.joined ? 'Открыть' : 'Вступить'}</a>
+                                    </div>
+                                    <p class="text-gray-600 mt-4">${c.description.substring(0, 100)}${c.description.length > 100 ? '...' : ''}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-12 text-red-500">Ошибка загрузки</div>';
+            }
+        }
+        
+        // Страница компаний
+        async function renderCompanies() {
+            const container = document.getElementById('pageContent');
+            container.innerHTML = `<div class="text-center py-12">Загрузка...</div>`;
+            try {
+                const response = await fetch(`${API_URL}/company`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+                if (!data.company) {
+                    container.innerHTML = `<div class="text-center py-12"><p class="text-gray-500 mb-4">У вас еще нет зарегистрированной компании</p><a href="/create-company.html" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Зарегистрировать компанию</a></div>`;
+                } else {
+                    container.innerHTML = `
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+                            <div class="bg-gradient-to-r from-blue-600 to-purple-600 h-32"></div>
+                            <div class="px-8 pb-8">
+                                <div class="flex items-end -mt-16 mb-6">
+                                    <div class="w-32 h-32 bg-white rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-building text-5xl text-blue-600"></i></div>
+                                    <div class="ml-6 mb-4"><h1 class="text-3xl font-bold">${data.company.name}</h1><p class="text-gray-500">ИНН: ${data.company.inn || 'Не указан'}</p></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="col-span-2"><h3 class="font-semibold mb-2">О компании</h3><p class="text-gray-600">${data.company.description || 'Описание не добавлено'}</p><h3 class="font-semibold mt-6 mb-2">Контакты</h3><p><i class="fas fa-phone mr-2"></i>${data.company.phone || 'Не указан'}</p><p><i class="fas fa-globe mr-2"></i>${data.company.website || 'Не указан'}</p><p><i class="fas fa-map-marker-alt mr-2"></i>${data.company.address || 'Не указан'}</p></div>
+                                    <div class="bg-gray-50 rounded-xl p-6"><h3 class="font-semibold mb-4">Статистика</h3><div><p class="text-sm text-gray-500">Сотрудников</p><p class="text-2xl font-bold">${data.company.employee_count || 0}</p></div><div class="mt-3"><p class="text-sm text-gray-500">Подписчиков</p><p class="text-2xl font-bold">${data.company.followers_count || 0}</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-12 text-red-500">Ошибка загрузки</div>';
+            }
+        }
+        
+        // Страница друзей
+        async function renderFriends() {
+            const container = document.getElementById('pageContent');
+            container.innerHTML = `<div class="text-center py-12">Загрузка...</div>`;
+            try {
+                const response = await fetch(`${API_URL}/friends`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const data = await response.json();
+                container.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 class="text-2xl font-bold mb-6">Мои друзья</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${data.friends.map(f => `
+                                <div class="flex items-center space-x-3 p-3 border rounded-lg">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">${f.friend_name?.charAt(0)}</div>
+                                    <div><p class="font-semibold">${f.friend_name}</p><p class="text-xs text-gray-500">${f.friend_email}</p></div>
+                                </div>
+                            `).join('')}
+                            ${data.friends.length === 0 ? '<div class="col-span-3 text-center py-8 text-gray-500">У вас пока нет друзей</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-12 text-red-500">Ошибка загрузки</div>';
+            }
+        }
+        
+        // Переключение страниц
+        function switchToPage(page) {
+            document.getElementById('pageTitle').innerHTML = page === 'dashboard' ? 'Дашборд' : page === 'communities' ? 'Сообщества' : page === 'companies' ? 'Моя компания' : page === 'forum' ? 'Форум' : page === 'chat' ? 'Чат' : 'Друзья';
+            if (page === 'dashboard') renderDashboard();
+            else if (page === 'communities') renderCommunities();
+            else if (page === 'companies') renderCompanies();
+            else if (page === 'friends') renderFriends();
+            else if (page === 'forum') window.location.href = '/forum.html';
+            else if (page === 'chat') window.location.href = '/chat.html';
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) return;
+            
+            renderDashboard();
+            
+            // Sidebar navigation
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    switchToPage(item.dataset.page);
+                });
+            });
+            
+            // Profile dropdown
+            const profileBtn = document.getElementById('profileBtn');
+            const dropdown = document.getElementById('profileDropdown');
+            const arrow = document.getElementById('dropdownArrow');
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+                arrow.style.transform = dropdown.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+            document.addEventListener('click', () => { dropdown.classList.add('hidden'); arrow.style.transform = 'rotate(0deg)'; });
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+</body>
+</html>
