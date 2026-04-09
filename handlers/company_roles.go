@@ -71,6 +71,12 @@ func CreateCompanyRole(c *gin.Context) {
 
 func GetCompanyEmployees(c *gin.Context) {
 	companyID := c.Param("id")
+	userID := currentUserID(c)
+	var isPublic bool
+	if err := database.DB.QueryRow(`SELECT is_public FROM companies WHERE id = $1`, companyID).Scan(&isPublic); err == nil && !isPublic && !isCompanyMember(companyID, userID) {
+		jsonError(c, http.StatusForbidden, "Employees are hidden for private company")
+		return
+	}
 	rows, err := database.DB.Query(`
         SELECT u.id, u.full_name, u.email, u.avatar_url, ce.position_name, ce.department, ce.hire_date::text, ce.is_active, ce.assigned_at
         FROM company_employees ce

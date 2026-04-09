@@ -205,6 +205,51 @@ func CreateTables() {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+
+		`ALTER TABLE posts ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false`,
+		`ALTER TABLE posts ADD COLUMN IF NOT EXISTS is_unpublished BOOLEAN NOT NULL DEFAULT false`,
+		`CREATE TABLE IF NOT EXISTS company_members (
+            company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (company_id, user_id)
+        )`,
+		`CREATE TABLE IF NOT EXISTS company_join_requests (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            message TEXT,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (company_id, user_id)
+        )`,
+		`CREATE TABLE IF NOT EXISTS resumes (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+            title VARCHAR(200) NOT NULL,
+            about TEXT,
+            activity_type VARCHAR(100),
+            skills TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+            education_levels TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+            previous_workplaces TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
+		`CREATE TABLE IF NOT EXISTS vacancies (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            publisher_type VARCHAR(20) NOT NULL,
+            publisher_id UUID NOT NULL,
+            publisher_name VARCHAR(255) NOT NULL,
+            position VARCHAR(200) NOT NULL,
+            salary VARCHAR(100) NOT NULL,
+            expectations TEXT NOT NULL,
+            required_skills TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+            required_experience VARCHAR(100),
+            employment_type VARCHAR(100),
+            location VARCHAR(255),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
 		`CREATE TABLE IF NOT EXISTS post_likes (
             post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -20,6 +20,7 @@
                 <div><label class="block text-sm font-medium mb-1">Сайт</label><input type="url" id="website" class="w-full px-4 py-2 border rounded-lg"></div>
                 <div><label class="block text-sm font-medium mb-1">Телефон</label><input type="tel" id="phone" class="w-full px-4 py-2 border rounded-lg"></div>
                 <div><label class="block text-sm font-medium mb-1">Адрес</label><input type="text" id="address" class="w-full px-4 py-2 border rounded-lg"></div>
+                <div><label class="flex items-center space-x-2"><input type="checkbox" id="isPrivate"><span>Приватная компания (контент и участники скрыты до одобрения заявки)</span></label></div>
                 <div class="flex justify-end space-x-3 pt-4"><button type="button" onclick="history.back()" class="px-4 py-2 border rounded-lg">Отмена</button><button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg">Зарегистрировать</button></div>
             </form>
         </div>
@@ -33,7 +34,7 @@
                 inn: document.getElementById('inn').value || null,
                 description: document.getElementById('description').value || null,
                 logo_url: document.getElementById('logoUrl').value || null,
-                is_public: true,
+                is_public: !document.getElementById('isPrivate').checked,
                 search_tags: [],
                 website: document.getElementById('website').value || null,
                 phone: document.getElementById('phone').value || null,

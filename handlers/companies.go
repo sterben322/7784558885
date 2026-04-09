@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"lastop/database"
 	"lastop/models"
@@ -71,6 +72,12 @@ func GetCompany(c *gin.Context) {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	if !company.IsPublic && !isCompanyMember(company.ID.String(), userID) && company.OwnerID != userID {
+		company.Description = nil
+		company.Website = nil
+		company.Phone = nil
+		company.Address = nil
+	}
 	c.JSON(http.StatusOK, gin.H{"company": company})
 }
 
@@ -98,6 +105,7 @@ func CreateCompany(c *gin.Context) {
 		jsonError(c, http.StatusInternalServerError, "Failed to create company")
 		return
 	}
+	_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
 	c.JSON(http.StatusCreated, gin.H{"message": "Company created successfully", "company_id": companyID})
 }
 
@@ -173,7 +181,118 @@ func SearchCompanies(c *gin.Context) {
 			jsonError(c, http.StatusInternalServerError, err.Error())
 			return
 		}
+		if !company.IsPublic && !isCompanyMember(company.ID.String(), userID) && company.OwnerID != userID {
+			company.Description = nil
+			company.Website = nil
+			company.Phone = nil
+			company.Address = nil
+		}
 		companies = append(companies, company)
 	}
 	c.JSON(http.StatusOK, gin.H{"companies": companies})
+}
+
+func RequestJoinCompany(c *gin.Context) {
+	companyID := c.Param("id")
+	userID := currentUserID(c)
+	var req struct {
+		Message *string `json:"message"`
+	}
+	_ = c.ShouldBindJSON(&req)
+
+	var isPublic bool
+	if err := database.DB.QueryRow(`SELECT is_public FROM companies WHERE id = $1`, companyID).Scan(&isPublic); err != nil {
+		jsonError(c, http.StatusNotFound, "Company not found")
+		return
+	}
+	if isPublic {
+		_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
+		c.JSON(http.StatusOK, gin.H{"message": "Company is public, access granted"})
+		return
+	}
+	if isCompanyMember(companyID, userID) {
+		jsonError(c, http.StatusBadRequest, "Already approved")
+		return
+	}
+	requestID := uuid.New()
+	if _, err := database.DB.Exec(`INSERT INTO company_join_requests (id, company_id, user_id, message) VALUES ($1, $2, $3, $4) ON CONFLICT (company_id, user_id) DO UPDATE SET status = 'pending', message = EXCLUDED.message, created_at = NOW()`, requestID, companyID, userID, req.Message); err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to create join request")
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Join request sent"})
+}
+
+func GetCompanyJoinRequests(c *gin.Context) {
+	companyID := c.Param("id")
+	userID := currentUserID(c)
+	allowed, err := requireCompanyOwner(companyID, userID)
+	if err != nil || !allowed {
+		jsonError(c, http.StatusForbidden, "Only company owner can review requests")
+		return
+	}
+	rows, err := database.DB.Query(`
+        SELECT cjr.id, cjr.user_id, u.full_name, u.email, cjr.message, cjr.status, cjr.created_at
+        FROM company_join_requests cjr
+        JOIN users u ON u.id = cjr.user_id
+        WHERE cjr.company_id = $1 AND cjr.status = 'pending'
+        ORDER BY cjr.created_at ASC
+    `, companyID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+	requests := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var requestID, requestUserID uuid.UUID
+		var fullName, email, status string
+		var message sql.NullString
+		var createdAt time.Time
+		if err := rows.Scan(&requestID, &requestUserID, &fullName, &email, &message, &status, &createdAt); err != nil {
+			jsonError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		item := map[string]interface{}{"id": requestID, "user_id": requestUserID, "full_name": fullName, "email": email, "status": status, "created_at": createdAt}
+		if message.Valid {
+			item["message"] = message.String
+		}
+		requests = append(requests, item)
+	}
+	c.JSON(http.StatusOK, gin.H{"requests": requests})
+}
+
+func ApproveCompanyJoinRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	ownerID := currentUserID(c)
+	var companyID, requestUserID uuid.UUID
+	err := database.DB.QueryRow(`SELECT company_id, user_id FROM company_join_requests WHERE id = $1 AND status = 'pending'`, requestID).Scan(&companyID, &requestUserID)
+	if err != nil {
+		jsonError(c, http.StatusNotFound, "Request not found")
+		return
+	}
+	allowed, err := requireCompanyOwner(companyID.String(), ownerID)
+	if err != nil || !allowed {
+		jsonError(c, http.StatusForbidden, "Only company owner can approve requests")
+		return
+	}
+	_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, requestUserID)
+	_, _ = database.DB.Exec(`UPDATE company_join_requests SET status = 'approved' WHERE id = $1`, requestID)
+	c.JSON(http.StatusOK, gin.H{"message": "Request approved"})
+}
+
+func RejectCompanyJoinRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	ownerID := currentUserID(c)
+	var companyID uuid.UUID
+	if err := database.DB.QueryRow(`SELECT company_id FROM company_join_requests WHERE id = $1 AND status = 'pending'`, requestID).Scan(&companyID); err != nil {
+		jsonError(c, http.StatusNotFound, "Request not found")
+		return
+	}
+	allowed, err := requireCompanyOwner(companyID.String(), ownerID)
+	if err != nil || !allowed {
+		jsonError(c, http.StatusForbidden, "Only company owner can reject requests")
+		return
+	}
+	_, _ = database.DB.Exec(`UPDATE company_join_requests SET status = 'rejected' WHERE id = $1`, requestID)
+	c.JSON(http.StatusOK, gin.H{"message": "Request rejected"})
 }

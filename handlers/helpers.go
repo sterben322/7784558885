@@ -107,3 +107,19 @@ func authRequiredPage(c *gin.Context) {
 		return
 	}
 }
+
+func isCommunityMember(communityID string, userID uuid.UUID) bool {
+	var exists bool
+	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM community_members WHERE community_id = $1 AND user_id = $2)`, communityID, userID).Scan(&exists)
+	return exists
+}
+
+func isCompanyMember(companyID string, userID uuid.UUID) bool {
+	var exists bool
+	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM company_members WHERE company_id = $1 AND user_id = $2)`, companyID, userID).Scan(&exists)
+	if exists {
+		return true
+	}
+	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM company_employees WHERE company_id = $1 AND user_id = $2 AND is_active = true)`, companyID, userID).Scan(&exists)
+	return exists
+}

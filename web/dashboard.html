@@ -31,6 +31,8 @@
                 <div class="sidebar-item active p-3 rounded-lg flex items-center space-x-3" data-page="dashboard"><i class="fas fa-tachometer-alt w-5"></i><span>Дашборд</span></div>
                 <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="communities"><i class="fas fa-users w-5"></i><span>Сообщества</span></div>
                 <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="companies"><i class="fas fa-building w-5"></i><span>Компании</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="news"><i class="fas fa-newspaper w-5"></i><span>Новости</span></div>
+                <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="jobs"><i class="fas fa-briefcase w-5"></i><span>Резюме и вакансии</span></div>
                 <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="forum"><i class="fas fa-comments w-5"></i><span>Форум</span></div>
                 <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="chat"><i class="fas fa-comment-dots w-5"></i><span>Чат</span></div>
                 <div class="sidebar-item p-3 rounded-lg flex items-center space-x-3" data-page="friends"><i class="fas fa-user-friends w-5"></i><span>Друзья</span></div>
@@ -197,6 +199,30 @@
             }
         }
         
+
+        async function renderNews() {
+            const container = document.getElementById('pageContent');
+            container.innerHTML = `<div class="text-center py-12">Загрузка...</div>`;
+            try {
+                const response = await fetch(`${API_URL}/news`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const data = await response.json();
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold">Новости сообществ и организаций</h2>
+                        ${(data.posts || []).map(post => `
+                            <div class="bg-white rounded-xl p-5 shadow-sm border">
+                                <p class="text-sm text-gray-500">${post.author_name} • ${new Date(post.created_at).toLocaleString()}</p>
+                                ${post.title ? `<h3 class="text-lg font-semibold mt-1">${post.title}</h3>` : ''}
+                                <p class="text-gray-700 mt-2">${post.content}</p>
+                            </div>
+                        `).join('') || '<p class="text-gray-500">Пока нет новостей</p>'}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-12 text-red-500">Ошибка загрузки новостей</div>';
+            }
+        }
+
         // Страница друзей
         async function renderFriends() {
             const container = document.getElementById('pageContent');
@@ -227,11 +253,13 @@
         
         // Переключение страниц
         function switchToPage(page) {
-            document.getElementById('pageTitle').innerHTML = page === 'dashboard' ? 'Дашборд' : page === 'communities' ? 'Сообщества' : page === 'companies' ? 'Моя компания' : page === 'forum' ? 'Форум' : page === 'chat' ? 'Чат' : 'Друзья';
+            document.getElementById('pageTitle').innerHTML = page === 'dashboard' ? 'Дашборд' : page === 'communities' ? 'Сообщества' : page === 'companies' ? 'Моя компания' : page === 'news' ? 'Новости' : page === 'jobs' ? 'Резюме и вакансии' : page === 'forum' ? 'Форум' : page === 'chat' ? 'Чат' : 'Друзья';
             if (page === 'dashboard') renderDashboard();
             else if (page === 'communities') renderCommunities();
             else if (page === 'companies') renderCompanies();
             else if (page === 'friends') renderFriends();
+            else if (page === 'news') renderNews();
+            else if (page === 'jobs') window.location.href = '/jobs.html';
             else if (page === 'forum') window.location.href = '/forum.html';
             else if (page === 'chat') window.location.href = '/chat.html';
         }
