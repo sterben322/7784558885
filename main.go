@@ -156,5 +156,7 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Server running on port %s", port)
-	log.Fatal(r.Run(":" + port))
+	if err := r.Run(":" + port); err != nil {
+		log.Fatal(err)
+	}
 }
