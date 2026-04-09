@@ -44,3 +44,45 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Зеленая тема интерфейса */
+.green-gradient-bg {
+    background: linear-gradient(135deg, #0f9d58 0%, #22c55e 50%, #16a34a 100%);
+}
+
+.green-gradient-text {
+    background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.green-focus {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.green-focus:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.green-link {
+    color: #16a34a;
+}
+
+.green-link:hover {
+    color: #15803d;
+}
+
+.feature-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+}
