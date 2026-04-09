@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -14,36 +15,49 @@ var DB *sql.DB
 
 func InitDB() {
 	if os.Getenv("TEST_MODE") == "1" {
-		log.Println("TEST_MODE=1: database initialization skipped")
 		return
 	}
 
-	host := getenv("DB_HOST", "localhost")
+	host := getenv("DB_HOST", "")
 	port := getenv("DB_PORT", "5432")
 	user := getenv("DB_USER", "postgres")
 	password := getenv("DB_PASSWORD", "postgres")
 	dbname := getenv("DB_NAME", "lastop_db")
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-
-	var err error
-	DB, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal("error opening database:", err)
+	if host == "" {
+		return
 	}
+	hostsToTry := []string{host}
 
-	DB.SetMaxOpenConns(25)
-	DB.SetMaxIdleConns(25)
-	DB.SetConnMaxLifetime(5 * time.Minute)
+	var lastErr error
+	for _, hostCandidate := range hostsToTry {
+		connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", hostCandidate, port, user, password, dbname)
 
-	if err = DB.Ping(); err != nil {
-		log.Printf("warning: database is unavailable, running without DB: %v", err)
-		_ = DB.Close()
-		DB = nil
+		db, err := sql.Open("postgres", connStr)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		db.SetMaxOpenConns(25)
+		db.SetMaxIdleConns(25)
+		db.SetConnMaxLifetime(5 * time.Minute)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		err = db.PingContext(ctx)
+		cancel()
+		if err != nil {
+			lastErr = err
+			_ = db.Close()
+			continue
+		}
+
+		DB = db
+		log.Printf("database connected (host=%s)", hostCandidate)
 		return
 	}
 
-	log.Println("database connected")
+	log.Printf("warning: database is unavailable, running without DB: %v", lastErr)
 }
 
 func CloseDB() {
@@ -61,7 +75,6 @@ func getenv(key, fallback string) string {
 
 func CreateTables() {
 	if DB == nil {
-		log.Println("database not initialized: skipping table creation")
 		return
 	}
 
