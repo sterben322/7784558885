@@ -44,6 +44,12 @@ func GetCommunityRoles(c *gin.Context) {
 
 func GetCommunityMembersWithRoles(c *gin.Context) {
 	communityID := c.Param("id")
+	userID := currentUserID(c)
+	var isPrivate bool
+	if err := database.DB.QueryRow(`SELECT is_private FROM communities WHERE id = $1`, communityID).Scan(&isPrivate); err == nil && isPrivate && !isCommunityMember(communityID, userID) {
+		jsonError(c, http.StatusForbidden, "Members list is hidden for private community")
+		return
+	}
 	rows, err := database.DB.Query(`
         SELECT u.id, u.full_name, u.email, u.avatar_url,
                COALESCE(cur.role_name, 'member') AS role_name,

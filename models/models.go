@@ -117,6 +117,8 @@ type Post struct {
 	Tags             []string   `json:"tags"`
 	PrivacyLevel     string     `json:"privacy_level"`
 	TargetID         *uuid.UUID `json:"target_id,omitempty"`
+	IsHidden         bool       `json:"is_hidden"`
+	IsUnpublished    bool       `json:"is_unpublished"`
 	LikesCount       int        `json:"likes_count"`
 	CommentsCount    int        `json:"comments_count"`
 	SharesCount      int        `json:"shares_count"`
@@ -133,6 +135,8 @@ type CreatePostRequest struct {
 	Tags             []string `json:"tags"`
 	PrivacyLevel     string   `json:"privacy_level"`
 	TargetID         *string  `json:"target_id"`
+	IsHidden         bool     `json:"is_hidden"`
+	IsUnpublished    bool     `json:"is_unpublished"`
 }
 
 type Comment struct {
@@ -218,6 +222,55 @@ type CompanyEmployee struct {
 	AssignedAt   time.Time `json:"assigned_at"`
 }
 
+type Resume struct {
+	ID                 uuid.UUID `json:"id"`
+	UserID             uuid.UUID `json:"user_id"`
+	Title              string    `json:"title"`
+	About              *string   `json:"about,omitempty"`
+	ActivityType       *string   `json:"activity_type,omitempty"`
+	Skills             []string  `json:"skills"`
+	EducationLevels    []string  `json:"education_levels"`
+	PreviousWorkplaces []string  `json:"previous_workplaces"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+}
+
+type CreateResumeRequest struct {
+	Title              string   `json:"title" binding:"required"`
+	About              *string  `json:"about"`
+	ActivityType       *string  `json:"activity_type"`
+	Skills             []string `json:"skills"`
+	EducationLevels    []string `json:"education_levels"`
+	PreviousWorkplaces []string `json:"previous_workplaces"`
+}
+
+type Vacancy struct {
+	ID                 uuid.UUID `json:"id"`
+	PublisherType      string    `json:"publisher_type"`
+	PublisherID        uuid.UUID `json:"publisher_id"`
+	PublisherName      string    `json:"publisher_name"`
+	Position           string    `json:"position"`
+	Salary             string    `json:"salary"`
+	Expectations       string    `json:"expectations"`
+	RequiredSkills     []string  `json:"required_skills"`
+	RequiredExperience *string   `json:"required_experience,omitempty"`
+	EmploymentType     *string   `json:"employment_type,omitempty"`
+	Location           *string   `json:"location,omitempty"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+}
+
+type CreateVacancyRequest struct {
+	PublisherType      string   `json:"publisher_type" binding:"required"`
+	PublisherID        string   `json:"publisher_id" binding:"required"`
+	Position           string   `json:"position" binding:"required"`
+	Salary             string   `json:"salary" binding:"required"`
+	Expectations       string   `json:"expectations" binding:"required"`
+	RequiredSkills     []string `json:"required_skills"`
+	RequiredExperience *string  `json:"required_experience"`
+	EmploymentType     *string  `json:"employment_type"`
+	Location           *string  `json:"location"`
+}
 type AssignRoleRequest struct {
 	UserID   uuid.UUID `json:"user_id" binding:"required"`
 	RoleName string    `json:"role_name" binding:"required"`

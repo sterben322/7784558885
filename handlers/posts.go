@@ -71,9 +71,9 @@ func CreatePost(c *gin.Context) {
 
 	postID := uuid.New()
 	_, err := database.DB.Exec(`
-        INSERT INTO posts (id, author_id, author_type, author_name, title, content, short_description, image_url, tags, privacy_level, target_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    `, postID, userID, authorType, authorName, req.Title, req.Content, req.ShortDescription, req.ImageURL, pq.Array(req.Tags), req.PrivacyLevel, targetID)
+        INSERT INTO posts (id, author_id, author_type, author_name, title, content, short_description, image_url, tags, privacy_level, target_id, is_hidden, is_unpublished)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    `, postID, userID, authorType, authorName, req.Title, req.Content, req.ShortDescription, req.ImageURL, pq.Array(req.Tags), req.PrivacyLevel, targetID, req.IsHidden, req.IsUnpublished)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to create post")
 		return
@@ -93,10 +93,10 @@ func GetFeed(c *gin.Context) {
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-                   p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
-            WHERE p.privacy_level = 'public'
+            WHERE p.privacy_level = 'public' AND p.is_hidden = false AND p.is_unpublished = false
             ORDER BY p.created_at DESC
             LIMIT 50
         `
@@ -105,10 +105,11 @@ func GetFeed(c *gin.Context) {
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-                   p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
             WHERE p.author_type = 'user'
+              AND p.is_hidden = false AND p.is_unpublished = false
               AND (p.privacy_level = 'public' OR (p.privacy_level = 'friends' AND EXISTS (
                     SELECT 1 FROM user_friends uf
                     WHERE ((uf.user_id = p.author_id AND uf.friend_id = $1) OR (uf.user_id = $1 AND uf.friend_id = p.author_id))
@@ -122,23 +123,28 @@ func GetFeed(c *gin.Context) {
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-                   p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
-            WHERE p.author_id = $1 AND p.author_type = 'user'
+            WHERE p.author_id = $1 AND p.author_type = 'user' AND p.is_hidden = false AND p.is_unpublished = false
             ORDER BY p.created_at DESC
             LIMIT 50
         `
 		args = []interface{}{userID}
 	case "community":
 		communityID := c.Query("community_id")
+		var isPrivate bool
+		if err := database.DB.QueryRow(`SELECT is_private FROM communities WHERE id = $1`, communityID).Scan(&isPrivate); err == nil && isPrivate && !isCommunityMember(communityID, userID) {
+			jsonError(c, http.StatusForbidden, "Community posts are hidden until your request is approved")
+			return
+		}
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-                   p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
-            WHERE p.author_type = 'community' AND p.target_id = $2
+            WHERE p.author_type = 'community' AND p.target_id = $2 AND p.is_hidden = false AND p.is_unpublished = false
               AND (p.privacy_level = 'public' OR (p.privacy_level = 'members' AND EXISTS (
                    SELECT 1 FROM community_members WHERE community_id = $2 AND user_id = $1
               )))
@@ -146,11 +152,37 @@ func GetFeed(c *gin.Context) {
             LIMIT 50
         `
 		args = []interface{}{userID, communityID}
+	case "company":
+		companyID := c.Query("company_id")
+		var isPublic bool
+		if err := database.DB.QueryRow(`SELECT is_public FROM companies WHERE id = $1`, companyID).Scan(&isPublic); err != nil {
+			jsonError(c, http.StatusNotFound, "Company not found")
+			return
+		}
+		if !isPublic && !isCompanyMember(companyID, userID) {
+			jsonError(c, http.StatusForbidden, "Company posts are hidden until your request is approved")
+			return
+		}
+		query = `
+            SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
+                   p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
+            FROM posts p
+            WHERE p.author_type = 'company' AND p.target_id = $2
+              AND p.is_hidden = false AND p.is_unpublished = false
+              AND (p.privacy_level = 'public' OR (p.privacy_level = 'members' AND EXISTS (
+                   SELECT 1 FROM company_members WHERE company_id = $2 AND user_id = $1
+              )))
+            ORDER BY p.created_at DESC
+            LIMIT 50
+        `
+		args = []interface{}{userID, companyID}
 	default:
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-                   p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+                   p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
             ORDER BY p.created_at DESC LIMIT 50
@@ -171,7 +203,7 @@ func GetFeed(c *gin.Context) {
 		var title, shortDesc, imageURL sql.NullString
 		var targetID sql.NullString
 		var tags pq.StringArray
-		if err := rows.Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked); err != nil {
+		if err := rows.Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.IsHidden, &post.IsUnpublished, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked); err != nil {
 			jsonError(c, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -206,10 +238,10 @@ func GetPost(c *gin.Context) {
 	err := database.DB.QueryRow(`
         SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
-               p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+               p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
         FROM posts p WHERE p.id = $2
-    `, userID, postID).Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked)
+    `, userID, postID).Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.IsHidden, &post.IsUnpublished, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked)
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Post not found")
 		return
@@ -299,4 +331,113 @@ func GetComments(c *gin.Context) {
 		comments = append(comments, comment)
 	}
 	c.JSON(http.StatusOK, gin.H{"comments": comments})
+}
+
+func GetNews(c *gin.Context) {
+	userID := currentUserID(c)
+	rows, err := database.DB.Query(`
+        SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
+               p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
+               p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+               EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
+        FROM posts p
+        WHERE p.author_type IN ('community', 'company')
+          AND p.privacy_level = 'public'
+          AND p.is_hidden = false
+          AND p.is_unpublished = false
+        ORDER BY p.created_at DESC
+        LIMIT 100
+    `, userID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+	posts := make([]models.Post, 0)
+	for rows.Next() {
+		var post models.Post
+		var title, shortDesc, imageURL, targetID sql.NullString
+		var tags pq.StringArray
+		if err := rows.Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.IsHidden, &post.IsUnpublished, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked); err != nil {
+			jsonError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if title.Valid {
+			post.Title = &title.String
+		}
+		if shortDesc.Valid {
+			post.ShortDescription = &shortDesc.String
+		}
+		if imageURL.Valid {
+			post.ImageURL = &imageURL.String
+		}
+		if targetID.Valid {
+			if parsed, err := uuid.Parse(targetID.String); err == nil {
+				post.TargetID = &parsed
+			}
+		}
+		post.Tags = tags
+		posts = append(posts, post)
+	}
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
+}
+
+func GetWall(c *gin.Context) {
+	userID := currentUserID(c)
+	wallType := c.Param("type")
+	entityID := c.Param("id")
+	query := `
+        SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
+               p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
+               p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
+               EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
+        FROM posts p
+        WHERE p.is_hidden = false AND p.is_unpublished = false
+    `
+	args := []interface{}{userID}
+	switch wallType {
+	case "user":
+		query += " AND p.author_type = 'user' AND p.author_id = $2"
+		args = append(args, entityID)
+	case "community", "company":
+		query += " AND p.author_type = '" + wallType + "' AND p.target_id = $2"
+		args = append(args, entityID)
+	default:
+		jsonError(c, http.StatusBadRequest, "invalid wall type")
+		return
+	}
+	query += " ORDER BY p.created_at DESC LIMIT 100"
+	rows, err := database.DB.Query(query, args...)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+	posts := make([]models.Post, 0)
+	for rows.Next() {
+		var post models.Post
+		var title, shortDesc, imageURL, targetID sql.NullString
+		var tags pq.StringArray
+		if err := rows.Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.IsHidden, &post.IsUnpublished, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked); err != nil {
+			jsonError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if title.Valid {
+			post.Title = &title.String
+		}
+		if shortDesc.Valid {
+			post.ShortDescription = &shortDesc.String
+		}
+		if imageURL.Valid {
+			post.ImageURL = &imageURL.String
+		}
+		if targetID.Valid {
+			if parsed, err := uuid.Parse(targetID.String); err == nil {
+				post.TargetID = &parsed
+			}
+		}
+		post.Tags = tags
+		posts = append(posts, post)
+	}
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
 }

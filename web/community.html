@@ -135,7 +135,20 @@
                 if (response.ok) {
                     showToast('Вы вступили в сообщество!', 'success');
                     location.reload();
-                } else { showToast('Ошибка', 'error'); }
+                } else {
+                    const error = await response.json();
+                    if ((error.error || '').includes('private')) {
+                        const req = await fetch(`${API_URL}/communities/${communityId}/request`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                        });
+                        if (req.ok) {
+                            showToast('Заявка отправлена администратору', 'info');
+                            return;
+                        }
+                    }
+                    showToast(error.error || 'Ошибка', 'error');
+                }
             } catch (error) { showToast('Ошибка соединения', 'error'); }
         }
         

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Резюме и вакансии</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+<div class="max-w-6xl mx-auto p-4 space-y-6">
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h1 class="text-2xl font-bold mb-2">Резюме и вакансии</h1>
+        <p class="text-gray-600">Резюме публикуют только пользователи, вакансии — компании и сообщества.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <form id="resumeForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+            <h2 class="text-xl font-semibold">Моё резюме</h2>
+            <input id="resumeTitle" placeholder="Желаемая должность" class="w-full border rounded-lg px-3 py-2" required>
+            <textarea id="resumeAbout" placeholder="О себе" class="w-full border rounded-lg px-3 py-2"></textarea>
+            <input id="resumeActivity" placeholder="Вид деятельности" class="w-full border rounded-lg px-3 py-2">
+            <input id="resumeSkills" placeholder="Навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
+            <input id="resumeEducation" placeholder="Образование (например: среднее, высшее)" class="w-full border rounded-lg px-3 py-2">
+            <textarea id="resumeWorkplaces" placeholder="Прошлые места работы (по одному в строке, максимум 20)" class="w-full border rounded-lg px-3 py-2" rows="4"></textarea>
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Сохранить резюме</button>
+        </form>
+
+        <form id="vacancyForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3">
+            <h2 class="text-xl font-semibold">Создать вакансию</h2>
+            <select id="publisherType" class="w-full border rounded-lg px-3 py-2"><option value="company">Компания</option><option value="community">Сообщество</option></select>
+            <input id="publisherId" placeholder="ID компании или сообщества" class="w-full border rounded-lg px-3 py-2" required>
+            <input id="vacancyPosition" placeholder="Должность" class="w-full border rounded-lg px-3 py-2" required>
+            <input id="vacancySalary" placeholder="Зарплата" class="w-full border rounded-lg px-3 py-2" required>
+            <textarea id="vacancyExpectations" placeholder="Ожидания от соискателя: навыки, стаж и т.д." class="w-full border rounded-lg px-3 py-2" required></textarea>
+            <input id="vacancySkills" placeholder="Ключевые навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
+            <input id="vacancyExp" placeholder="Требуемый стаж" class="w-full border rounded-lg px-3 py-2">
+            <button class="px-4 py-2 bg-green-600 text-white rounded-lg">Опубликовать вакансию</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-semibold mb-3">Лента резюме</h3><div id="resumesList" class="space-y-3 text-sm"></div></div>
+        <div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-semibold mb-3">Лента вакансий</h3><div id="vacanciesList" class="space-y-3 text-sm"></div></div>
+    </div>
+</div>
+
+<script>
+const API_URL = '/api';
+const token = localStorage.getItem('token');
+
+function splitCsv(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
+
+async function loadData(){
+  const [rResumes, rVacancies, rMy] = await Promise.all([
+    fetch(`${API_URL}/resumes`, {headers:{Authorization:`Bearer ${token}`}}),
+    fetch(`${API_URL}/vacancies`, {headers:{Authorization:`Bearer ${token}`}}),
+    fetch(`${API_URL}/resume/me`, {headers:{Authorization:`Bearer ${token}`}})
+  ]);
+  const resumes = (await rResumes.json()).resumes || [];
+  const vacancies = (await rVacancies.json()).vacancies || [];
+  const my = (await rMy.json()).resume;
+
+  document.getElementById('resumesList').innerHTML = resumes.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.title}</div><div class="text-gray-600">${(x.skills||[]).join(', ')}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
+  document.getElementById('vacanciesList').innerHTML = vacancies.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.position} — ${x.salary}</div><div class="text-gray-600">${x.publisher_name}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
+
+  if (my){
+    resumeTitle.value = my.title || '';
+    resumeAbout.value = my.about || '';
+    resumeActivity.value = my.activity_type || '';
+    resumeSkills.value = (my.skills || []).join(', ');
+    resumeEducation.value = (my.education_levels || []).join(', ');
+    resumeWorkplaces.value = (my.previous_workplaces || []).join('\n');
+  }
+}
+
+document.getElementById('resumeForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const previous = resumeWorkplaces.value.split('\n').map(x=>x.trim()).filter(Boolean);
+  const body = {
+    title: resumeTitle.value,
+    about: resumeAbout.value || null,
+    activity_type: resumeActivity.value || null,
+    skills: splitCsv(resumeSkills.value),
+    education_levels: splitCsv(resumeEducation.value),
+    previous_workplaces: previous
+  };
+  const r = await fetch(`${API_URL}/resume`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  alert(r.ok ? 'Резюме сохранено' : 'Ошибка сохранения резюме');
+  loadData();
+});
+
+document.getElementById('vacancyForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const body = {
+    publisher_type: publisherType.value,
+    publisher_id: publisherId.value,
+    position: vacancyPosition.value,
+    salary: vacancySalary.value,
+    expectations: vacancyExpectations.value,
+    required_skills: splitCsv(vacancySkills.value),
+    required_experience: vacancyExp.value || null
+  };
+  const r = await fetch(`${API_URL}/vacancies`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  alert(r.ok ? 'Вакансия создана' : 'Ошибка создания вакансии');
+  loadData();
+});
+
+loadData();
+</script>
+</body>
+</html>

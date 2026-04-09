@@ -76,6 +76,10 @@ func main() {
 		api.PUT("/company", handlers.UpdateCompany)
 		api.POST("/company/:id/follow", handlers.FollowCompany)
 		api.DELETE("/company/:id/follow", handlers.UnfollowCompany)
+		api.POST("/companies/:id/request", handlers.RequestJoinCompany)
+		api.GET("/companies/:id/requests", handlers.GetCompanyJoinRequests)
+		api.POST("/companies/requests/:request_id/approve", handlers.ApproveCompanyJoinRequest)
+		api.POST("/companies/requests/:request_id/reject", handlers.RejectCompanyJoinRequest)
 
 		api.GET("/companies/:id/roles", handlers.GetCompanyRoles)
 		api.POST("/companies/:id/roles", handlers.CreateCompanyRole)
@@ -87,6 +91,8 @@ func main() {
 
 		api.POST("/posts", handlers.CreatePost)
 		api.GET("/feed", handlers.GetFeed)
+		api.GET("/news", handlers.GetNews)
+		api.GET("/walls/:type/:id", handlers.GetWall)
 		api.GET("/posts/:id", handlers.GetPost)
 		api.POST("/posts/:id/like", handlers.LikePost)
 		api.DELETE("/posts/:id/like", handlers.UnlikePost)
@@ -103,6 +109,11 @@ func main() {
 		api.POST("/chats/:id/messages", handlers.SendMessage)
 
 		api.GET("/dashboard/stats", handlers.GetDashboardStats)
+		api.GET("/resumes", handlers.GetResumes)
+		api.GET("/resume/me", handlers.GetMyResume)
+		api.POST("/resume", handlers.CreateOrUpdateResume)
+		api.GET("/vacancies", handlers.GetVacancies)
+		api.POST("/vacancies", handlers.CreateVacancy)
 
 		api.GET("/search/communities", handlers.SearchCommunities)
 		api.GET("/search/companies", handlers.SearchCompanies)
@@ -124,6 +135,7 @@ func main() {
 		"/chat.html":             "chat.html",
 		"/settings.html":         "settings.html",
 		"/profile.html":          "profile.html",
+		"/jobs.html":             "jobs.html",
 	}
 	for route, file := range pageRoutes {
 		routeCopy := route
