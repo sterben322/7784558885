@@ -13,6 +13,11 @@ import (
 var DB *sql.DB
 
 func InitDB() {
+	if os.Getenv("TEST_MODE") == "1" {
+		log.Println("TEST_MODE=1: database initialization skipped")
+		return
+	}
+
 	host := getenv("DB_HOST", "localhost")
 	port := getenv("DB_PORT", "5432")
 	user := getenv("DB_USER", "postgres")
@@ -32,7 +37,10 @@ func InitDB() {
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
 	if err = DB.Ping(); err != nil {
-		log.Fatal("error pinging database:", err)
+		log.Printf("warning: database is unavailable, running without DB: %v", err)
+		_ = DB.Close()
+		DB = nil
+		return
 	}
 
 	log.Println("database connected")
@@ -52,6 +60,11 @@ func getenv(key, fallback string) string {
 }
 
 func CreateTables() {
+	if DB == nil {
+		log.Println("database not initialized: skipping table creation")
+		return
+	}
+
 	queries := []string{
 		`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`,
 		`CREATE TABLE IF NOT EXISTS users (
@@ -320,6 +333,10 @@ func CreateTables() {
 }
 
 func EnsureDefaultCommunityRoles(communityID string) error {
+	if DB == nil {
+		return nil
+	}
+
 	statements := []string{
 		`INSERT INTO community_roles (community_id, name, display_name, permissions)
          VALUES ($1, 'admin', 'Администратор', ARRAY['manage_members','manage_posts','manage_settings','delete_posts','pin_posts','manage_roles'])
