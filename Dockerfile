@@ -3,6 +3,7 @@ FROM golang:1.21-alpine
 WORKDIR /app
 
 COPY go.mod ./
+COPY stubs ./stubs
 RUN go mod download
 
 COPY . .
