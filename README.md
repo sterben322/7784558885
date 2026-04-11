@@ -45,6 +45,14 @@ docker compose down -v
 docker compose up --build
 ```
 
+
+## Деплой на Railway
+1. Создайте новый проект на Railway и подключите этот репозиторий.
+2. Railway автоматически использует `railway.json` и запустит сборку `go build -mod=mod -o main .`.
+3. Добавьте переменные окружения из `.env.example` (минимум: `JWT_SECRET`, `CORS_ALLOWED_ORIGINS`).
+4. Подключите PostgreSQL plugin в Railway (переменная `DATABASE_URL` добавляется автоматически).
+5. После деплоя проверьте `https://<your-domain>/api/health` — должен вернуться `status: ok` или `status: degraded` при отключенной БД.
+
 ## Что исправлено
 - выровнена схема БД и код хендлеров
 - добавлены отсутствующие таблицы

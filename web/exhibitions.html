@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Выставки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/assets/styles.css" rel="stylesheet">
+    <script src="/assets/theme.js" defer></script>
+</head>
+<body class="bg-[#f8fafb] text-[#273244]">
+<div class="mx-auto min-h-screen max-w-5xl px-4 py-10">
+    <div class="rounded-3xl border border-[#e7ecef] bg-white p-8 shadow-[0_18px_60px_rgba(162,175,186,0.12)]">
+        <h1 class="text-3xl font-semibold">Выставки</h1>
+        <p class="mt-2 text-[#6b7785]">Раздел готов к публикации: сетка мероприятий, фильтры и CTA.</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-3" id="expoList"></div>
+        <div class="mt-8"><a href="/" class="rounded-xl bg-[#4c8d78] px-5 py-3 font-medium text-white">Вернуться на главную</a></div>
+    </div>
+</div>
+<script>
+const items = ['Иннопром 2026', 'TechnoBuild Expo', 'LogiTrans Forum'];
+const container = document.getElementById('expoList');
+items.forEach((name, idx) => {
+  const card = document.createElement('div');
+  card.className = 'rounded-2xl border border-[#e7ecef] p-4';
+  card.innerHTML = `<div class="text-sm text-[#8a97a4]">${idx + 1} квартал 2026</div><div class="mt-1 font-semibold">${name}</div>`;
+  container.appendChild(card);
+});
+</script>
+</body>
+</html>

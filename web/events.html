@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Мероприятия</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/assets/styles.css" rel="stylesheet">
+    <script src="/assets/theme.js" defer></script>
+</head>
+<body class="bg-[#f3f7f8] text-[#273244]">
+<div class="mx-auto min-h-screen max-w-4xl px-4 py-10">
+    <h1 class="text-3xl font-semibold">Календарь мероприятий</h1>
+    <ul class="mt-6 space-y-3" id="events"></ul>
+</div>
+<script>
+[
+  ['Вебинар по экспортным поставкам', '15 апреля 2026'],
+  ['Meetup HR & Hiring', '22 апреля 2026'],
+  ['Онлайн-день продукта LASTOP', '29 апреля 2026']
+].forEach(([title,date]) => {
+  const li = document.createElement('li');
+  li.className = 'rounded-2xl border border-[#dbe4e8] bg-white p-4';
+  li.innerHTML = `<div class="text-sm text-[#8a97a4]">${date}</div><div class="mt-1 font-semibold">${title}</div>`;
+  document.getElementById('events').appendChild(li);
+});
+</script>
+</body>
+</html>
