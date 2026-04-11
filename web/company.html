@@ -3,135 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Компания</title>
+    <title>LASTOP | Компании</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
     <script src="/assets/theme.js" defer></script>
 </head>
-<body class="bg-gray-50">
-    <header class="bg-white border-b">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-            <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
-            </nav>
-        </div>
-    </header>
+<body class="bg-[#eef2f3] text-[#273244]">
+<div class="min-h-screen p-6 font-sans">
+    <div class="mx-auto max-w-6xl rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
+        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#e8ecef] px-6 py-5 bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
+            <div>
+                <a href="/dashboard.html" class="text-sm text-[#7f8b98] hover:text-[#2c394b]"><i class="fa-solid fa-arrow-left mr-2"></i>Назад в ленту</a>
+                <h1 class="mt-2 text-[30px] font-semibold tracking-[-0.02em] text-[#2c394b]">Компании LASTOP</h1>
+                <p class="text-[#7e8a97]">Каталог компаний с быстрым поиском и фильтрацией.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/create-company.html" class="rounded-2xl border border-[#dbe4e9] bg-white px-4 py-2.5 text-sm font-medium text-[#3f5163] hover:bg-[#f4f8fa]">
+                    <i class="fa-solid fa-plus mr-2"></i>Создать компанию
+                </a>
+                <a id="openMyCompany" href="/company-profile.html" class="rounded-2xl bg-[#4c8d78] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3f7866]">
+                    <i class="fa-regular fa-building mr-2"></i>Моя компания
+                </a>
+            </div>
+        </header>
 
-    <div class="max-w-6xl mx-auto p-4">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 h-32"></div>
-            <div class="px-6 pb-6">
-                <div class="flex items-end justify-between">
-                    <div class="flex items-end space-x-4">
-                        <div class="w-28 h-28 bg-white rounded-2xl flex items-center justify-center shadow-lg -mt-14" id="companyLogo"><i class="fas fa-building text-5xl text-blue-600"></i></div>
-                        <div class="mb-2"><h1 class="text-2xl font-bold" id="companyName">Загрузка...</h1><div class="flex items-center space-x-2 mt-1"><span id="companyStats" class="text-sm text-gray-500"></span></div></div>
-                    </div>
-                </div>
+        <section class="border-b border-[#e8ecef] px-6 py-5 bg-[#fbfcfc]">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px_220px]">
+                <label class="flex items-center gap-3 rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3">
+                    <i class="fa-solid fa-magnifying-glass text-[#95a1ad]"></i>
+                    <input id="companySearch" class="w-full bg-transparent outline-none text-[15px]" placeholder="Поиск по названию, отрасли или тегам" />
+                </label>
+                <select id="companySectorFilter" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
+                    <option value="all">Все отрасли</option>
+                    <option value="Логистика">Логистика</option>
+                    <option value="IT">IT</option>
+                    <option value="Производство">Производство</option>
+                </select>
+                <select id="companySort" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
+                    <option value="followers">Сначала популярные</option>
+                    <option value="employees">По числу сотрудников</option>
+                    <option value="name">По алфавиту</option>
+                </select>
             </div>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-sm mt-6 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="col-span-2">
-                    <h3 class="font-semibold text-lg mb-3">О компании</h3>
-                    <p class="text-gray-600" id="companyDescription"></p>
-                    <h3 class="font-semibold text-lg mt-6 mb-3">Контакты</h3>
-                    <div class="space-y-2"><p id="companyPhone" class="text-gray-600"><i class="fas fa-phone mr-2"></i></p><p id="companyEmail" class="text-gray-600"><i class="fas fa-envelope mr-2"></i></p><p id="companyWebsite" class="text-gray-600"><i class="fas fa-globe mr-2"></i></p><p id="companyAddress" class="text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i></p></div>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h3 class="font-semibold mb-3">Статистика</h3>
-                    <div class="space-y-3"><div><p class="text-sm text-gray-500">Сотрудников</p><p class="text-2xl font-bold" id="employeeCount">0</p></div><div><p class="text-sm text-gray-500">Подписчиков</p><p class="text-2xl font-bold" id="followersCount">0</p></div><div><p class="text-sm text-gray-500">ИНН</p><p class="font-medium" id="companyInn">—</p></div></div>
-                </div>
+        </section>
+
+        <main class="px-6 py-6 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]">
+            <div id="companyList" class="grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
+            <div id="companyListEmpty" class="hidden rounded-2xl border border-dashed border-[#d4dde3] bg-white p-8 text-center text-[#7f8b98]">
+                По вашему фильтру компании не найдены.
             </div>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-sm mt-6 p-6">
-            <h3 class="font-semibold text-lg mb-4">Сотрудники</h3>
-            <div id="employeesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </div>
+        </main>
     </div>
-    
-    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg hidden transition-all z-50 bg-gray-800 text-white"></div>
+</div>
 
-    <script>
-        const API_URL = '/api';
-        let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        let currentCompany = null;
-        
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all z-50 ${colors[type]}`;
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+<script>
+const DEMO_COMPANIES = [
+    {
+        id: 'demo-1',
+        name: 'NorthBridge Logistics',
+        owner_name: 'Ирина Власова',
+        economic_sector: 'Логистика',
+        description: 'Международная B2B логистика и таможенное сопровождение поставок в СНГ и ЕС.',
+        followers_count: 1240,
+        employee_count: 58,
+        is_public: true,
+        tags: ['логистика', 'экспорт', 'склад'],
+        website: 'northbridge.example.com',
+        address: 'Москва, Ленинградский пр-т 35'
+    },
+    {
+        id: 'demo-2',
+        name: 'CloudForge Systems',
+        owner_name: 'Алексей Ким',
+        economic_sector: 'IT',
+        description: 'Разработка корпоративных платформ для автоматизации закупок и продаж.',
+        followers_count: 980,
+        employee_count: 41,
+        is_public: true,
+        tags: ['it', 'saas', 'автоматизация'],
+        website: 'cloudforge.example.com',
+        address: 'Санкт-Петербург, Невский пр-т 108'
+    },
+    {
+        id: 'demo-3',
+        name: 'Volga Industrial Group',
+        owner_name: 'Роман Дёмин',
+        economic_sector: 'Производство',
+        description: 'Производство и поставка комплектующих для строительной и сельхоз техники.',
+        followers_count: 760,
+        employee_count: 133,
+        is_public: true,
+        tags: ['производство', 'комплектующие', 'b2b'],
+        website: 'volgaindustrial.example.com',
+        address: 'Казань, ул. Аграрная 9'
+    }
+];
+
+let companies = [...DEMO_COMPANIES];
+
+function getCompanyTags(company) {
+    const tags = company.search_tags || company.tags || [];
+    return Array.isArray(tags) ? tags : [];
+}
+
+function companyCard(company) {
+    const tags = getCompanyTags(company);
+    return `
+        <article class="rounded-[22px] border border-[#e8ecee] bg-white px-5 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${company.name}</h3>
+                    <p class="mt-1 text-sm text-[#7f8b98]">Владелец: ${company.owner_name || 'Не указан'}</p>
+                    <p class="mt-3 text-[15px] leading-6 text-[#697685]">${company.description || 'Описание отсутствует'}</p>
+                </div>
+                <span class="rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${company.economic_sector || 'Без отрасли'}</span>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2.5">
+                ${tags.length ? tags.map((tag) => `<span class="rounded-full bg-[#eef2f6] px-3 py-1.5 text-[12px] font-medium text-[#5f7081]">#${tag}</span>`).join('') : '<span class="text-xs text-[#97a3af]">Теги не указаны</span>'}
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Подписчики</dt><dd class="text-lg font-semibold text-[#344153]">${company.followers_count || 0}</dd></div>
+                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Сотрудники</dt><dd class="text-lg font-semibold text-[#344153]">${company.employee_count || 0}</dd></div>
+            </dl>
+
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-[#7a8794]">
+                <span><i class="fa-solid fa-globe mr-1.5"></i>${company.website || 'Сайт не указан'}</span>
+                <span><i class="fa-solid fa-location-dot mr-1.5"></i>${company.address || 'Адрес не указан'}</span>
+            </div>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+                <button data-open-company="${company.owner_id || ''}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть профиль</button>
+                <button data-follow-company="${company.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Подписаться</button>
+            </div>
+        </article>
+    `;
+}
+
+function filteredCompanies() {
+    const q = document.getElementById('companySearch').value.trim().toLowerCase();
+    const sector = document.getElementById('companySectorFilter').value;
+    const sort = document.getElementById('companySort').value;
+
+    const filtered = companies.filter((company) => {
+        const haystack = `${company.name} ${company.economic_sector || ''} ${getCompanyTags(company).join(' ')} ${company.description || ''}`.toLowerCase();
+        const byQuery = !q || haystack.includes(q);
+        const bySector = sector === 'all' || (company.economic_sector || '').toLowerCase() === sector.toLowerCase();
+        return byQuery && bySector;
+    });
+
+    filtered.sort((a, b) => {
+        if (sort === 'employees') return (b.employee_count || 0) - (a.employee_count || 0);
+        if (sort === 'name') return (a.name || '').localeCompare(b.name || '', 'ru');
+        return (b.followers_count || 0) - (a.followers_count || 0);
+    });
+
+    return filtered;
+}
+
+function renderCompanies() {
+    const list = document.getElementById('companyList');
+    const empty = document.getElementById('companyListEmpty');
+    const data = filteredCompanies();
+
+    if (!data.length) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+
+    empty.classList.add('hidden');
+    list.innerHTML = data.map(companyCard).join('');
+}
+
+async function tryLoadFromAPI() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch('/api/search/companies?q=', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (Array.isArray(data.companies) && data.companies.length) {
+            companies = [...DEMO_COMPANIES, ...data.companies];
         }
-        
-        async function loadCompany() {
-            try {
-                const response = await fetch(`${API_URL}/company`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
-                const data = await response.json();
-                const company = data.company;
-                currentCompany = company;
-                
-                if (!company) {
-                    document.body.innerHTML = '<div class="text-center py-12"><p class="text-gray-500">Компания не найдена</p><a href="/create-company.html" class="text-blue-600">Создать компанию</a></div>';
-                    return;
-                }
-                
-                document.getElementById('companyName').textContent = company.name;
-                document.getElementById('companyDescription').textContent = company.description || 'Описание не добавлено';
-                document.getElementById('employeeCount').textContent = company.employee_count || 0;
-                document.getElementById('followersCount').textContent = company.followers_count || 0;
-                document.getElementById('companyInn').textContent = company.inn || '—';
-                document.getElementById('companyPhone').innerHTML = `<i class="fas fa-phone mr-2"></i>${company.phone || 'Не указан'}`;
-                document.getElementById('companyEmail').innerHTML = `<i class="fas fa-envelope mr-2"></i>${currentUser.email || 'Не указан'}`;
-                document.getElementById('companyWebsite').innerHTML = `<i class="fas fa-globe mr-2"></i>${company.website || 'Не указан'}`;
-                document.getElementById('companyAddress').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${company.address || 'Не указан'}`;
-                
-                if (company.logo_url) {
-                    document.getElementById('companyLogo').innerHTML = `<img src="${company.logo_url}" class="w-full h-full rounded-2xl object-cover">`;
-                }
-                
-                await loadEmployees();
-            } catch (error) {
-                console.error('Failed to load company:', error);
-                showToast('Ошибка загрузки', 'error');
+    } catch (error) {
+        console.warn('Не удалось получить список компаний из API:', error);
+    }
+}
+
+function wireActions() {
+    ['companySearch', 'companySectorFilter', 'companySort'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', renderCompanies);
+        document.getElementById(id).addEventListener('change', renderCompanies);
+    });
+
+    document.getElementById('companyList').addEventListener('click', async (event) => {
+        const openBtn = event.target.closest('[data-open-company]');
+        if (openBtn) {
+            const ownerId = openBtn.dataset.openCompany;
+            if (ownerId) {
+                window.location.href = `/company-profile.html?owner_id=${encodeURIComponent(ownerId)}`;
+            } else {
+                window.location.href = '/company-profile.html';
+            }
+            return;
+        }
+
+        const followBtn = event.target.closest('[data-follow-company]');
+        if (followBtn) {
+            const companyId = followBtn.dataset.followCompany;
+            if (companyId.startsWith('demo-')) {
+                followBtn.textContent = 'Демо: подписка включена';
+                followBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
+                followBtn.classList.add('bg-[#4c8d78]', 'text-white');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Требуется авторизация для подписки.');
+                return;
+            }
+
+            const response = await fetch(`/api/company/${companyId}/follow`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+                followBtn.textContent = 'Вы подписаны';
+                followBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
+                followBtn.classList.add('bg-[#4c8d78]', 'text-white');
             }
         }
-        
-        async function loadEmployees() {
-            try {
-                if (!currentCompany) return;
-                const response = await fetch(`${API_URL}/companies/${currentCompany.id}/employees`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
-                const data = await response.json();
-                const container = document.getElementById('employeesContainer');
-                if (!data.employees || data.employees.length === 0) {
-                    container.innerHTML = '<div class="col-span-3 text-center py-8 text-gray-500">Нет сотрудников</div>';
-                    return;
-                }
-                container.innerHTML = data.employees.map(emp => `
-                    <div class="flex items-center space-x-3 p-3 border rounded-lg">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">${emp.user_name?.charAt(0) || 'U'}</div>
-                        <div><p class="font-semibold">${emp.user_name}</p><p class="text-sm text-gray-600">${emp.position_name}</p>${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}</div>
-                    </div>
-                `).join('');
-            } catch (error) { console.error(error); }
-        }
-        
-        loadCompany();
-    </script>
+    });
+}
+
+(async function init() {
+    wireActions();
+    await tryLoadFromAPI();
+    renderCompanies();
+})();
+</script>
 </body>
 </html>

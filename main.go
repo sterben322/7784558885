@@ -153,6 +153,8 @@ func main() {
 		"/community.html":        "community.html",
 		"/company":               "company.html",
 		"/company.html":          "company.html",
+		"/company-profile":       "company-profile.html",
+		"/company-profile.html":  "company-profile.html",
 		"/create-community":      "create-community.html",
 		"/create-community.html": "create-community.html",
 		"/create-company":        "create-company.html",
