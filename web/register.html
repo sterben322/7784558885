@@ -61,8 +61,8 @@
         
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const terms = document.getElementById('terms').checked;
@@ -86,7 +86,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ full_name: fullName, email, password, terms })
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok) {
                     showToast('Регистрация успешна! Теперь войдите.', 'success');
                     setTimeout(() => { window.location.href = '/login.html'; }, 1500);
