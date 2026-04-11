@@ -2,46 +2,87 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>LASTOP | Настройки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Настройки профиля</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
     <script src="/assets/theme.js" defer></script>
 </head>
-<body class="bg-gray-50">
-    <header class="bg-white border-b">
-        <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-            <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
+<body class="bg-[#eef2f3] text-[#273244]">
+<div class="min-h-screen p-4 md:p-6">
+    <div class="mx-auto w-full max-w-[960px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
+        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecef] px-5 py-4 md:px-7">
+            <a href="/dashboard.html" class="flex items-center gap-3">
+                <div class="grid h-10 w-10 place-items-center rounded-2xl bg-[#eaf3ee] text-[#3e826e]"><i class="fa-solid fa-link"></i></div>
+                <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
+            </a>
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="/profile.html" class="rounded-xl px-3 py-2 text-[#5d6978] hover:bg-[#f4f7f7]">Профиль</a>
+                <a href="/settings.html" class="rounded-xl bg-[#eff7f3] px-3 py-2 font-semibold text-[#4c8d78]">Настройки</a>
             </nav>
-        </div>
-    </header>
-    <div class="max-w-2xl mx-auto p-8">
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h1 class="text-2xl font-bold mb-6">Настройки</h1>
-            <div class="space-y-6">
-                <div>
-                    <h3 class="font-semibold mb-3">Уведомления</h3>
-                    <label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Email уведомления</span></label>
-                    <label class="flex items-center space-x-3 mt-2"><input type="checkbox" class="w-4 h-4"><span>Push уведомления</span></label>
+        </header>
+
+        <main class="space-y-5 p-5 md:p-7">
+            <section class="rounded-2xl border border-[#e7ecef] bg-[#fbfcfc] p-5">
+                <h1 class="text-3xl font-semibold text-[#2f3d4f]">Настройки аккаунта</h1>
+                <p class="mt-2 text-[#708090]">Профиль и настройки теперь разделены: на странице профиля только публичная информация, здесь — управление аккаунтом.</p>
+            </section>
+
+            <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
+                <h2 class="text-xl font-semibold">Публичные данные</h2>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                    <label class="space-y-1 text-sm"><span class="text-[#6f7f8f]">Имя и фамилия</span><input id="fullNameInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" /></label>
+                    <label class="space-y-1 text-sm"><span class="text-[#6f7f8f]">Компания</span><input id="companyInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" /></label>
+                    <label class="space-y-1 text-sm md:col-span-2"><span class="text-[#6f7f8f]">О себе</span><textarea rows="4" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Кратко расскажите о вашем опыте"></textarea></label>
                 </div>
-                <div>
-                    <h3 class="font-semibold mb-3">Конфиденциальность</h3>
-                    <label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Закрытый профиль</span></label>
+            </section>
+
+            <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
+                <h2 class="text-xl font-semibold">Уведомления</h2>
+                <div class="mt-4 space-y-3 text-[#4e5d6c]">
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Email уведомления</span><input type="checkbox" checked class="h-4 w-4"></label>
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Push уведомления</span><input type="checkbox" class="h-4 w-4"></label>
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Еженедельная статистика профиля</span><input type="checkbox" checked class="h-4 w-4"></label>
                 </div>
-                <button onclick="window.location.href='/stub.html?section=Смена%20пароля'" class="px-4 py-2 bg-gray-100 rounded-lg">Сменить пароль</button>
+            </section>
+
+            <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
+                <h2 class="text-xl font-semibold">Конфиденциальность и безопасность</h2>
+                <div class="mt-4 space-y-3 text-[#4e5d6c]">
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Закрытый профиль</span><input type="checkbox" class="h-4 w-4"></label>
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Показывать email в профиле</span><input type="checkbox" class="h-4 w-4"></label>
+                </div>
+                <button onclick="window.location.href='/stub.html?section=Смена%20пароля'" class="mt-4 rounded-xl border border-[#dbe3e8] px-4 py-2.5 text-sm font-medium text-[#4f5e6d] hover:bg-[#f5f8f9]">Сменить пароль</button>
+            </section>
+
+            <div class="flex flex-wrap gap-3">
+                <button id="saveBtn" class="rounded-xl bg-[#2f7f5e] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Сохранить изменения</button>
+                <a href="/profile.html" class="rounded-xl border border-[#dbe3e8] px-5 py-2.5 text-sm font-medium text-[#4f5e6d]">Вернуться в профиль</a>
             </div>
-        </div>
+        </main>
     </div>
-    <script>
-        if (!localStorage.getItem('token')) window.location.href = '/login.html';
-    </script>
+</div>
+
+<script>
+if (!localStorage.getItem('token')) window.location.href = '/login.html';
+
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const fullNameInput = document.getElementById('fullNameInput');
+const companyInput = document.getElementById('companyInput');
+
+fullNameInput.value = user.full_name || '';
+companyInput.value = user.company_name || '';
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const updatedUser = {
+    ...user,
+    full_name: fullNameInput.value.trim(),
+    company_name: companyInput.value.trim()
+  };
+  localStorage.setItem('user', JSON.stringify(updatedUser));
+  alert('Настройки сохранены');
+});
+</script>
 </body>
 </html>
