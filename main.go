@@ -149,8 +149,6 @@ func main() {
 		"/":                      "index.html",
 		"/login":                 "login.html",
 		"/login.html":            "login.html",
-		"/register":              "register.html",
-		"/register.html":         "register.html",
 		"/dashboard":             "dashboard.html",
 		"/dashboard.html":        "dashboard.html",
 		"/community":             "community.html",
@@ -179,6 +177,13 @@ func main() {
 		fileCopy := file
 		r.GET(routeCopy, func(c *gin.Context) { c.File(filepath.Join("web", fileCopy)) })
 	}
+
+	r.GET("/register", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
+	r.GET("/register.html", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
 
 	r.NoRoute(func(c *gin.Context) {
 		if c.Request.Method != http.MethodGet {
