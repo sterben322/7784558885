@@ -81,13 +81,12 @@
         }
         
         function checkAuth() {
-            const token = localStorage.getItem('token');
             const user = localStorage.getItem('user');
-            if (!token || !user) {
-                window.location.href = '/login.html';
-                return false;
+            if (user) {
+                currentUser = JSON.parse(user);
+            } else {
+                currentUser = { full_name: 'Гость', email: 'guest@lastop.local' };
             }
-            currentUser = JSON.parse(user);
             document.getElementById('userName').textContent = currentUser.full_name;
             document.getElementById('userEmail').textContent = currentUser.email;
             document.getElementById('userAvatar').textContent = currentUser.full_name?.charAt(0) || 'U';
@@ -97,7 +96,8 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login.html';
+            showToast('Вы вышли из аккаунта', 'info');
+            switchToPage('dashboard');
         }
         
         // Dashboard
