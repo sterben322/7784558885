@@ -9,6 +9,17 @@
     <link href="/assets/styles.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50">
+<header class="bg-white border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
+        <nav class="flex items-center gap-4 text-sm">
+            <a href="/dashboard.html" class="text-gray-600 hover:text-black">Дашборд</a>
+            <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
+            <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
+            <a href="/profile.html" class="text-gray-600 hover:text-black">Профиль</a>
+        </nav>
+    </div>
+</header>
 <div class="max-w-6xl mx-auto p-4 space-y-6">
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h1 class="text-2xl font-bold mb-2">Резюме и вакансии</h1>
@@ -49,29 +60,35 @@
 <script>
 const API_URL = '/api';
 const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
 
 function splitCsv(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
 
 async function loadData(){
-  const [rResumes, rVacancies, rMy] = await Promise.all([
-    fetch(`${API_URL}/resumes`, {headers:{Authorization:`Bearer ${token}`}}),
-    fetch(`${API_URL}/vacancies`, {headers:{Authorization:`Bearer ${token}`}}),
-    fetch(`${API_URL}/resume/me`, {headers:{Authorization:`Bearer ${token}`}})
-  ]);
-  const resumes = (await rResumes.json()).resumes || [];
-  const vacancies = (await rVacancies.json()).vacancies || [];
-  const my = (await rMy.json()).resume;
+  try {
+    const [rResumes, rVacancies, rMy] = await Promise.all([
+      fetch(`${API_URL}/resumes`, {headers:{Authorization:`Bearer ${token}`}}),
+      fetch(`${API_URL}/vacancies`, {headers:{Authorization:`Bearer ${token}`}}),
+      fetch(`${API_URL}/resume/me`, {headers:{Authorization:`Bearer ${token}`}})
+    ]);
+    const resumes = (await rResumes.json()).resumes || [];
+    const vacancies = (await rVacancies.json()).vacancies || [];
+    const my = (await rMy.json()).resume;
 
-  document.getElementById('resumesList').innerHTML = resumes.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.title}</div><div class="text-gray-600">${(x.skills||[]).join(', ')}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
-  document.getElementById('vacanciesList').innerHTML = vacancies.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.position} — ${x.salary}</div><div class="text-gray-600">${x.publisher_name}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
+    document.getElementById('resumesList').innerHTML = resumes.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.title}</div><div class="text-gray-600">${(x.skills||[]).join(', ')}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
+    document.getElementById('vacanciesList').innerHTML = vacancies.map(x=>`<div class="border rounded p-3"><div class="font-semibold">${x.position} — ${x.salary}</div><div class="text-gray-600">${x.publisher_name}</div></div>`).join('') || '<p class="text-gray-500">Пока пусто</p>';
 
-  if (my){
-    resumeTitle.value = my.title || '';
-    resumeAbout.value = my.about || '';
-    resumeActivity.value = my.activity_type || '';
-    resumeSkills.value = (my.skills || []).join(', ');
-    resumeEducation.value = (my.education_levels || []).join(', ');
-    resumeWorkplaces.value = (my.previous_workplaces || []).join('\n');
+    if (my){
+      resumeTitle.value = my.title || '';
+      resumeAbout.value = my.about || '';
+      resumeActivity.value = my.activity_type || '';
+      resumeSkills.value = (my.skills || []).join(', ');
+      resumeEducation.value = (my.education_levels || []).join(', ');
+      resumeWorkplaces.value = (my.previous_workplaces || []).join('\n');
+    }
+  } catch (e) {
+    document.getElementById('resumesList').innerHTML = '<p class="text-red-500">Ошибка загрузки данных</p>';
+    document.getElementById('vacanciesList').innerHTML = '<p class="text-red-500">Ошибка загрузки данных</p>';
   }
 }
 

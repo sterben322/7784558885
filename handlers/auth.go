@@ -15,6 +15,10 @@ import (
 )
 
 func Register(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
 	var req models.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonError(c, http.StatusBadRequest, err.Error())
@@ -52,6 +56,10 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonError(c, http.StatusBadRequest, err.Error())
@@ -95,6 +103,10 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
 	token := currentToken(c)
 	if token == "" {
 		jsonError(c, http.StatusUnauthorized, "Not authenticated")
@@ -108,6 +120,10 @@ func Logout(c *gin.Context) {
 }
 
 func GetMe(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
 	userID := currentUserID(c)
 	var user models.User
 	err := database.DB.QueryRow(`
@@ -122,6 +138,10 @@ func GetMe(c *gin.Context) {
 }
 
 func UpdateProfile(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
 	userID := currentUserID(c)
 	var req struct {
 		FullName    string  `json:"full_name"`

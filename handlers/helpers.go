@@ -27,6 +27,14 @@ func jsonError(c *gin.Context, status int, msg string) {
 	c.JSON(status, gin.H{"error": msg})
 }
 
+func ensureDatabase(c *gin.Context) bool {
+	if database.DB != nil {
+		return true
+	}
+	jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
+	return false
+}
+
 func requireChatParticipant(chatID string, userID uuid.UUID) error {
 	var exists bool
 	err := database.DB.QueryRow(`
