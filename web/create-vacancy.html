@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LASTOP | Создать вакансию</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+<div class="max-w-3xl mx-auto p-4">
+  <a href="/jobs.html" class="text-blue-600">← Назад к вакансиям и резюме</a>
+  <form id="vacancyForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3 mt-4">
+    <h1 class="text-2xl font-bold">Создать вакансию</h1>
+    <select id="publisherType" class="w-full border rounded-lg px-3 py-2"><option value="company">Компания</option><option value="community">Сообщество</option></select>
+    <input id="publisherId" placeholder="ID компании или сообщества" class="w-full border rounded-lg px-3 py-2" required>
+    <input id="vacancyPosition" placeholder="Должность" class="w-full border rounded-lg px-3 py-2" required>
+    <input id="vacancySalary" placeholder="Зарплата" class="w-full border rounded-lg px-3 py-2" required>
+    <textarea id="vacancyExpectations" placeholder="Ожидания от соискателя: навыки, стаж и т.д." class="w-full border rounded-lg px-3 py-2" required></textarea>
+    <input id="vacancySkills" placeholder="Ключевые навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
+    <input id="vacancyExp" placeholder="Требуемый стаж" class="w-full border rounded-lg px-3 py-2">
+    <button class="px-4 py-2 bg-green-600 text-white rounded-lg">Опубликовать вакансию</button>
+  </form>
+</div>
+<script>
+const API_URL = '/api';
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
+function splitCsv(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
+
+document.getElementById('vacancyForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const body = {
+    publisher_type: publisherType.value,
+    publisher_id: publisherId.value,
+    position: vacancyPosition.value,
+    salary: vacancySalary.value,
+    expectations: vacancyExpectations.value,
+    required_skills: splitCsv(vacancySkills.value),
+    required_experience: vacancyExp.value || null
+  };
+  const r = await fetch(`${API_URL}/vacancies`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  alert(r.ok ? 'Вакансия создана' : 'Ошибка создания вакансии');
+  if (r.ok) window.location.href = '/jobs.html';
+});
+</script>
+</body>
+</html>

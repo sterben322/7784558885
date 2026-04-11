@@ -255,7 +255,7 @@
         function switchToPage(page) {
             document.getElementById('pageTitle').innerHTML = page === 'dashboard' ? 'Дашборд' : page === 'communities' ? 'Сообщества' : page === 'companies' ? 'Моя компания' : page === 'news' ? 'Новости' : page === 'jobs' ? 'Резюме и вакансии' : page === 'forum' ? 'Форум' : page === 'chat' ? 'Чат' : 'Друзья';
             if (page === 'dashboard') renderDashboard();
-            else if (page === 'communities') renderCommunities();
+            else if (page === 'communities') window.location.href = '/communities.html';
             else if (page === 'companies') renderCompanies();
             else if (page === 'friends') renderFriends();
             else if (page === 'news') renderNews();

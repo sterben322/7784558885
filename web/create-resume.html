@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LASTOP | Создать резюме</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+<div class="max-w-3xl mx-auto p-4">
+  <a href="/jobs.html" class="text-blue-600">← Назад к вакансиям и резюме</a>
+  <form id="resumeForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3 mt-4">
+    <h1 class="text-2xl font-bold">Создать / обновить резюме</h1>
+    <input id="resumeTitle" placeholder="Желаемая должность" class="w-full border rounded-lg px-3 py-2" required>
+    <textarea id="resumeAbout" placeholder="О себе" class="w-full border rounded-lg px-3 py-2"></textarea>
+    <input id="resumeActivity" placeholder="Вид деятельности" class="w-full border rounded-lg px-3 py-2">
+    <input id="resumeSkills" placeholder="Навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
+    <input id="resumeEducation" placeholder="Образование (например: среднее, высшее)" class="w-full border rounded-lg px-3 py-2">
+    <textarea id="resumeWorkplaces" placeholder="Прошлые места работы (по одному в строке, максимум 20)" class="w-full border rounded-lg px-3 py-2" rows="4"></textarea>
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Сохранить резюме</button>
+  </form>
+</div>
+<script>
+const API_URL = '/api';
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
+function splitCsv(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
+
+async function preload(){
+  const r = await fetch(`${API_URL}/resume/me`, {headers:{Authorization:`Bearer ${token}`}});
+  if (!r.ok) return;
+  const my = (await r.json()).resume;
+  if (!my) return;
+  resumeTitle.value = my.title || '';
+  resumeAbout.value = my.about || '';
+  resumeActivity.value = my.activity_type || '';
+  resumeSkills.value = (my.skills || []).join(', ');
+  resumeEducation.value = (my.education_levels || []).join(', ');
+  resumeWorkplaces.value = (my.previous_workplaces || []).join('\n');
+}
+
+document.getElementById('resumeForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const body = {
+    title: resumeTitle.value,
+    about: resumeAbout.value || null,
+    activity_type: resumeActivity.value || null,
+    skills: splitCsv(resumeSkills.value),
+    education_levels: splitCsv(resumeEducation.value),
+    previous_workplaces: resumeWorkplaces.value.split('\n').map(x=>x.trim()).filter(Boolean)
+  };
+  const r = await fetch(`${API_URL}/resume`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  alert(r.ok ? 'Резюме сохранено' : 'Ошибка сохранения резюме');
+  if (r.ok) window.location.href = '/jobs.html';
+});
+
+preload();
+</script>
+</body>
+</html>
