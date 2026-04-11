@@ -14,7 +14,6 @@
     <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)_330px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
         <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
             <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8"><a href="/" class="flex items-center gap-3"><div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div><div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div></a></div>
-            <div class="border-b border-[#e8ecef] px-5 py-4"><a href="/settings.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left hover:bg-[#f4f7f7]"><div id="userAvatar" class="grid h-11 w-11 place-items-center rounded-full bg-[#6eaf95] text-sm font-semibold text-white">U</div><i class="fa-solid fa-chevron-down h-4 w-4 text-[#91a0ad]"></i></a></div>
             <div class="px-4 py-5"><div class="space-y-1.5">
                 <a href="/" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-house"></i></span><span class="text-[15px] font-medium">Главная</span></a>
                 <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-newspaper"></i></span><span class="text-[15px] font-medium">Новости</span></a>
@@ -61,8 +60,10 @@ const name = user.full_name || 'Гость';
 const letter = (name[0] || 'U').toUpperCase();
 const sidebarUserName = document.getElementById('userName');
     if (sidebarUserName) sidebarUserName.textContent = name;
-document.getElementById('userAvatar').textContent = letter;
-document.getElementById('footerAvatar').textContent = letter;
+const userAvatar = document.getElementById('userAvatar');
+if (userAvatar) userAvatar.textContent = letter;
+const footerAvatar = document.getElementById('footerAvatar');
+if (footerAvatar) footerAvatar.textContent = letter;
 </script>
 </body>
 </html>
