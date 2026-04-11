@@ -161,3 +161,84 @@ body {
         padding-bottom: 14px;
     }
 }
+
+.theme-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    color: #1f2937;
+    border: 1px solid #d7dee3;
+    border-radius: 999px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.15);
+}
+
+.theme-toggle-track {
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+.theme-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+}
+
+body.dark-theme .theme-toggle-track { background: #334155; }
+body.dark-theme .theme-toggle-thumb { transform: translateX(18px); background: #0f172a; }
+body.dark-theme .theme-toggle { background: #111827; color: #e5e7eb; border-color: #374151; }
+
+body.dark-theme {
+    background: #0f172a !important;
+    color: #e5e7eb !important;
+}
+
+body.dark-theme .dashboard-shell,
+body.dark-theme .bg-white,
+body.dark-theme .bg-gray-50,
+body.dark-theme .bg-\[\#eef2f3\],
+body.dark-theme .bg-\[\#f7f8f9\],
+body.dark-theme .bg-\[\#fbfcfc\],
+body.dark-theme .bg-\[linear-gradient\(180deg\,\#fbfcfc_0\%\,\#f7f9f9_100\%\)\],
+body.dark-theme .bg-white\/90 {
+    background: #111827 !important;
+    color: #e5e7eb !important;
+}
+
+body.dark-theme .border,
+body.dark-theme [class*="border-"] {
+    border-color: #374151 !important;
+}
+
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select {
+    background: #0b1220 !important;
+    color: #e5e7eb !important;
+    border-color: #374151 !important;
+}
+
+body.dark-theme .text-gray-500,
+body.dark-theme .text-gray-600,
+body.dark-theme .text-\[\#5d6978\],
+body.dark-theme .text-\[\#7e8a97\],
+body.dark-theme .text-\[\#95a1ad\],
+body.dark-theme .text-\[\#445164\],
+body.dark-theme .text-\[\#273244\] {
+    color: #9ca3af !important;
+}
