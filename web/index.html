@@ -3,21 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Платформа для бизнеса</title>
+    <title>LASTOP | Главная</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script>
-        // Переход сразу в дашборд
-        window.location.href = '/dashboard.html';
-    </script>
     <link href="/assets/styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p class="mt-4 text-gray-600">Загрузка...</p>
-        </div>
+<body class="bg-[#eef2f3] text-[#273244] dashboard-page">
+<div class="min-h-screen p-6 font-sans">
+    <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)_330px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
+        <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
+            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div>
+                    <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
+                </a>
+            </div>
+
+            <div class="border-b border-[#e8ecef] px-5 py-4">
+                <a href="/settings.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left hover:bg-[#f4f7f7]">
+                    <div id="userAvatar" class="grid h-11 w-11 place-items-center rounded-full bg-[#6eaf95] text-sm font-semibold text-white">U</div>
+                    <div id="userName" class="flex-1 truncate text-[15px] font-medium text-[#445164]">Гость</div>
+                    <i class="fa-solid fa-chevron-down h-4 w-4 text-[#91a0ad]"></i>
+                </a>
+            </div>
+
+            <div class="px-4 py-5">
+                <div class="space-y-1.5">
+                    <a href="/" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition bg-[#eff7f3] text-[#4c8d78]">
+                        <span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-solid fa-house"></i></span>
+                        <span class="text-[15px] font-semibold">Главная</span>
+                    </a>
+                    <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
+                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-newspaper"></i></span>
+                        <span class="text-[15px] font-medium">Новости</span>
+                    </a>
+                    <a href="/forum.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
+                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-message"></i></span>
+                        <span class="text-[15px] font-medium">Форум</span>
+                    </a>
+                    <a href="/company.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
+                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-building"></i></span>
+                        <span class="text-[15px] font-medium">Компании</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-auto border-t border-[#e8ecef] px-5 py-5">
+                <a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
+                    <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div>
+                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Гость</div></div>
+                    <i class="fa-solid fa-angles-right h-4 w-4 text-[#a0acb8]"></i>
+                </a>
+            </div>
+        </aside>
+
+        <main class="dashboard-main relative bg-white">
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]"></div>
+            <div class="absolute inset-y-0 right-0 w-[42%] bg-[radial-gradient(circle_at_top_right,rgba(208,219,226,0.72),transparent_62%)]"></div>
+
+            <header class="dashboard-main-header relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
+                <h1 class="text-[26px] font-semibold tracking-[-0.02em] text-[#2c394b]">Главная страница</h1>
+                <a href="/dashboard.html" class="rounded-xl border border-[#e5eaed] px-4 py-2 text-sm text-[#61707f] hover:bg-[#f6f8f9]">Открыть все новости</a>
+            </header>
+
+            <div class="relative z-10 px-8 py-6">
+                <div class="mb-5 rounded-[24px] border border-[#e7ecef] bg-white/90 p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur">
+                    <h2 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Новости</h2>
+                    <p class="mt-2 text-[16px] text-[#7e8a97]">В центральном блоке выводятся новости из раздела «Новости».</p>
+                </div>
+
+                <section id="mainNewsFeed" class="space-y-4"></section>
+            </div>
+        </main>
+
+        <aside class="dashboard-sidebar border-l border-[#e7ebed] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)] px-6 py-6">
+            <div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
+                <h3 class="text-[18px] font-semibold text-[#334153]">Быстрые переходы</h3>
+                <div class="mt-4 space-y-3 text-[15px] text-[#5f6b79]">
+                    <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/dashboard.html">Все новости</a>
+                    <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/forum.html">Обсуждения на форуме</a>
+                    <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/company.html">Каталог компаний</a>
+                </div>
+            </div>
+        </aside>
     </div>
+</div>
+
+<script>
+const FEED_SOURCE = [
+    {
+        title: 'Рост деловой активности в производственном секторе',
+        excerpt: 'Компании расширяют экспортные каналы и ищут партнеров для совместных поставок оборудования и сырья.',
+        category: 'Экономика',
+        author: 'Редакция LASTOP',
+        minutesAgo: 15,
+        tags: ['экспорт', 'партнерство', 'производство']
+    },
+    {
+        title: 'Новые логистические коридоры для малого и среднего бизнеса',
+        excerpt: 'На форуме обсудили альтернативные маршруты и снижение издержек на доставку в страны СНГ и Ближнего Востока.',
+        category: 'Логистика',
+        author: 'Команда аналитики',
+        minutesAgo: 34,
+        tags: ['логистика', 'снг', 'маршруты']
+    },
+    {
+        title: 'Технологические тренды 2026: автоматизация закупок',
+        excerpt: 'Предприниматели внедряют AI-инструменты для прогноза спроса и оптимизации складских запасов.',
+        category: 'Технологии',
+        author: 'LASTOP Insights',
+        minutesAgo: 58,
+        tags: ['ai', 'закупки', 'автоматизация']
+    }
+];
+
+function setUserInfo() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const name = user.full_name || 'Гость';
+    const letter = (name[0] || 'U').toUpperCase();
+
+    document.getElementById('userName').textContent = name;
+    ['userAvatar', 'footerAvatar'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = letter;
+    });
+    document.getElementById('footerName').textContent = name;
+}
+
+function createNewsCard(item, idx) {
+    const article = document.createElement('article');
+    article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
+    article.innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 flex-1">
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${item.category}</div>
+                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title}</h3>
+                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${item.excerpt}</p>
+            </div>
+            <div class="text-right text-[13px] text-[#95a1ad]">
+                <div>${item.minutesAgo} мин назад</div>
+                <div class="mt-1 font-medium text-[#61707f]">${item.author}</div>
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2.5">
+            ${item.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
+        </div>
+        <div class="mt-4 text-sm text-[#8f9ba8]">Публикация #${idx + 1}</div>
+    `;
+    return article;
+}
+
+function renderMainNews() {
+    const feed = document.getElementById('mainNewsFeed');
+    FEED_SOURCE.forEach((item, idx) => feed.appendChild(createNewsCard(item, idx)));
+}
+
+setUserInfo();
+renderMainNews();
+</script>
 </body>
 </html>
