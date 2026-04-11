@@ -1,0 +1,9 @@
+<svg width="320" height="95" viewBox="0 0 320 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0,2)">
+    <path d="M55 3L14 25v21l19 11 20-11 20 11 20-11V24L55 3Z" stroke="#007A3D" stroke-width="8" fill="none" stroke-linejoin="round"/>
+    <path d="M55 25L34 37l-20-12" stroke="#007A3D" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M55 25l20 12 18-10" stroke="#007A3D" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M34 48l20 11 19-11" stroke="#007A3D" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="0" y="89" fill="#007A3D" font-size="36" font-family="Inter, Arial, sans-serif" font-weight="800" letter-spacing="1.5">LASTOP GROUP</text>
+</svg>
