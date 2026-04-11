@@ -31,6 +31,15 @@ func ensureDatabase(c *gin.Context) bool {
 	if database.DB != nil {
 		return true
 	}
+
+	if database.IsConfigured() {
+		database.InitDB()
+		if database.DB != nil {
+			database.CreateTables()
+			return true
+		}
+	}
+
 	jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
 	return false
 }
