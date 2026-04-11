@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
+    <script src="/assets/theme.js" defer></script>
 </head>
 <body class="bg-[#eef2f3] text-[#273244] dashboard-page">
 <div class="min-h-screen p-6 font-sans">
@@ -65,10 +66,10 @@
             </div>
 
             <div class="mt-auto border-t border-[#e8ecef] px-5 py-5">
-                <a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
+                <a href="/settings.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
                     <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div>
-                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Гость</div></div>
-                    <i class="fa-solid fa-angles-right h-4 w-4 text-[#a0acb8]"></i>
+                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Настройки</div></div>
+                    <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
                 </a>
             </div>
         </aside>
@@ -187,7 +188,6 @@ function setUserInfo() {
         const el = document.getElementById(id);
         if (el) el.textContent = letter;
     });
-    document.getElementById('footerName').textContent = name;
 }
 
 function createNewsCard(item, idx) {
