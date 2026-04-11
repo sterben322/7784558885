@@ -1,4 +1,42 @@
 <!DOCTYPE html>
-<html lang="ru"><head><meta charset="UTF-8"><title>LASTOP | Настройки</title><script src="https://cdn.tailwindcss.com"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">    <link href="/assets/styles.css" rel="stylesheet">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>LASTOP | Настройки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/assets/styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50"><div class="max-w-2xl mx-auto p-8"><div class="bg-white rounded-xl shadow-sm p-6"><h1 class="text-2xl font-bold mb-6">Настройки</h1><div class="space-y-6"><div><h3 class="font-semibold mb-3">Уведомления</h3><label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Email уведомления</span></label><label class="flex items-center space-x-3 mt-2"><input type="checkbox" class="w-4 h-4"><span>Push уведомления</span></label></div><div><h3 class="font-semibold mb-3">Конфиденциальность</h3><label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Закрытый профиль</span></label></div><button onclick="alert('Функция в разработке')" class="px-4 py-2 bg-gray-100 rounded-lg">Сменить пароль</button></div></div></div></body></html>
+<body class="bg-gray-50">
+    <header class="bg-white border-b">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
+            <nav class="flex items-center gap-4 text-sm">
+                <a href="/profile.html" class="text-gray-600 hover:text-black">Профиль</a>
+                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
+                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
+            </nav>
+        </div>
+    </header>
+    <div class="max-w-2xl mx-auto p-8">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h1 class="text-2xl font-bold mb-6">Настройки</h1>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="font-semibold mb-3">Уведомления</h3>
+                    <label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Email уведомления</span></label>
+                    <label class="flex items-center space-x-3 mt-2"><input type="checkbox" class="w-4 h-4"><span>Push уведомления</span></label>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-3">Конфиденциальность</h3>
+                    <label class="flex items-center space-x-3"><input type="checkbox" class="w-4 h-4"><span>Закрытый профиль</span></label>
+                </div>
+                <button onclick="alert('Функция в разработке')" class="px-4 py-2 bg-gray-100 rounded-lg">Сменить пароль</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        if (!localStorage.getItem('token')) window.location.href = '/login.html';
+    </script>
+</body>
+</html>
