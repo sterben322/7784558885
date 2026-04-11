@@ -147,8 +147,6 @@ func main() {
 
 	pageRoutes := map[string]string{
 		"/":                      "index.html",
-		"/login":                 "login.html",
-		"/login.html":            "login.html",
 		"/dashboard":             "dashboard.html",
 		"/dashboard.html":        "dashboard.html",
 		"/community":             "community.html",
@@ -178,6 +176,12 @@ func main() {
 		r.GET(routeCopy, func(c *gin.Context) { c.File(filepath.Join("web", fileCopy)) })
 	}
 
+	r.GET("/login", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
+	r.GET("/login.html", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
 	r.GET("/register", func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
 	})
