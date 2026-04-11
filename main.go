@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"lastop/database"
 	"lastop/handlers"
@@ -36,6 +38,22 @@ func main() {
 		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
 	}
+
+	r.GET("/api/health", func(c *gin.Context) {
+		if !database.IsConfigured() {
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "database": "disabled"})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second)
+		defer cancel()
+		if err := database.Ping(ctx); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "degraded", "database": "down"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "database": "up"})
+	})
 
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware())
