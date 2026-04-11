@@ -242,3 +242,73 @@ body.dark-theme .text-\[\#445164\],
 body.dark-theme .text-\[\#273244\] {
     color: #9ca3af !important;
 }
+
+
+/* Глобальный светлый фон без серых оттенков */
+body {
+    min-height: 100vh;
+    background: #ffffff !important;
+    color: #111111;
+}
+
+.bg-gray-50,
+.bg-gray-100,
+.bg-\[\#eef2f3\],
+.bg-\[\#f7f8f9\],
+.bg-\[\#fbfcfc\],
+.bg-\[\#fafbfb\],
+.bg-\[linear-gradient\(180deg\,\#fbfcfc_0\%\,\#f7f9f9_100\%\)\] {
+    background: #ffffff !important;
+}
+
+/* Фиксация оболочки: скроллится только центральная колонка */
+.dashboard-page .min-h-screen {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.dashboard-shell {
+    height: 100%;
+}
+
+.dashboard-main {
+    min-height: 0;
+}
+
+#feedScrollContainer {
+    height: calc(100vh - 82px - (var(--shell-v-gap) * 2));
+    overflow-y: auto;
+}
+
+/* Темная тема: белые буквы и черные блоки */
+body.dark-theme {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.dark-theme * {
+    color: #ffffff !important;
+}
+
+body.dark-theme .dashboard-shell,
+body.dark-theme [class*="bg-"],
+body.dark-theme .bg-white,
+body.dark-theme .bg-white\/90,
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select,
+body.dark-theme button,
+body.dark-theme article,
+body.dark-theme section,
+body.dark-theme aside,
+body.dark-theme header,
+body.dark-theme main,
+body.dark-theme nav,
+body.dark-theme div {
+    background: #000000 !important;
+}
+
+body.dark-theme .border,
+body.dark-theme [class*="border-"] {
+    border-color: #222222 !important;
+}

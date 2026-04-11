@@ -236,14 +236,14 @@ function appendNewsBatch() {
 
 function setupInfiniteScroll() {
     const status = document.getElementById('feedStatus');
+    const container = document.getElementById('feedScrollContainer');
 
     function checkScroll() {
-        const statusTop = status.getBoundingClientRect().top;
-        const triggerPoint = window.innerHeight + 220;
-        if (statusTop <= triggerPoint) appendNewsBatch();
+        const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+        if (remaining <= 280) appendNewsBatch();
     }
 
-    window.addEventListener('scroll', checkScroll, { passive: true });
+    container.addEventListener('scroll', checkScroll, { passive: true });
     window.addEventListener('resize', checkScroll);
     checkScroll();
 }
