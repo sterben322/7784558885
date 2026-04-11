@@ -12,26 +12,38 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func abortUnauthorized(c *gin.Context, message string) {
+	acceptHeader := c.GetHeader("Accept")
+	if c.Request.Method == http.MethodGet && strings.Contains(acceptHeader, "text/html") {
+		if c.Writer != nil {
+			c.Writer.Header().Set("Location", "/login.html")
+			c.Writer.WriteHeader(http.StatusFound)
+		}
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusUnauthorized, gin.H{"error": message})
+	c.Abort()
+}
+
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
+			abortUnauthorized(c, "Authorization header required")
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Bearer token required"})
-			c.Abort()
+			abortUnauthorized(c, "Bearer token required")
 			return
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		userID, err := utils.ValidateJWT(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			c.Abort()
+			abortUnauthorized(c, "Invalid token")
 			return
 		}
 
@@ -40,10 +52,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		err = database.DB.QueryRow(`
             SELECT user_id::text, expires_at FROM sessions
             WHERE token = $1
-        `, tokenString).Scan(&sessionUserID, &expiresAt)
+		`, tokenString).Scan(&sessionUserID, &expiresAt)
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session not found"})
-			c.Abort()
+			abortUnauthorized(c, "Session not found")
 			return
 		}
 		if err != nil {
@@ -52,8 +63,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		if expiresAt.Before(time.Now()) || sessionUserID != userID.String() {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
-			c.Abort()
+			abortUnauthorized(c, "Session expired")
 			return
 		}
 
