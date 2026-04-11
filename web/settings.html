@@ -56,6 +56,15 @@
                 <button onclick="window.location.href='/stub.html?section=Смена%20пароля'" class="mt-4 rounded-xl border border-[#dbe3e8] px-4 py-2.5 text-sm font-medium text-[#4f5e6d] hover:bg-[#f5f8f9]">Сменить пароль</button>
             </section>
 
+            <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
+                <h2 class="text-xl font-semibold">Внешний вид сайта</h2>
+                <p class="mt-2 text-sm text-[#708090]">Настройте ширину контента для широкоформатных экранов.</p>
+                <label class="mt-4 flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5 text-[#4e5d6c]">
+                    <span>Широкоформатный режим</span>
+                    <input id="layoutWideToggle" type="checkbox" class="h-4 w-4">
+                </label>
+            </section>
+
             <div class="flex flex-wrap gap-3">
                 <button id="saveBtn" class="rounded-xl bg-[#2f7f5e] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Сохранить изменения</button>
                 <a href="/profile.html" class="rounded-xl border border-[#dbe3e8] px-5 py-2.5 text-sm font-medium text-[#4f5e6d]">Вернуться в профиль</a>
@@ -68,11 +77,20 @@
 if (!localStorage.getItem('token')) window.location.href = '/login.html';
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
+const LAYOUT_KEY = 'lastop-layout-mode';
 const fullNameInput = document.getElementById('fullNameInput');
 const companyInput = document.getElementById('companyInput');
+const layoutWideToggle = document.getElementById('layoutWideToggle');
 
 fullNameInput.value = user.full_name || '';
 companyInput.value = user.company_name || '';
+layoutWideToggle.checked = (localStorage.getItem(LAYOUT_KEY) || 'standard') === 'wide';
+
+layoutWideToggle.addEventListener('change', () => {
+  const nextMode = layoutWideToggle.checked ? 'wide' : 'standard';
+  localStorage.setItem(LAYOUT_KEY, nextMode);
+  document.body.classList.toggle('widescreen-mode', nextMode === 'wide');
+});
 
 document.getElementById('saveBtn').addEventListener('click', () => {
   const updatedUser = {

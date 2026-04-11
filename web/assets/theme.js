@@ -130,6 +130,47 @@
     });
   }
 
+  function createNavItem({ href, iconClass, label }) {
+    const link = document.createElement('a');
+    link.href = href;
+    link.className = 'flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]';
+    link.innerHTML = `
+      <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="${iconClass}"></i></span>
+      <span class="text-[15px] font-medium">${label}</span>
+    `;
+    return link;
+  }
+
+  function ensureDashboardSidebarAccess() {
+    const navBlocks = document.querySelectorAll('.dashboard-shell > aside.dashboard-sidebar .space-y-1\\.5');
+    navBlocks.forEach((nav) => {
+      if (!nav.querySelector('a[href="/jobs.html"]')) {
+        nav.appendChild(createNavItem({
+          href: '/jobs.html',
+          iconClass: 'fa-solid fa-briefcase',
+          label: 'Резюме и вакансии'
+        }));
+      }
+    });
+
+    const leftSidebar = document.querySelector('.dashboard-shell > aside.dashboard-sidebar');
+    if (!leftSidebar) return;
+
+    const settingsLinks = leftSidebar.querySelectorAll('a[href="/settings.html"]');
+    if (settingsLinks.length > 0) return;
+
+    const footer = document.createElement('div');
+    footer.className = 'mt-auto border-t border-[#e8ecef] px-5 py-5';
+    footer.innerHTML = `
+      <a href="/settings.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
+        <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]">S</div>
+        <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]">Настройки</div></div>
+        <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
+      </a>
+    `;
+    leftSidebar.appendChild(footer);
+  }
+
   function createGlobalSidebar() {
     const path = window.location.pathname;
     const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
@@ -185,6 +226,7 @@
     createGlobalSidebar();
     applyBranding();
     simplifyLeftSidebar();
+    ensureDashboardSidebarAccess();
     createSidebarToggles();
   });
 })();
