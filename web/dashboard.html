@@ -232,7 +232,7 @@ function createNewsCard(item, idx) {
         </div>
         <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
             <span>Публикация #${publicationIndex}</span>
-            <button class="news-read rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</button>
+            <a href="/news-detail.html" class="news-read rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</a>
         </div>
     `;
     return article;
@@ -289,6 +289,7 @@ function setupNewsReadLinks() {
     document.getElementById('newsFeed').addEventListener('click', (event) => {
         const readButton = event.target.closest('.news-read');
         if (!readButton) return;
+        event.preventDefault();
         const card = readButton.closest('article');
         if (!card || !card.dataset.newsPayload) return;
         openNewsDetail(JSON.parse(card.dataset.newsPayload));
