@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Детали новости</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/assets/styles.css" rel="stylesheet">
+</head>
+<body class="bg-[#eef2f3] text-[#273244] dashboard-page">
+<div class="min-h-screen p-6 font-sans">
+    <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
+        <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
+            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div>
+                    <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
+                </a>
+            </div>
+            <div class="border-b border-[#e8ecef] px-5 py-4">
+                <a href="/settings.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left hover:bg-[#f4f7f7]">
+                    <div id="userAvatar" class="grid h-11 w-11 place-items-center rounded-full bg-[#6eaf95] text-sm font-semibold text-white">U</div>
+                    <div id="userName" class="flex-1 truncate text-[15px] font-medium text-[#445164]">Гость</div>
+                </a>
+            </div>
+            <div class="px-4 py-5">
+                <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
+                    <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-newspaper"></i></span>
+                    <span class="text-[15px] font-medium">К новостям</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="dashboard-main relative bg-white">
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]"></div>
+            <div class="absolute inset-y-0 right-0 w-[42%] bg-[radial-gradient(circle_at_top_right,rgba(208,219,226,0.72),transparent_62%)]"></div>
+
+            <header class="dashboard-main-header relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
+                <h1 class="text-[26px] font-semibold tracking-[-0.02em] text-[#2c394b]">Детали новости</h1>
+                <a href="/dashboard.html" class="rounded-xl border border-[#e5eaed] px-4 py-2 text-sm text-[#61707f] hover:bg-[#f6f8f9]">Назад в ленту</a>
+            </header>
+
+            <div class="relative z-10 px-8 py-6">
+                <article class="rounded-[26px] border border-[#e7ecef] bg-white/90 p-6 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur">
+                    <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]" id="newsCategory">Новость</div>
+                    <h2 id="newsTitle" class="text-[32px] font-semibold leading-[1.2] text-[#2f3c4e]"></h2>
+                    <div class="mt-3 text-sm text-[#8d99a6]" id="newsMeta"></div>
+
+                    <img id="newsImage" class="mt-6 h-[360px] w-full rounded-[22px] object-cover ring-1 ring-[#e8ecee]" alt="Изображение новости">
+
+                    <p id="newsText" class="mt-6 text-[18px] leading-8 text-[#5e6c7c]"></p>
+                </article>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function setUserInfo() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const name = user.full_name || 'Гость';
+    const letter = (name[0] || 'U').toUpperCase();
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = letter;
+}
+
+function renderNewsDetail() {
+    const saved = localStorage.getItem('lastopSelectedNews');
+    if (!saved) {
+        document.getElementById('newsTitle').textContent = 'Новость не выбрана';
+        document.getElementById('newsText').textContent = 'Вернитесь в ленту и выберите материал, который хотите прочитать.';
+        document.getElementById('newsImage').src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1600&q=80';
+        return;
+    }
+
+    const news = JSON.parse(saved);
+    document.title = `LASTOP | ${news.title}`;
+    document.getElementById('newsCategory').textContent = news.category || 'Новость';
+    document.getElementById('newsTitle').textContent = news.title || 'Без заголовка';
+    document.getElementById('newsMeta').textContent = `${news.author || 'Редакция'} · ${news.minutesAgo || 0} мин назад`;
+    document.getElementById('newsImage').src = news.image;
+    document.getElementById('newsImage').alt = news.title || 'Изображение новости';
+    document.getElementById('newsText').textContent = news.content || news.excerpt || '';
+}
+
+setUserInfo();
+renderNewsDetail();
+</script>
+</body>
+</html>

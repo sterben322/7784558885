@@ -92,24 +92,33 @@
 <script>
 const FEED_SOURCE = [
     {
+        id: 'news-1',
         title: 'Рост деловой активности в производственном секторе',
         excerpt: 'Компании расширяют экспортные каналы и ищут партнеров для совместных поставок оборудования и сырья.',
+        image: 'https://images.unsplash.com/photo-1565514158740-064f34bd6c46?auto=format&fit=crop&w=1600&q=80',
+        content: 'За первый квартал отраслевые объединения зафиксировали рост спроса на локальные производственные цепочки. Компании усиливают кооперацию с региональными поставщиками, расширяют географию экспортных поставок и запускают совместные проекты по модернизации складов. Эксперты отмечают, что ключевыми драйверами остаются снижение логистических издержек, ускорение контрактных процедур и рост интереса к долгосрочным B2B-партнерствам.',
         category: 'Экономика',
         author: 'Редакция LASTOP',
         minutesAgo: 15,
         tags: ['экспорт', 'партнерство', 'производство']
     },
     {
+        id: 'news-2',
         title: 'Новые логистические коридоры для малого и среднего бизнеса',
         excerpt: 'На форуме обсудили альтернативные маршруты и снижение издержек на доставку в страны СНГ и Ближнего Востока.',
+        image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80',
+        content: 'Участники профильной сессии представили несколько альтернативных маршрутов для международных поставок и поделились практиками консолидации грузов. По оценкам аналитиков, переход на гибридные схемы доставки позволяет бизнесу уменьшить расходы на последнюю милю и повысить предсказуемость сроков. Дополнительный эффект даёт цифровизация документооборота и предварительное страхование рисков.',
         category: 'Логистика',
         author: 'Команда аналитики',
         minutesAgo: 34,
         tags: ['логистика', 'снг', 'маршруты']
     },
     {
+        id: 'news-3',
         title: 'Технологические тренды 2026: автоматизация закупок',
         excerpt: 'Предприниматели внедряют AI-инструменты для прогноза спроса и оптимизации складских запасов.',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
+        content: 'В 2026 году автоматизация закупок стала одним из основных направлений операционной трансформации. Компании интегрируют ML-модели в ERP-системы, чтобы прогнозировать сезонные пики спроса и оптимизировать закупочные планы. Это помогает снижать объём неликвидных запасов, ускорять согласование заявок между отделами и повышать прозрачность бюджета.',
         category: 'Технологии',
         author: 'LASTOP Insights',
         minutesAgo: 58,
@@ -133,6 +142,7 @@ function setUserInfo() {
 function createNewsCard(item, idx) {
     const article = document.createElement('article');
     article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
+    article.dataset.newsPayload = JSON.stringify(item);
     article.innerHTML = `
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
@@ -140,6 +150,7 @@ function createNewsCard(item, idx) {
                 <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title}</h3>
                 <p class="mt-3 text-[16px] leading-7 text-[#697685]">${item.excerpt}</p>
             </div>
+            <img src="${item.image}" alt="${item.title}" class="h-28 w-40 shrink-0 rounded-2xl object-cover ring-1 ring-[#e8ecee]" />
             <div class="text-right text-[13px] text-[#95a1ad]">
                 <div>${item.minutesAgo} мин назад</div>
                 <div class="mt-1 font-medium text-[#61707f]">${item.author}</div>
@@ -148,9 +159,17 @@ function createNewsCard(item, idx) {
         <div class="mt-4 flex flex-wrap gap-2.5">
             ${item.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
         </div>
-        <div class="mt-4 text-sm text-[#8f9ba8]">Публикация #${idx + 1}</div>
+        <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
+            <span>Публикация #${idx + 1}</span>
+            <button class="news-read rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</button>
+        </div>
     `;
     return article;
+}
+
+function openNewsDetail(item) {
+    localStorage.setItem('lastopSelectedNews', JSON.stringify(item));
+    window.open('/news-detail.html', '_blank', 'noopener,noreferrer');
 }
 
 function renderMainNews() {
@@ -158,8 +177,19 @@ function renderMainNews() {
     FEED_SOURCE.forEach((item, idx) => feed.appendChild(createNewsCard(item, idx)));
 }
 
+function setupNewsReadLinks() {
+    document.getElementById('mainNewsFeed').addEventListener('click', (event) => {
+        const readButton = event.target.closest('.news-read');
+        if (!readButton) return;
+        const card = readButton.closest('article');
+        if (!card || !card.dataset.newsPayload) return;
+        openNewsDetail(JSON.parse(card.dataset.newsPayload));
+    });
+}
+
 setUserInfo();
 renderMainNews();
+setupNewsReadLinks();
 </script>
 </body>
 </html>
