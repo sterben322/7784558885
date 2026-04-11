@@ -305,20 +305,22 @@ body {
     overflow-y: auto;
 }
 
-/* Темная тема: белые буквы и черные блоки */
+/* Темная тема: перекрашиваем только светлые подложки и светлый текст */
 body.dark-theme {
     background: #000000 !important;
     color: #ffffff !important;
 }
 
-body.dark-theme * {
-    color: #ffffff !important;
-}
-
 body.dark-theme .dashboard-shell,
-body.dark-theme [class*="bg-"],
 body.dark-theme .bg-white,
 body.dark-theme .bg-white\/90,
+body.dark-theme .bg-gray-50,
+body.dark-theme .bg-gray-100,
+body.dark-theme .bg-\[\#eef2f3\],
+body.dark-theme .bg-\[\#f7f8f9\],
+body.dark-theme .bg-\[\#fbfcfc\],
+body.dark-theme .bg-\[\#fafbfb\],
+body.dark-theme .bg-\[linear-gradient\(180deg\,\#fbfcfc_0\%\,\#f7f9f9_100\%\)\],
 body.dark-theme input,
 body.dark-theme textarea,
 body.dark-theme select,
@@ -329,8 +331,48 @@ body.dark-theme aside,
 body.dark-theme header,
 body.dark-theme main,
 body.dark-theme nav,
-body.dark-theme div {
+body.dark-theme div[style*="background: white"],
+body.dark-theme div[style*="background:#fff"] {
     background: #000000 !important;
+}
+
+body.dark-theme .text-black,
+body.dark-theme .text-\[\#000\],
+body.dark-theme .text-\[\#111111\],
+body.dark-theme .text-\[\#111827\],
+body.dark-theme .text-\[\#1f2937\],
+body.dark-theme .text-\[\#273244\],
+body.dark-theme .text-\[\#324154\],
+body.dark-theme .text-\[\#334153\],
+body.dark-theme .text-\[\#3a4758\],
+body.dark-theme .text-\[\#445164\],
+body.dark-theme .text-\[\#4c5b6b\],
+body.dark-theme .text-\[\#51606f\],
+body.dark-theme .text-\[\#5d6978\],
+body.dark-theme .text-\[\#5f6b79\],
+body.dark-theme .text-\[\#7e8a97\],
+body.dark-theme .text-\[\#95a1ad\],
+body.dark-theme .text-\[\#a0acb8\],
+body.dark-theme .text-gray-500,
+body.dark-theme .text-gray-600 {
+    color: #ffffff !important;
+}
+
+/* Зеленые акценты не перекрашиваем в темной теме */
+body.dark-theme .text-green-500,
+body.dark-theme .text-green-600,
+body.dark-theme .text-green-700,
+body.dark-theme .text-\[\#16a34a\],
+body.dark-theme .text-\[\#15803d\],
+body.dark-theme .text-\[\#22c55e\],
+body.dark-theme .green-link,
+body.dark-theme .green-gradient-text {
+    color: #22c55e !important;
+}
+
+body.dark-theme ::selection {
+    background: rgba(34, 197, 94, 0.35);
+    color: #ffffff;
 }
 
 body.dark-theme .border,
