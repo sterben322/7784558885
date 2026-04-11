@@ -23,8 +23,7 @@
             <div class="border-b border-[#e8ecef] px-5 py-4">
                 <a href="/settings.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left hover:bg-[#f4f7f7]">
                     <div id="userAvatar" class="grid h-11 w-11 place-items-center rounded-full bg-[#6eaf95] text-sm font-semibold text-white">U</div>
-                    <div id="userName" class="flex-1 truncate text-[15px] font-medium text-[#445164]">Гость</div>
-                    <i class="fa-solid fa-chevron-down h-4 w-4 text-[#91a0ad]"></i>
+                                        <i class="fa-solid fa-chevron-down h-4 w-4 text-[#91a0ad]"></i>
                 </a>
             </div>
 
@@ -182,7 +181,8 @@ function setUserInfo() {
     const name = user.full_name || 'Гость';
     const letter = (name[0] || 'U').toUpperCase();
 
-    document.getElementById('userName').textContent = name;
+    const sidebarUserName = document.getElementById('userName');
+    if (sidebarUserName) sidebarUserName.textContent = name;
     document.getElementById('topUserName').textContent = name;
     ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
         const el = document.getElementById(id);
