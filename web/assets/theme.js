@@ -59,14 +59,15 @@
 
   function createSidebarToggles() {
     if (document.getElementById('sidebarSwitches')) return;
-
-    const sidebar = document.querySelector('.dashboard-shell > aside.dashboard-sidebar');
+    const sidebar =
+      document.querySelector('#globalSidebar') ||
+      document.querySelector('.dashboard-shell > aside.dashboard-sidebar');
     if (!sidebar) return;
 
-    const settingsBlock = sidebar.querySelector('.mt-auto');
+    const settingsBlock = sidebar.querySelector('.sidebar-settings-block, .mt-auto');
     const host = document.createElement('div');
     host.id = 'sidebarSwitches';
-    host.className = 'sidebar-switches px-5 pb-3';
+    host.className = 'sidebar-switches px-3 pb-3';
     host.innerHTML = `
       <button id="layoutToggle" type="button" class="sidebar-toggle" aria-label="Переключить режим экрана">
         <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
@@ -175,7 +176,6 @@
     const path = window.location.pathname;
     const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
     if (isAuthPage) return;
-    if (document.querySelector('.dashboard-shell')) return;
     if (document.getElementById('globalSidebar')) return;
 
     const wrapper = document.createElement('aside');
@@ -191,8 +191,10 @@
         <a href="/company.html" class="global-sidebar__item">Компании</a>
         <a href="/jobs.html" class="global-sidebar__item">Резюме и вакансии</a>
         <a href="/profile.html" class="global-sidebar__item">Профиль</a>
-        <a href="/settings.html" class="global-sidebar__item">Настройки</a>
       </nav>
+      <div class="sidebar-settings-block">
+        <a href="/settings.html" class="global-sidebar__item global-sidebar__item--settings">Настройки</a>
+      </div>
     `;
 
     const right = document.createElement('aside');
@@ -214,6 +216,9 @@
     search.innerHTML = '<i class="fa-solid fa-magnifying-glass h-5 w-5 text-[#95a1ad]"></i><input class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск по разделам" />';
 
     document.body.classList.add('with-global-sidebar', 'with-global-sidebar-right', 'with-global-search');
+    if (document.querySelector('.dashboard-shell')) {
+      document.body.classList.add('use-global-sidebars');
+    }
     document.body.appendChild(wrapper);
     document.body.appendChild(right);
     document.body.appendChild(search);

@@ -421,6 +421,12 @@ body.dark-theme [class*="border-"] {
     gap: 6px;
 }
 
+.sidebar-settings-block {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #e6eaec;
+}
+
 .global-sidebar__item {
     border-radius: 14px;
     padding: 10px 12px;
@@ -429,6 +435,10 @@ body.dark-theme [class*="border-"] {
 
 .global-sidebar__item:hover {
     background: #f4f7f7;
+}
+
+.global-sidebar__item--settings {
+    display: block;
 }
 
 @media (max-width: 1024px) {
@@ -460,6 +470,14 @@ body.dark-theme [class*="border-"] {
         display: inline-flex;
         align-items: center;
         margin-top: 0;
+    }
+
+    .sidebar-settings-block {
+        display: inline-block;
+        margin-top: 0;
+        border-top: 0;
+        padding-top: 0;
+        margin-left: 6px;
     }
 }
 
@@ -525,4 +543,12 @@ body.dark-theme [class*="border-"] {
         left: 16px;
         top: 92px;
     }
+}
+
+body.use-global-sidebars .dashboard-shell {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+body.use-global-sidebars .dashboard-shell > aside {
+    display: none !important;
 }
