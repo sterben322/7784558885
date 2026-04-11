@@ -108,6 +108,10 @@ body {
     overflow: visible;
 }
 
+body.widescreen-mode {
+    --shell-max-width: 1760px;
+}
+
 .dashboard-main {
     display: flex;
     flex-direction: column;
@@ -162,11 +166,13 @@ body {
     }
 }
 
-.theme-toggle {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 100;
+.sidebar-switches {
+    display: grid;
+    gap: 8px;
+}
+
+.sidebar-toggle {
+    width: 100%;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -175,7 +181,8 @@ body {
     border: 1px solid #d7dee3;
     border-radius: 999px;
     padding: 8px 12px;
-    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.15);
+    box-shadow: 0 6px 16px rgba(17, 24, 39, 0.12);
+    font-size: 13px;
 }
 
 .theme-toggle-track {
@@ -199,9 +206,27 @@ body {
     transition: transform 0.2s ease;
 }
 
-body.dark-theme .theme-toggle-track { background: #334155; }
-body.dark-theme .theme-toggle-thumb { transform: translateX(18px); background: #0f172a; }
-body.dark-theme .theme-toggle { background: #111827; color: #e5e7eb; border-color: #374151; }
+#themeToggle .theme-toggle-track,
+#layoutToggle .theme-toggle-track {
+    transition: background 0.2s ease;
+}
+
+body.dark-theme #themeToggle .theme-toggle-track,
+body.widescreen-mode #layoutToggle .theme-toggle-track {
+    background: #334155;
+}
+
+body.dark-theme #themeToggle .theme-toggle-thumb,
+body.widescreen-mode #layoutToggle .theme-toggle-thumb {
+    transform: translateX(18px);
+    background: #0f172a;
+}
+
+body.dark-theme .sidebar-toggle {
+    background: #111827;
+    color: #e5e7eb;
+    border-color: #374151;
+}
 
 body.dark-theme {
     background: #0f172a !important;

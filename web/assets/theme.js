@@ -1,5 +1,6 @@
 (function () {
   const THEME_KEY = 'lastop-theme';
+  const LAYOUT_KEY = 'lastop-layout-mode';
   const DEMO_USER_KEY = 'user';
   const DEMO_TOKEN_KEY = 'token';
 
@@ -16,6 +17,15 @@
     const isDark = theme === 'dark';
     document.body.classList.toggle('dark-theme', isDark);
     document.documentElement.classList.toggle('dark', isDark);
+  }
+
+  function applyLayout(mode) {
+    const isWide = mode === 'wide';
+    document.body.classList.toggle('widescreen-mode', isWide);
+  }
+
+  function currentLayout() {
+    return localStorage.getItem(LAYOUT_KEY) || 'standard';
   }
 
   function currentTheme() {
@@ -47,23 +57,47 @@
     }
   }
 
-  function createToggle() {
-    if (document.getElementById('themeToggle')) return;
+  function createSidebarToggles() {
+    if (document.getElementById('sidebarSwitches')) return;
 
-    const btn = document.createElement('button');
-    btn.id = 'themeToggle';
-    btn.type = 'button';
-    btn.className = 'theme-toggle';
-    btn.setAttribute('aria-label', 'Переключить тему');
-    btn.innerHTML = '<span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span><span class="theme-toggle-label">Тёмная тема</span>';
+    const sidebar = document.querySelector('.dashboard-shell > aside.dashboard-sidebar');
+    if (!sidebar) return;
 
-    btn.addEventListener('click', function () {
+    const settingsBlock = sidebar.querySelector('.mt-auto');
+    const host = document.createElement('div');
+    host.id = 'sidebarSwitches';
+    host.className = 'sidebar-switches px-5 pb-3';
+    host.innerHTML = `
+      <button id="layoutToggle" type="button" class="sidebar-toggle" aria-label="Переключить режим экрана">
+        <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
+        <span class="theme-toggle-label">Стандарт / широкоформат</span>
+      </button>
+      <button id="themeToggle" type="button" class="sidebar-toggle" aria-label="Переключить тему">
+        <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
+        <span class="theme-toggle-label">Тёмная тема</span>
+      </button>
+    `;
+
+    if (settingsBlock) {
+      sidebar.insertBefore(host, settingsBlock);
+    } else {
+      sidebar.appendChild(host);
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    const layoutToggle = document.getElementById('layoutToggle');
+
+    themeToggle.addEventListener('click', function () {
       const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
     });
 
-    document.body.appendChild(btn);
+    layoutToggle.addEventListener('click', function () {
+      const next = document.body.classList.contains('widescreen-mode') ? 'standard' : 'wide';
+      localStorage.setItem(LAYOUT_KEY, next);
+      applyLayout(next);
+    });
   }
 
   function logoMarkup() {
@@ -147,9 +181,10 @@
   document.addEventListener('DOMContentLoaded', function () {
     ensureDemoSession();
     applyTheme(currentTheme());
+    applyLayout(currentLayout());
     createGlobalSidebar();
     applyBranding();
     simplifyLeftSidebar();
-    createToggle();
+    createSidebarToggles();
   });
 })();
