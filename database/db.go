@@ -19,22 +19,28 @@ func InitDB() {
 		return
 	}
 
+	databaseURL := os.Getenv("DATABASE_URL")
 	host := getenv("DB_HOST", "")
 	port := getenv("DB_PORT", "5432")
 	user := getenv("DB_USER", "postgres")
 	password := getenv("DB_PASSWORD", "postgres")
 	dbname := getenv("DB_NAME", "lastop_db")
 
-	if host == "" {
-		log.Println("DB_HOST is not set: database initialization skipped")
+	if databaseURL == "" && host == "" {
+		log.Println("DB_HOST / DATABASE_URL is not set: database initialization skipped")
 		return
 	}
-	hostsToTry := []string{host}
+
+	connStrings := make([]string, 0, 1)
+	if databaseURL != "" {
+		connStrings = append(connStrings, databaseURL)
+	} else {
+		connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+		connStrings = append(connStrings, connStr)
+	}
 
 	var lastErr error
-	for _, hostCandidate := range hostsToTry {
-		connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", hostCandidate, port, user, password, dbname)
-
+	for _, connStr := range connStrings {
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
 			lastErr = err
@@ -55,11 +61,22 @@ func InitDB() {
 		}
 
 		DB = db
-		log.Printf("database connected (host=%s)", hostCandidate)
+		log.Println("database connected")
 		return
 	}
 
 	log.Printf("warning: database is unavailable, running without DB: %v", lastErr)
+}
+
+func IsConfigured() bool {
+	return os.Getenv("DATABASE_URL") != "" || os.Getenv("DB_HOST") != ""
+}
+
+func Ping(ctx context.Context) error {
+	if DB == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+	return DB.PingContext(ctx)
 }
 
 func CloseDB() {
