@@ -133,6 +133,10 @@ func GetFeed(c *gin.Context) {
 		args = []interface{}{userID}
 	case "community":
 		communityID := c.Query("community_id")
+		if communityID == "" {
+			jsonError(c, http.StatusBadRequest, "community_id is required for community feed")
+			return
+		}
 		var isPrivate bool
 		if err := database.DB.QueryRow(`SELECT is_private FROM communities WHERE id = $1`, communityID).Scan(&isPrivate); err == nil && isPrivate && !isCommunityMember(communityID, userID) {
 			jsonError(c, http.StatusForbidden, "Community posts are hidden until your request is approved")
@@ -154,6 +158,10 @@ func GetFeed(c *gin.Context) {
 		args = []interface{}{userID, communityID}
 	case "company":
 		companyID := c.Query("company_id")
+		if companyID == "" {
+			jsonError(c, http.StatusBadRequest, "company_id is required for company feed")
+			return
+		}
 		var isPublic bool
 		if err := database.DB.QueryRow(`SELECT is_public FROM companies WHERE id = $1`, companyID).Scan(&isPublic); err != nil {
 			jsonError(c, http.StatusNotFound, "Company not found")
@@ -178,16 +186,23 @@ func GetFeed(c *gin.Context) {
             LIMIT 50
         `
 		args = []interface{}{userID, companyID}
-	default:
+	case "news":
 		query = `
             SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
                    p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
                    p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
+            WHERE p.author_type IN ('community', 'company')
+              AND p.privacy_level = 'public'
+              AND p.is_hidden = false
+              AND p.is_unpublished = false
             ORDER BY p.created_at DESC LIMIT 50
         `
 		args = []interface{}{userID}
+	default:
+		jsonError(c, http.StatusBadRequest, "Invalid feed type. Allowed: global, friends, my, community, company, news")
+		return
 	}
 
 	rows, err := database.DB.Query(query, args...)
