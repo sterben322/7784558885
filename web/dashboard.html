@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Главная</title>
+    <title>LASTOP | Новости</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
@@ -14,9 +14,7 @@
         <aside class="relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
             <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8">
                 <a href="/dashboard.html" class="flex items-center gap-3">
-                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]">
-                        <div class="text-[30px]">⛓</div>
-                    </div>
+                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div>
                     <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
                 </a>
             </div>
@@ -31,9 +29,13 @@
 
             <div class="px-4 py-5">
                 <div class="space-y-1.5">
+                    <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
+                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-table-columns"></i></span>
+                        <span class="text-[15px] font-medium">Дашборд</span>
+                    </a>
                     <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition bg-[#eff7f3] text-[#4c8d78]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-solid fa-table-columns"></i></span>
-                        <span class="text-[15px] font-semibold">Дашборд</span>
+                        <span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-regular fa-newspaper"></i></span>
+                        <span class="text-[15px] font-semibold">Новости</span>
                     </a>
                     <button disabled class="flex w-full cursor-not-allowed items-center gap-3 rounded-2xl px-4 py-3 text-left text-[#9aa6b2] opacity-70">
                         <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-folder-tree"></i></span>
@@ -55,22 +57,12 @@
                         <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-building"></i></span>
                         <span class="text-[15px] font-medium">Компании</span>
                     </a>
-                    <button disabled class="flex w-full cursor-not-allowed items-center gap-3 rounded-2xl px-4 py-3 text-left text-[#9aa6b2] opacity-70">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-chart-column"></i></span>
-                        <span class="text-[15px] font-medium">Аналитика</span>
-                    </button>
-                    <button disabled class="flex w-full cursor-not-allowed items-center gap-3 rounded-2xl px-4 py-3 text-left text-[#9aa6b2] opacity-70">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-ellipsis"></i></span>
-                        <span class="text-[15px] font-medium">Ещё</span>
-                    </button>
                 </div>
             </div>
 
             <div class="mx-4 mt-4 rounded-[18px] border border-[#e3ebe6] bg-[#f5fbf7] px-4 py-4 shadow-[0_4px_14px_rgba(154,176,164,0.08)]">
                 <div class="flex items-start gap-3">
-                    <div class="mt-0.5 rounded-xl bg-white p-2 text-[#6aa084] shadow-sm">
-                        <i class="fa-solid fa-shield"></i>
-                    </div>
+                    <div class="mt-0.5 rounded-xl bg-white p-2 text-[#6aa084] shadow-sm"><i class="fa-solid fa-shield"></i></div>
                     <div>
                         <div class="text-[14px] font-medium leading-5 text-[#5f6b79]">Файл для участника</div>
                         <div class="mt-1 text-[16px] font-semibold text-[#384556]">Стройтекс '24</div>
@@ -81,9 +73,7 @@
             <div class="mt-auto border-t border-[#e8ecef] px-5 py-5">
                 <a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
                     <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div>
-                    <div class="min-w-0 flex-1">
-                        <div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Гость</div>
-                    </div>
+                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Гость</div></div>
                     <i class="fa-solid fa-angles-right h-4 w-4 text-[#a0acb8]"></i>
                 </a>
             </div>
@@ -97,7 +87,7 @@
             <header class="relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
                 <div class="flex w-full max-w-[770px] items-center gap-3 rounded-2xl border border-[#edf0f2] bg-[#f7f8f9] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                     <i class="fa-solid fa-magnifying-glass h-5 w-5 text-[#95a1ad]"></i>
-                    <input class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск" />
+                    <input id="newsSearch" class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск новостей" />
                 </div>
 
                 <div class="ml-5 flex items-center gap-4">
@@ -111,95 +101,14 @@
                 </div>
             </header>
 
-            <div class="relative z-10 px-8 py-6">
-                <div class="rounded-[28px] bg-transparent pb-4">
-                    <h1 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Добро пожаловать на LASTOP, <span id="welcomeUser">друг</span>!</h1>
-                    <p class="mt-2 text-[17px] text-[#7e8a97]">Платформа для развития бизнеса, профессиональных связей и карьеры</p>
-
-                    <div class="mt-6 grid grid-cols-3 gap-5">
-                        <div class="rounded-[22px] border border-[#eaedef] bg-white px-6 py-6 shadow-[0_10px_22px_rgba(178,190,198,0.12)] opacity-80">
-                            <div class="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#eef7f2] text-[#6ea288] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"><i class="fa-solid fa-briefcase"></i></div>
-                            <div class="text-[17px] font-semibold text-[#2f3b4c]">Проекты</div>
-                            <div class="mt-4 whitespace-pre-line text-[16px] leading-7 text-[#697685]">Вы участвуете в 3 проектах</div>
-                            <button disabled class="mt-5 cursor-not-allowed rounded-[14px] border border-[#e7eaec] bg-[#f7f8f9] px-5 py-2.5 text-[15px] font-medium text-[#97a2ad]">Перейти</button>
-                        </div>
-                        <div class="rounded-[22px] border border-[#eaedef] bg-white px-6 py-6 shadow-[0_10px_22px_rgba(178,190,198,0.12)] opacity-80">
-                            <div class="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#eef7f2] text-[#6ea288] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"><i class="fa-regular fa-file-lines"></i></div>
-                            <div class="text-[17px] font-semibold text-[#2f3b4c]">Выставки</div>
-                            <div class="mt-4 whitespace-pre-line text-[16px] leading-7 text-[#697685]">Следующая 3–6 июня
-Стройтекс '24</div>
-                            <button disabled class="mt-5 cursor-not-allowed rounded-[14px] border border-[#e7eaec] bg-[#f7f8f9] px-5 py-2.5 text-[15px] font-medium text-[#97a2ad]">Подробнее</button>
-                        </div>
-                        <div class="rounded-[22px] border border-[#eaedef] bg-white px-6 py-6 shadow-[0_10px_22px_rgba(178,190,198,0.12)] opacity-80">
-                            <div class="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#eef7f2] text-[#6ea288] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"><i class="fa-regular fa-calendar"></i></div>
-                            <div class="text-[17px] font-semibold text-[#2f3b4c]">Мероприятия</div>
-                            <div class="mt-4 whitespace-pre-line text-[16px] leading-7 text-[#697685]">У вас 2 события
-на этой неделе</div>
-                            <button disabled class="mt-5 cursor-not-allowed rounded-[14px] border border-[#e7eaec] bg-[#f7f8f9] px-5 py-2.5 text-[15px] font-medium text-[#97a2ad]">Показать</button>
-                        </div>
-                    </div>
+            <div id="feedScrollContainer" class="relative z-10 h-[calc(100%-82px)] overflow-y-auto px-8 py-6">
+                <div class="mb-5 rounded-[24px] border border-[#e7ecef] bg-white/90 p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur">
+                    <h1 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Лента новостей LASTOP</h1>
+                    <p class="mt-2 text-[16px] text-[#7e8a97]">Бесконечная лента: прокручивайте вниз для подгрузки новых публикаций.</p>
                 </div>
 
-                <div class="mt-2 rounded-[28px] border border-[#e9edef] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(178,190,198,0.12)] backdrop-blur-[2px]">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button class="rounded-[14px] bg-[#5c9a82] px-5 py-3 text-[15px] font-medium text-white shadow-[0_8px_18px_rgba(92,154,130,0.26)]">Все темы ▾</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#63707f]">Популярные ▾</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#63707f]">По дате</button>
-                        <div class="ml-auto flex items-center gap-5 pr-2 text-[15px] text-[#80909e]">
-                            <button>Публики</button>
-                            <button>Сбросить</button>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 flex flex-wrap gap-3">
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-[#fbfcfc] px-5 py-3 text-[15px] font-medium text-[#344154]">Все темы</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#697685]">Мои</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#697685]">Туризм</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#697685]">Производство</button>
-                        <button class="rounded-[14px] border border-[#e7eaec] bg-white px-5 py-3 text-[15px] font-medium text-[#697685]">Текстиль</button>
-                        <button class="rounded-[14px] border border-[#dce9e2] bg-[#f6fbf8] px-5 py-3 text-[15px] font-medium text-[#6b9b86]">+ Добавить</button>
-                    </div>
-
-                    <div class="mt-5 space-y-4">
-                        <article class="rounded-[24px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">Выставка в Дубае: партнёрство и поставки</h3>
-                                    <p class="mt-4 max-w-[760px] text-[17px] leading-8 text-[#697685]">Ищем партнёров для выставки в ОАЕ в июне. Интересуют поставки строительных материалов.</p>
-                                </div>
-                                <div class="flex items-center gap-2 pt-1 text-[15px] text-[#98a6b2]"><span>◔</span><span>8</span><span>▾</span></div>
-                            </div>
-                            <div class="mt-3 flex flex-wrap gap-2.5">
-                                <span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[14px] font-medium text-[#6e9c88]">#партнёрство</span>
-                                <span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[14px] font-medium text-[#6e9c88]">#поставки</span>
-                                <span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[14px] font-medium text-[#6e9c88]">#ивенты</span>
-                            </div>
-                            <div class="mt-4 flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="grid h-9 w-9 place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] text-xs font-semibold text-[#5f6b79] shadow-[0_2px_6px_rgba(170,180,188,0.10)]">H</div>
-                                    <div class="grid h-9 w-9 place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] text-xs font-semibold text-[#5f6b79] shadow-[0_2px_6px_rgba(170,180,188,0.10)]">A</div>
-                                    <div class="grid h-9 w-9 place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] text-xs font-semibold text-[#5f6b79] shadow-[0_2px_6px_rgba(170,180,188,0.10)]">M</div>
-                                    <div class="grid h-9 w-9 place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] text-xs font-semibold text-[#5f6b79] shadow-[0_2px_6px_rgba(170,180,188,0.10)]">S</div>
-                                    <div class="grid h-9 w-9 place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] text-xs font-semibold text-[#5f6b79] shadow-[0_2px_6px_rgba(170,180,188,0.10)]">T</div>
-                                    <div class="grid h-9 min-w-[42px] place-items-center rounded-xl border border-[#e7eaec] bg-[#fbfcfc] px-2 text-sm font-medium text-[#62707e]">+5</div>
-                                </div>
-                                <span class="rounded-full bg-[#eaf6f0] px-4 py-2 text-[14px] font-semibold text-[#5d9b81]">Обсуждается 8</span>
-                            </div>
-                        </article>
-                    </div>
-
-                    <div class="mt-5 flex justify-center">
-                        <a href="/forum.html" class="rounded-[16px] bg-[#6ea389] px-10 py-3 text-[16px] font-semibold text-white shadow-[0_10px_22px_rgba(110,163,137,0.26)]">Перейти к форуму →</a>
-                    </div>
-                </div>
-
-                <section id="communitiesBlock" class="mt-6 rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)] hidden">
-                    <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-[#334153]">Сообщества</h2>
-                        <a href="/create-community.html" class="text-sm text-[#5c9a82]">Создать</a>
-                    </div>
-                    <div id="communitiesList" class="grid gap-4 md:grid-cols-2"><p class="text-slate-500">Загрузка...</p></div>
-                </section>
+                <section id="newsFeed" class="space-y-4"></section>
+                <div id="feedStatus" class="py-5 text-center text-sm text-[#8492a0]">Загрузка новостей...</div>
             </div>
         </main>
 
@@ -226,46 +135,60 @@
                         <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-[#7c8996] ring-1 ring-[#e6eaec]">#организация</span>
                         <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-[#7c8996] ring-1 ring-[#e6eaec]">#события</span>
                     </div>
-                    <div class="mt-3 flex items-center justify-between text-sm text-[#9aa7b2]">
-                        <div class="flex -space-x-2">
-                            <div class="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-[#d7dfe4] text-[10px] text-[#5a6775]">A</div>
-                            <div class="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-[#d7dfe4] text-[10px] text-[#5a6775]">A</div>
-                            <div class="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-[#d7dfe4] text-[10px] text-[#5a6775]">A</div>
-                            <div class="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-[#d7dfe4] text-[10px] text-[#5a6775]">A</div>
-                        </div>
-                        <span>5</span>
-                    </div>
+                    <div class="mt-3 flex items-center justify-between text-sm text-[#9aa7b2]"><span>Перейти в тему</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
                 </div>
-            </div>
-
-            <div class="mt-5 rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
-                <div class="flex gap-3">
-                    <div class="grid h-11 w-11 place-items-center rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">В</div>
-                    <div>
-                        <div class="text-[18px] font-semibold text-[#334153]">Отзывы</div>
-                        <div class="mt-1 text-[15px] font-medium text-[#4f5d6d]">Виктория Смирнова</div>
-                    </div>
-                </div>
-                <p class="mt-4 text-[15px] leading-7 text-[#6f7c8b]">Благодаря LASTOP мы нашли надёжных партнёров и успешно организовали несколько мероприятий. Удобно работать.</p>
-                <div class="mt-4 text-right text-sm text-[#a0adb8]">Все отзывы</div>
             </div>
         </aside>
     </div>
 </div>
 
 <script>
-const API_URL = '/api';
+const FEED_SOURCE = [
+    {
+        title: 'Рост деловой активности в производственном секторе',
+        excerpt: 'Компании расширяют экспортные каналы и ищут партнеров для совместных поставок оборудования и сырья.',
+        category: 'Экономика',
+        author: 'Редакция LASTOP',
+        minutesAgo: 15,
+        tags: ['экспорт', 'партнерство', 'производство']
+    },
+    {
+        title: 'Новые логистические коридоры для малого и среднего бизнеса',
+        excerpt: 'На форуме обсудили альтернативные маршруты и снижение издержек на доставку в страны СНГ и Ближнего Востока.',
+        category: 'Логистика',
+        author: 'Команда аналитики',
+        minutesAgo: 34,
+        tags: ['логистика', 'снг', 'маршруты']
+    },
+    {
+        title: 'Технологические тренды 2026: автоматизация закупок',
+        excerpt: 'Предприниматели внедряют AI-инструменты для прогноза спроса и оптимизации складских запасов.',
+        category: 'Технологии',
+        author: 'LASTOP Insights',
+        minutesAgo: 58,
+        tags: ['ai', 'закупки', 'автоматизация']
+    },
+    {
+        title: 'Подготовка к отраслевым выставкам: чек-лист для участников',
+        excerpt: 'Как подготовить стенд, презентацию и коммерческое предложение, чтобы получить максимум лидов.',
+        category: 'Выставки',
+        author: 'Ивент-редакция',
+        minutesAgo: 85,
+        tags: ['выставки', 'маркетинг', 'продажи']
+    }
+];
+
+let feedIteration = 0;
+let isLoading = false;
+const pageSize = 6;
 
 function setUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const name = user.full_name || 'Гость';
-    const first = name.split(' ')[0] || name;
     const letter = (name[0] || 'U').toUpperCase();
 
     document.getElementById('userName').textContent = name;
-    document.getElementById('welcomeUser').textContent = first;
     document.getElementById('topUserName').textContent = name;
-
     ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.textContent = letter;
@@ -273,36 +196,73 @@ function setUserInfo() {
     document.getElementById('footerName').textContent = name;
 }
 
-async function loadCommunities() {
-    const list = document.getElementById('communitiesList');
-    try {
-        const response = await fetch(`${API_URL}/communities`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
-        const communities = data.communities || [];
-
-        list.innerHTML = communities.map((community) => `
-            <a href="/community.html?id=${community.id}" class="rounded-[16px] border border-[#e8ecee] bg-[#fbfcfc] p-4 transition hover:shadow-sm">
-                <p class="text-lg font-semibold text-[#334153]">${community.name}</p>
-                <p class="mt-1 text-sm text-[#7d8995]">${community.members_count || 0} участников</p>
-                <p class="mt-2 text-sm text-[#5f6b79]">${(community.description || '').slice(0, 120)}</p>
-            </a>
-        `).join('') || '<p class="text-slate-500">Пока нет сообществ.</p>';
-    } catch (error) {
-        list.innerHTML = '<p class="text-red-500">Не удалось загрузить сообщества.</p>';
-    }
+function createNewsCard(item, idx) {
+    const article = document.createElement('article');
+    article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
+    article.innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 flex-1">
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${item.category}</div>
+                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title}</h3>
+                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${item.excerpt}</p>
+            </div>
+            <div class="text-right text-[13px] text-[#95a1ad]">
+                <div>${item.minutesAgo + feedIteration * 5} мин назад</div>
+                <div class="mt-1 font-medium text-[#61707f]">${item.author}</div>
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2.5">
+            ${item.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
+        </div>
+        <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
+            <span>Публикация #${idx + 1 + feedIteration * pageSize}</span>
+            <button class="rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</button>
+        </div>
+    `;
+    return article;
 }
 
-function handleHashNavigation() {
-    const showCommunities = location.hash === '#communities';
-    document.getElementById('communitiesBlock').classList.toggle('hidden', !showCommunities);
-    if (showCommunities) loadCommunities();
+function appendNewsBatch() {
+    if (isLoading) return;
+    isLoading = true;
+    const feed = document.getElementById('newsFeed');
+    const status = document.getElementById('feedStatus');
+    status.textContent = 'Подгружаем ещё...';
+
+    setTimeout(() => {
+        for (let i = 0; i < pageSize; i++) {
+            const sourceItem = FEED_SOURCE[(i + feedIteration) % FEED_SOURCE.length];
+            feed.appendChild(createNewsCard(sourceItem, i));
+        }
+        feedIteration++;
+        isLoading = false;
+        status.textContent = 'Прокрутите вниз, чтобы загрузить больше новостей';
+    }, 250);
+}
+
+function setupInfiniteScroll() {
+    const container = document.getElementById('feedScrollContainer');
+    container.addEventListener('scroll', () => {
+        const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 240;
+        if (nearBottom) appendNewsBatch();
+    });
+}
+
+function setupSearch() {
+    const searchInput = document.getElementById('newsSearch');
+    searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        document.querySelectorAll('#newsFeed article').forEach((card) => {
+            card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
 }
 
 setUserInfo();
-handleHashNavigation();
-window.addEventListener('hashchange', handleHashNavigation);
+appendNewsBatch();
+appendNewsBatch();
+setupInfiniteScroll();
+setupSearch();
 </script>
 </body>
 </html>
