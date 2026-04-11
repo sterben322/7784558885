@@ -2,39 +2,124 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>LASTOP | Профиль</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Мой профиль</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
     <script src="/assets/theme.js" defer></script>
 </head>
-<body class="bg-gray-50">
-    <header class="bg-white border-b">
-        <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-            <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
+<body class="bg-[#eef2f3] text-[#273244]">
+<div class="min-h-screen p-4 md:p-6">
+    <div class="mx-auto w-full max-w-[1460px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
+        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecef] px-5 py-4 md:px-7">
+            <a href="/dashboard.html" class="flex items-center gap-3">
+                <div class="grid h-10 w-10 place-items-center rounded-2xl bg-[#eaf3ee] text-[#3e826e]"><i class="fa-solid fa-link"></i></div>
+                <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
+            </a>
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="/profile.html" class="rounded-xl bg-[#eff7f3] px-3 py-2 font-semibold text-[#4c8d78]">Профиль</a>
+                <a href="/settings.html" class="rounded-xl px-3 py-2 text-[#5d6978] hover:bg-[#f4f7f7]">Настройки</a>
             </nav>
-        </div>
-    </header>
-    <div class="max-w-2xl mx-auto p-8">
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h1 class="text-2xl font-bold mb-6">Мой профиль</h1>
-            <div id="profileInfo" class="space-y-4"><div class="text-center py-8">Загрузка...</div></div>
+        </header>
+
+        <div class="grid gap-5 p-4 md:grid-cols-[minmax(0,1fr)_320px] md:p-6">
+            <main class="space-y-4">
+                <section class="rounded-[24px] border border-[#e7ecef] bg-white shadow-[0_10px_22px_rgba(178,190,198,0.10)]">
+                    <div class="h-[220px] rounded-t-[24px] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_40%),linear-gradient(110deg,#1f6a4d_0%,#2b8662_48%,#41936f_100%)]"></div>
+                    <div class="relative px-5 pb-5 pt-0 md:px-7 md:pb-6">
+                        <div class="-mt-12 flex flex-wrap items-end justify-between gap-4">
+                            <div class="flex items-end gap-4">
+                                <div id="mainAvatar" class="grid h-24 w-24 place-items-center rounded-full border-4 border-white bg-[#3f8566] text-4xl font-bold text-white shadow">U</div>
+                                <div class="pb-2">
+                                    <h1 id="profileName" class="text-3xl font-semibold text-[#273244]">Пользователь</h1>
+                                    <p id="profileRole" class="text-[16px] text-[#607080]">Специалист платформы LASTOP</p>
+                                    <p id="profileLocation" class="text-sm text-[#8793a0]"><i class="fa-solid fa-location-dot mr-1"></i>Москва, Россия</p>
+                                </div>
+                            </div>
+                            <span class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Верифицирован</span>
+                        </div>
+
+                        <div class="mt-5 flex flex-wrap gap-2">
+                            <a href="/chat.html" class="rounded-xl bg-[#2f7f5e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#256b4f]">Написать сообщение</a>
+                            <button class="rounded-xl border border-[#d8e2e7] px-4 py-2 text-sm font-medium text-[#4f5e6d]">В контакты</button>
+                            <button class="rounded-xl border border-[#d8e2e7] px-4 py-2 text-sm font-medium text-[#4f5e6d]">Поделиться</button>
+                            <a href="/settings.html" class="rounded-xl border border-[#d8e2e7] px-4 py-2 text-sm font-medium text-[#4f5e6d]">Редактировать</a>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-2 gap-3 border-t border-[#e8ecef] pt-5 md:grid-cols-5">
+                            <div><div class="text-3xl font-semibold text-[#2f3d4f]">142</div><div class="text-sm text-[#8090a0]">Контакты</div></div>
+                            <div><div class="text-3xl font-semibold text-[#2f3d4f]">12</div><div class="text-sm text-[#8090a0]">Проекты</div></div>
+                            <div><div class="text-3xl font-semibold text-[#2f3d4f]">18</div><div class="text-sm text-[#8090a0]">Темы</div></div>
+                            <div><div class="text-3xl font-semibold text-[#2f3d4f]">5</div><div class="text-sm text-[#8090a0]">Выставки</div></div>
+                            <div><div class="text-3xl font-semibold text-[#2f3d4f]">4.9</div><div class="text-sm text-[#8090a0]">Рейтинг</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О себе</h2>
+                    <p class="mt-3 text-[16px] leading-7 text-[#667585]">Развиваю B2B-партнёрства в строительной и логистической сфере. Более 8 лет в управлении проектами, участии в международных выставках и запуске совместных программ с производственными компаниями.</p>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Навыки и экспертиза</h2>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="rounded-full bg-[#edf7f1] px-3 py-1.5 text-sm font-medium text-[#5d8f79]">B2B-партнёрства</span>
+                        <span class="rounded-full bg-[#edf7f1] px-3 py-1.5 text-sm font-medium text-[#5d8f79]">Управление проектами</span>
+                        <span class="rounded-full bg-[#edf7f1] px-3 py-1.5 text-sm font-medium text-[#5d8f79]">Логистика</span>
+                        <span class="rounded-full bg-[#edf7f1] px-3 py-1.5 text-sm font-medium text-[#5d8f79]">Выставочная деятельность</span>
+                        <span class="rounded-full bg-[#edf7f1] px-3 py-1.5 text-sm font-medium text-[#5d8f79]">Международная торговля</span>
+                    </div>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Опыт работы</h2>
+                    <div class="mt-4 space-y-4">
+                        <div class="rounded-2xl border border-[#e6ecef] px-4 py-4">
+                            <div class="text-lg font-semibold">Менеджер по развитию бизнеса</div>
+                            <div class="text-[#5f6f7f]">ООО «СтройМатериалы» · Январь 2020 — настоящее время</div>
+                        </div>
+                        <div class="rounded-2xl border border-[#e6ecef] px-4 py-4">
+                            <div class="text-lg font-semibold">Ведущий специалист по выставкам</div>
+                            <div class="text-[#5f6f7f]">ТекстильГрупп · Март 2016 — Декабрь 2019</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="space-y-4">
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <div class="text-sm text-[#7f8d9b]">Просмотры профиля за 7 дней</div>
+                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]">247</div>
+                    <div class="mt-1 text-sm font-semibold text-[#3e8c6f]">+18% к прошлой неделе</div>
+                    <button class="mt-4 w-full rounded-xl bg-[#2f7f5e] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Поднять профиль</button>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h3 class="text-lg font-semibold">Возможно, вы знакомы</h3>
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center gap-3 rounded-xl bg-[#f6faf8] p-3"><div class="grid h-10 w-10 place-items-center rounded-full bg-[#5fa786] text-sm font-semibold text-white">ИП</div><div class="flex-1"><div class="font-medium">Иван Петров</div><div class="text-xs text-[#8090a0]">CEO · Логистик Про</div></div><button class="rounded-full border border-[#9dc4b2] px-3 py-1 text-xs">Добавить</button></div>
+                        <div class="flex items-center gap-3 rounded-xl bg-[#f6faf8] p-3"><div class="grid h-10 w-10 place-items-center rounded-full bg-[#5fa786] text-sm font-semibold text-white">МК</div><div class="flex-1"><div class="font-medium">Мария Козлова</div><div class="text-xs text-[#8090a0]">Экспорт · ТекстильПро</div></div><button class="rounded-full border border-[#9dc4b2] px-3 py-1 text-xs">Добавить</button></div>
+                    </div>
+                </section>
+            </aside>
         </div>
     </div>
-    <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!token || !user?.email) window.location.href = '/login.html';
+</div>
 
-        document.getElementById('profileInfo').innerHTML = `<div class="flex items-center space-x-4"><div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">${user.full_name?.charAt(0) || 'U'}</div><div><h2 class="text-xl font-semibold">${user.full_name || 'Пользователь'}</h2><p class="text-gray-500">${user.email || ''}</p>${user.company_name ? `<p class="text-gray-500">${user.company_name}</p>` : ''}</div></div><div class="border-t pt-4"><button onclick="window.location.href='/settings.html'" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Редактировать профиль</button></div>`;
-    </script>
+<script>
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+if (!token || !user?.email) window.location.href = '/login.html';
+
+const fullName = user.full_name || 'Анна Карпова';
+const companyName = user.company_name || 'ООО «СтройМатериалы»';
+const firstLetter = (fullName[0] || 'U').toUpperCase();
+
+document.getElementById('mainAvatar').textContent = firstLetter;
+document.getElementById('profileName').textContent = fullName;
+document.getElementById('profileRole').textContent = `Менеджер по развитию бизнеса · ${companyName}`;
+</script>
 </body>
 </html>
