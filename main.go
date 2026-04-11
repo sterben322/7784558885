@@ -179,16 +179,16 @@ func main() {
 	}
 
 	r.GET("/login", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
+		c.File(filepath.Join("web", "login.html"))
 	})
 	r.GET("/login.html", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
+		c.File(filepath.Join("web", "login.html"))
 	})
 	r.GET("/register", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
+		c.File(filepath.Join("web", "register.html"))
 	})
 	r.GET("/register.html", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
+		c.File(filepath.Join("web", "register.html"))
 	})
 
 	r.NoRoute(func(c *gin.Context) {
