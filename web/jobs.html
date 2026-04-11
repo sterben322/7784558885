@@ -8,71 +8,77 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
-<header class="bg-white border-b">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-        <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
-            </nav>
-    </div>
-</header>
-<div class="max-w-6xl mx-auto p-4 space-y-6">
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h1 class="text-2xl font-bold mb-2">Резюме и вакансии</h1>
-        <p class="text-gray-600">Резюме публикуют только пользователи, вакансии — компании и сообщества.</p>
-    </div>
+<body class="bg-[#eef2f3] text-[#273244] dashboard-page">
+<div class="min-h-screen p-6 font-sans">
+    <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)_330px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
+        <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
+            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8"><a href="/" class="flex items-center gap-3"><div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div><div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div></a></div>
+            <div class="border-b border-[#e8ecef] px-5 py-4"><a href="/settings.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left hover:bg-[#f4f7f7]"><div id="userAvatar" class="grid h-11 w-11 place-items-center rounded-full bg-[#6eaf95] text-sm font-semibold text-white">U</div><div id="userName" class="flex-1 truncate text-[15px] font-medium text-[#445164]">Гость</div><i class="fa-solid fa-chevron-down h-4 w-4 text-[#91a0ad]"></i></a></div>
+            <div class="px-4 py-5"><div class="space-y-1.5">
+                <a href="/" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-house"></i></span><span class="text-[15px] font-medium">Главная</span></a>
+                <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-newspaper"></i></span><span class="text-[15px] font-medium">Новости</span></a>
+                <a href="/stub.html?section=Проекты" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-folder-tree"></i></span><span class="text-[15px] font-medium">Проекты</span></a>
+                <a href="/stub.html?section=Выставки" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-briefcase"></i></span><span class="text-[15px] font-medium">Выставки</span></a>
+                <a href="/stub.html?section=Мероприятия" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-calendar-days"></i></span><span class="text-[15px] font-medium">Мероприятия</span></a>
+                <a href="/forum.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-message"></i></span><span class="text-[15px] font-medium">Форум</span></a>
+                <a href="/company.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-building"></i></span><span class="text-[15px] font-medium">Компании</span></a>
+                <a href="/jobs.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition bg-[#eff7f3] text-[#4c8d78]"><span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-solid fa-briefcase"></i></span><span class="text-[15px] font-semibold">Резюме и вакансии</span></a>
+            </div></div>
+            <div class="mt-auto border-t border-[#e8ecef] px-5 py-5"><a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2"><div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div><div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Гость</div></div><i class="fa-solid fa-angles-right h-4 w-4 text-[#a0acb8]"></i></a></div>
+        </aside>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <form id="resumeForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3">
-            <h2 class="text-xl font-semibold">Моё резюме</h2>
-            <input id="resumeTitle" placeholder="Желаемая должность" class="w-full border rounded-lg px-3 py-2" required>
-            <textarea id="resumeAbout" placeholder="О себе" class="w-full border rounded-lg px-3 py-2"></textarea>
-            <input id="resumeActivity" placeholder="Вид деятельности" class="w-full border rounded-lg px-3 py-2">
-            <input id="resumeSkills" placeholder="Навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
-            <input id="resumeEducation" placeholder="Образование (например: среднее, высшее)" class="w-full border rounded-lg px-3 py-2">
-            <textarea id="resumeWorkplaces" placeholder="Прошлые места работы (по одному в строке, максимум 20)" class="w-full border rounded-lg px-3 py-2" rows="4"></textarea>
-            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Сохранить резюме</button>
-        </form>
+        <main class="dashboard-main relative bg-white">
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]"></div>
+            <div class="absolute inset-y-0 right-0 w-[42%] bg-[radial-gradient(circle_at_top_right,rgba(208,219,226,0.72),transparent_62%)]"></div>
+            <header class="dashboard-main-header relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
+                <div class="flex w-full max-w-[770px] items-center gap-3 rounded-2xl border border-[#edf0f2] bg-[#f7f8f9] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"><i class="fa-solid fa-magnifying-glass h-5 w-5 text-[#95a1ad]"></i><input class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск по разделам" /></div>
+                <div class="ml-5 flex items-center gap-4"><a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-bell h-5 w-5"></i></a><a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-envelope"></i></a><a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2"><div class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white" id="topAvatar">U</div><div class="text-[15px] font-semibold text-[#445164]" id="topUserName">Гость</div><i class="fa-solid fa-chevron-down h-4 w-4 text-[#9aa7b3]"></i></a></div>
+            </header>
 
-        <form id="vacancyForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3">
-            <h2 class="text-xl font-semibold">Создать вакансию</h2>
-            <select id="publisherType" class="w-full border rounded-lg px-3 py-2"><option value="company">Компания</option><option value="community">Сообщество</option></select>
-            <input id="publisherId" placeholder="ID компании или сообщества" class="w-full border rounded-lg px-3 py-2" required>
-            <input id="vacancyPosition" placeholder="Должность" class="w-full border rounded-lg px-3 py-2" required>
-            <input id="vacancySalary" placeholder="Зарплата" class="w-full border rounded-lg px-3 py-2" required>
-            <textarea id="vacancyExpectations" placeholder="Ожидания от соискателя: навыки, стаж и т.д." class="w-full border rounded-lg px-3 py-2" required></textarea>
-            <input id="vacancySkills" placeholder="Ключевые навыки (через запятую)" class="w-full border rounded-lg px-3 py-2">
-            <input id="vacancyExp" placeholder="Требуемый стаж" class="w-full border rounded-lg px-3 py-2">
-            <button class="px-4 py-2 bg-green-600 text-white rounded-lg">Опубликовать вакансию</button>
-        </form>
-    </div>
+            <div class="relative z-10 px-8 py-6 space-y-6">
+                <div class="rounded-[24px] border border-[#e7ecef] bg-white/90 p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur"><h1 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Резюме и вакансии</h1><p class="mt-2 text-[16px] text-[#7e8a97]">Резюме публикуют пользователи, вакансии — компании и сообщества.</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <form id="resumeForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3 border border-[#e8ecee]"><h2 class="text-xl font-semibold">Моё резюме</h2><input id="resumeTitle" placeholder="Желаемая должность" class="w-full border rounded-lg px-3 py-2" required><textarea id="resumeAbout" placeholder="О себе" class="w-full border rounded-lg px-3 py-2"></textarea><input id="resumeActivity" placeholder="Вид деятельности" class="w-full border rounded-lg px-3 py-2"><input id="resumeSkills" placeholder="Навыки (через запятую)" class="w-full border rounded-lg px-3 py-2"><input id="resumeEducation" placeholder="Образование" class="w-full border rounded-lg px-3 py-2"><textarea id="resumeWorkplaces" placeholder="Прошлые места работы (по одному в строке)" class="w-full border rounded-lg px-3 py-2" rows="4"></textarea><button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Сохранить резюме</button></form>
+                    <form id="vacancyForm" class="bg-white rounded-xl shadow-sm p-6 space-y-3 border border-[#e8ecee]"><h2 class="text-xl font-semibold">Создать вакансию</h2><select id="publisherType" class="w-full border rounded-lg px-3 py-2"><option value="company">Компания</option><option value="community">Сообщество</option></select><input id="publisherId" placeholder="ID компании или сообщества" class="w-full border rounded-lg px-3 py-2" required><input id="vacancyPosition" placeholder="Должность" class="w-full border rounded-lg px-3 py-2" required><input id="vacancySalary" placeholder="Зарплата" class="w-full border rounded-lg px-3 py-2" required><textarea id="vacancyExpectations" placeholder="Ожидания от соискателя" class="w-full border rounded-lg px-3 py-2" required></textarea><input id="vacancySkills" placeholder="Ключевые навыки (через запятую)" class="w-full border rounded-lg px-3 py-2"><input id="vacancyExp" placeholder="Требуемый стаж" class="w-full border rounded-lg px-3 py-2"><button class="px-4 py-2 bg-green-600 text-white rounded-lg">Опубликовать вакансию</button></form>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-white rounded-xl shadow-sm p-6 border border-[#e8ecee]"><h3 class="font-semibold mb-3">Лента резюме</h3><div id="resumesList" class="space-y-3 text-sm"></div></div><div class="bg-white rounded-xl shadow-sm p-6 border border-[#e8ecee]"><h3 class="font-semibold mb-3">Лента вакансий</h3><div id="vacanciesList" class="space-y-3 text-sm"></div></div></div>
+            </div>
+        </main>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-semibold mb-3">Лента резюме</h3><div id="resumesList" class="space-y-3 text-sm"></div></div>
-        <div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-semibold mb-3">Лента вакансий</h3><div id="vacanciesList" class="space-y-3 text-sm"></div></div>
+        <aside class="dashboard-sidebar border-l border-[#e7ebed] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)] px-6 py-6"><div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]"><h3 class="text-[18px] font-semibold text-[#334153]">Подсказка</h3><p class="mt-3 text-[15px] text-[#5f6b79]">Раздел открывается даже без авторизации. В таком случае показывается пустая лента, без возврата на главную.</p></div></aside>
     </div>
 </div>
 
 <script>
 const API_URL = '/api';
 const token = localStorage.getItem('token');
-if (!token) window.location.href = '/login.html';
-
+function authHeaders(extra = {}) { return token ? { ...extra, Authorization: `Bearer ${token}` } : extra; }
 function splitCsv(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
 
+function setUserInfo() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const name = user.full_name || 'Гость';
+    const letter = (name[0] || 'U').toUpperCase();
+    document.getElementById('userName').textContent = name;
+    document.getElementById('topUserName').textContent = name;
+    ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = letter;
+    });
+    document.getElementById('footerName').textContent = name;
+}
+
 async function loadData(){
+  if (!token) {
+    document.getElementById('resumesList').innerHTML = '<p class="text-gray-500">Пока пусто</p>';
+    document.getElementById('vacanciesList').innerHTML = '<p class="text-gray-500">Пока пусто</p>';
+    return;
+  }
   try {
     const [rResumes, rVacancies, rMy] = await Promise.all([
-      fetch(`${API_URL}/resumes`, {headers:{Authorization:`Bearer ${token}`}}),
-      fetch(`${API_URL}/vacancies`, {headers:{Authorization:`Bearer ${token}`}}),
-      fetch(`${API_URL}/resume/me`, {headers:{Authorization:`Bearer ${token}`}})
+      fetch(`${API_URL}/resumes`, {headers: authHeaders()}),
+      fetch(`${API_URL}/vacancies`, {headers: authHeaders()}),
+      fetch(`${API_URL}/resume/me`, {headers: authHeaders()})
     ]);
     const resumes = (await rResumes.json()).resumes || [];
     const vacancies = (await rVacancies.json()).vacancies || [];
@@ -90,43 +96,31 @@ async function loadData(){
       resumeWorkplaces.value = (my.previous_workplaces || []).join('\n');
     }
   } catch (e) {
-    document.getElementById('resumesList').innerHTML = '<p class="text-red-500">Ошибка загрузки данных</p>';
-    document.getElementById('vacanciesList').innerHTML = '<p class="text-red-500">Ошибка загрузки данных</p>';
+    document.getElementById('resumesList').innerHTML = '<p class="text-gray-500">Пока пусто</p>';
+    document.getElementById('vacanciesList').innerHTML = '<p class="text-gray-500">Пока пусто</p>';
   }
 }
 
 document.getElementById('resumeForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
+  if (!token) { alert('Войдите в аккаунт, чтобы сохранить резюме'); return; }
   const previous = resumeWorkplaces.value.split('\n').map(x=>x.trim()).filter(Boolean);
-  const body = {
-    title: resumeTitle.value,
-    about: resumeAbout.value || null,
-    activity_type: resumeActivity.value || null,
-    skills: splitCsv(resumeSkills.value),
-    education_levels: splitCsv(resumeEducation.value),
-    previous_workplaces: previous
-  };
-  const r = await fetch(`${API_URL}/resume`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  const body = { title: resumeTitle.value, about: resumeAbout.value || null, activity_type: resumeActivity.value || null, skills: splitCsv(resumeSkills.value), education_levels: splitCsv(resumeEducation.value), previous_workplaces: previous };
+  const r = await fetch(`${API_URL}/resume`, {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify(body)});
   alert(r.ok ? 'Резюме сохранено' : 'Ошибка сохранения резюме');
   loadData();
 });
 
 document.getElementById('vacancyForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
-  const body = {
-    publisher_type: publisherType.value,
-    publisher_id: publisherId.value,
-    position: vacancyPosition.value,
-    salary: vacancySalary.value,
-    expectations: vacancyExpectations.value,
-    required_skills: splitCsv(vacancySkills.value),
-    required_experience: vacancyExp.value || null
-  };
-  const r = await fetch(`${API_URL}/vacancies`, {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify(body)});
+  if (!token) { alert('Войдите в аккаунт, чтобы создать вакансию'); return; }
+  const body = { publisher_type: publisherType.value, publisher_id: publisherId.value, position: vacancyPosition.value, salary: vacancySalary.value, expectations: vacancyExpectations.value, required_skills: splitCsv(vacancySkills.value), required_experience: vacancyExp.value || null };
+  const r = await fetch(`${API_URL}/vacancies`, {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify(body)});
   alert(r.ok ? 'Вакансия создана' : 'Ошибка создания вакансии');
   loadData();
 });
 
+setUserInfo();
 loadData();
 </script>
 </body>

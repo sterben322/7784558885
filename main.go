@@ -169,6 +169,8 @@ func main() {
 		"/profile.html":          "profile.html",
 		"/jobs":                  "jobs.html",
 		"/jobs.html":             "jobs.html",
+		"/stub":                  "stub.html",
+		"/stub.html":             "stub.html",
 	}
 	for route, file := range pageRoutes {
 		routeCopy := route
