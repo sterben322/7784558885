@@ -145,49 +145,44 @@
 <script>
 const FEED_SOURCE = [
     {
-        id: 'news-1',
         title: 'Рост деловой активности в производственном секторе',
         excerpt: 'Компании расширяют экспортные каналы и ищут партнеров для совместных поставок оборудования и сырья.',
-        image: 'https://images.unsplash.com/photo-1565514158740-064f34bd6c46?auto=format&fit=crop&w=1600&q=80',
-        content: 'За первый квартал отраслевые объединения зафиксировали рост спроса на локальные производственные цепочки. Компании усиливают кооперацию с региональными поставщиками, расширяют географию экспортных поставок и запускают совместные проекты по модернизации складов. Эксперты отмечают, что ключевыми драйверами остаются снижение логистических издержек, ускорение контрактных процедур и рост интереса к долгосрочным B2B-партнерствам.',
         category: 'Экономика',
         author: 'Редакция LASTOP',
         minutesAgo: 15,
         tags: ['экспорт', 'партнерство', 'производство']
     },
     {
-        id: 'news-2',
         title: 'Новые логистические коридоры для малого и среднего бизнеса',
         excerpt: 'На форуме обсудили альтернативные маршруты и снижение издержек на доставку в страны СНГ и Ближнего Востока.',
-        image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80',
-        content: 'Участники профильной сессии представили несколько альтернативных маршрутов для международных поставок и поделились практиками консолидации грузов. По оценкам аналитиков, переход на гибридные схемы доставки позволяет бизнесу уменьшить расходы на последнюю милю и повысить предсказуемость сроков. Дополнительный эффект даёт цифровизация документооборота и предварительное страхование рисков.',
         category: 'Логистика',
         author: 'Команда аналитики',
         minutesAgo: 34,
         tags: ['логистика', 'снг', 'маршруты']
     },
     {
-        id: 'news-3',
         title: 'Технологические тренды 2026: автоматизация закупок',
         excerpt: 'Предприниматели внедряют AI-инструменты для прогноза спроса и оптимизации складских запасов.',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
-        content: 'В 2026 году автоматизация закупок стала одним из основных направлений операционной трансформации. Компании интегрируют ML-модели в ERP-системы, чтобы прогнозировать сезонные пики спроса и оптимизировать закупочные планы. Это помогает снижать объём неликвидных запасов, ускорять согласование заявок между отделами и повышать прозрачность бюджета.',
         category: 'Технологии',
         author: 'LASTOP Insights',
         minutesAgo: 58,
         tags: ['ai', 'закупки', 'автоматизация']
     },
     {
-        id: 'news-4',
         title: 'Подготовка к отраслевым выставкам: чек-лист для участников',
         excerpt: 'Как подготовить стенд, презентацию и коммерческое предложение, чтобы получить максимум лидов.',
-        image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
-        content: 'Организаторы рекомендуют заранее подготовить презентационные материалы, сценарии общения с посетителями и систему оперативной фиксации лидов. Также важно назначить ответственных за демонстрации продуктов, переговоры и follow-up после мероприятия. Компании, которые используют единый чек-лист подготовки, быстрее обрабатывают входящие контакты и чаще конвертируют их в сделки.',
         category: 'Выставки',
         author: 'Ивент-редакция',
         minutesAgo: 85,
         tags: ['выставки', 'маркетинг', 'продажи']
     }
+];
+
+const NEWS_IMAGES = [
+    'https://images.unsplash.com/photo-1565514158740-064f34bd6c46?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80'
 ];
 
 let feedIteration = 0;
@@ -209,27 +204,34 @@ function setUserInfo() {
 }
 
 function createNewsCard(item, idx) {
+    const publicationIndex = idx + 1 + feedIteration * pageSize;
+    const normalizedItem = {
+        ...item,
+        id: item.id || `news-${publicationIndex}`,
+        image: item.image || NEWS_IMAGES[publicationIndex % NEWS_IMAGES.length],
+        content: item.content || `${item.excerpt} Подробности доступны в полной версии новости.`
+    };
     const article = document.createElement('article');
     article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
-    article.dataset.newsPayload = JSON.stringify(item);
+    article.dataset.newsPayload = JSON.stringify(normalizedItem);
     article.innerHTML = `
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
-                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${item.category}</div>
-                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title}</h3>
-                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${item.excerpt}</p>
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${normalizedItem.category}</div>
+                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${normalizedItem.title}</h3>
+                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${normalizedItem.excerpt}</p>
             </div>
-            <img src="${item.image}" alt="${item.title}" class="h-28 w-40 shrink-0 rounded-2xl object-cover ring-1 ring-[#e8ecee]" />
+            <img src="${normalizedItem.image}" alt="${normalizedItem.title}" class="h-28 w-40 shrink-0 rounded-2xl object-cover ring-1 ring-[#e8ecee]" />
             <div class="text-right text-[13px] text-[#95a1ad]">
-                <div>${item.minutesAgo + feedIteration * 5} мин назад</div>
-                <div class="mt-1 font-medium text-[#61707f]">${item.author}</div>
+                <div>${normalizedItem.minutesAgo + feedIteration * 5} мин назад</div>
+                <div class="mt-1 font-medium text-[#61707f]">${normalizedItem.author}</div>
             </div>
         </div>
         <div class="mt-4 flex flex-wrap gap-2.5">
-            ${item.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
+            ${normalizedItem.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
         </div>
         <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
-            <span>Публикация #${idx + 1 + feedIteration * pageSize}</span>
+            <span>Публикация #${publicationIndex}</span>
             <button class="news-read rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</button>
         </div>
     `;
