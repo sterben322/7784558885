@@ -307,7 +307,7 @@ body {
 
 /* Темная тема: перекрашиваем только светлые подложки и светлый текст */
 body.dark-theme {
-    background: #000000 !important;
+    background: #16191d !important;
     color: #ffffff !important;
 }
 
@@ -324,7 +324,6 @@ body.dark-theme .bg-\[linear-gradient\(180deg\,\#fbfcfc_0\%\,\#f7f9f9_100\%\)\],
 body.dark-theme input,
 body.dark-theme textarea,
 body.dark-theme select,
-body.dark-theme button,
 body.dark-theme article,
 body.dark-theme section,
 body.dark-theme aside,
@@ -333,7 +332,7 @@ body.dark-theme main,
 body.dark-theme nav,
 body.dark-theme div[style*="background: white"],
 body.dark-theme div[style*="background:#fff"] {
-    background: #000000 !important;
+    background: #1a1f24 !important;
 }
 
 body.dark-theme .text-black,
@@ -377,7 +376,7 @@ body.dark-theme ::selection {
 
 body.dark-theme .border,
 body.dark-theme [class*="border-"] {
-    border-color: #222222 !important;
+    border-color: #2f363d !important;
 }
 
 /* Общая фиксация для ленты: сайдбары неподвижны, скроллится контент */
