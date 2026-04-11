@@ -63,6 +63,10 @@
                     <span>Широкоформатный режим</span>
                     <input id="layoutWideToggle" type="checkbox" class="h-4 w-4">
                 </label>
+                <label class="mt-3 flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5 text-[#4e5d6c]">
+                    <span>Тёмная тема</span>
+                    <input id="themeDarkToggle" type="checkbox" class="h-4 w-4">
+                </label>
             </section>
 
             <div class="flex flex-wrap gap-3">
@@ -78,18 +82,28 @@ if (!localStorage.getItem('token')) window.location.href = '/login.html';
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const LAYOUT_KEY = 'lastop-layout-mode';
+const THEME_KEY = 'lastop-theme';
 const fullNameInput = document.getElementById('fullNameInput');
 const companyInput = document.getElementById('companyInput');
 const layoutWideToggle = document.getElementById('layoutWideToggle');
+const themeToggle = document.getElementById('themeDarkToggle');
 
 fullNameInput.value = user.full_name || '';
 companyInput.value = user.company_name || '';
 layoutWideToggle.checked = (localStorage.getItem(LAYOUT_KEY) || 'standard') === 'wide';
+themeToggle.checked = (localStorage.getItem(THEME_KEY) || 'light') === 'dark';
 
 layoutWideToggle.addEventListener('change', () => {
   const nextMode = layoutWideToggle.checked ? 'wide' : 'standard';
   localStorage.setItem(LAYOUT_KEY, nextMode);
   document.body.classList.toggle('widescreen-mode', nextMode === 'wide');
+});
+
+themeToggle.addEventListener('change', () => {
+  const nextTheme = themeToggle.checked ? 'dark' : 'light';
+  localStorage.setItem(THEME_KEY, nextTheme);
+  document.body.classList.toggle('dark-theme', nextTheme === 'dark');
+  document.documentElement.classList.toggle('dark', nextTheme === 'dark');
 });
 
 document.getElementById('saveBtn').addEventListener('click', () => {
