@@ -48,7 +48,11 @@ func main() {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second)
 		defer cancel()
 		if err := database.Ping(ctx); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "degraded", "database": "down"})
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "degraded",
+				"database": "down",
+				"error":    err.Error(),
+			})
 			return
 		}
 
