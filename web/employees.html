@@ -10,42 +10,84 @@
     <script src="/assets/theme.js" defer></script>
 </head>
 <body class="bg-white">
-    <div class="max-w-6xl mx-auto p-8">
-        <div class="bg-white rounded-xl shadow-sm">
-            <div class="p-6 border-b flex justify-between items-center"><h1 class="text-2xl font-bold">Сотрудники компании</h1><button onclick="showInviteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-user-plus mr-2"></i>Пригласить</button></div>
+    <div class="max-w-6xl mx-auto p-8 space-y-5">
+        <div class="flex items-center justify-between"><a href="/company-profile.html" class="text-sm text-gray-600 hover:text-black"><i class="fa-solid fa-arrow-left mr-1"></i>К профилю компании</a><button onclick="showInviteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-user-plus mr-2"></i>Пригласить</button></div>
+        <div class="bg-white rounded-xl shadow-sm border">
+            <div class="p-6 border-b"><h1 class="text-2xl font-bold">Панель компании: сотрудники и роли</h1></div>
             <div class="p-6"><div id="employeesList" class="space-y-4"></div></div>
         </div>
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-xl font-semibold mb-3">Мои входящие приглашения</h2>
+            <div id="myInvites" class="space-y-2 text-sm text-gray-600"></div>
+        </div>
     </div>
-    <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"><div class="bg-white rounded-xl w-full max-w-md p-6"><h3 class="text-xl font-bold mb-4">Пригласить сотрудника</h3><div class="space-y-4"><select id="inviteUser" class="w-full px-3 py-2 border rounded-lg"><option value="">Выберите пользователя</option></select><input type="text" id="invitePosition" placeholder="Должность" class="w-full px-3 py-2 border rounded-lg"><input type="text" id="inviteDepartment" placeholder="Отдел" class="w-full px-3 py-2 border rounded-lg"></div><div class="flex justify-end space-x-3 mt-6"><button onclick="closeInviteModal()" class="px-4 py-2 border rounded-lg">Отмена</button><button onclick="sendInvite()" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Отправить</button></div></div></div>
+    <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"><div class="bg-white rounded-xl w-full max-w-md p-6"><h3 class="text-xl font-bold mb-4">Пригласить сотрудника</h3><div class="space-y-4"><select id="inviteUser" class="w-full px-3 py-2 border rounded-lg"><option value="">Выберите пользователя</option></select><input type="text" id="invitePosition" placeholder="Должность" class="w-full px-3 py-2 border rounded-lg"><select id="inviteRole" class="w-full px-3 py-2 border rounded-lg"></select><input type="text" id="inviteDepartment" placeholder="Отдел" class="w-full px-3 py-2 border rounded-lg"></div><div class="flex justify-end space-x-3 mt-6"><button onclick="closeInviteModal()" class="px-4 py-2 border rounded-lg">Отмена</button><button onclick="sendInvite()" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Отправить</button></div></div></div>
     <script>
         const API_URL = '/api';
         const companyId = new URLSearchParams(location.search).get('id');
+        let roles = [];
+
+        function auth() { return { 'Authorization': `Bearer ${localStorage.getItem('token')}` }; }
+
+        async function loadRoles() {
+            if (!companyId) return;
+            const response = await fetch(`${API_URL}/companies/${companyId}/roles`, { headers: auth() });
+            const data = await response.json();
+            roles = data.roles || [];
+            document.getElementById('inviteRole').innerHTML = roles.map(r => `<option value="${r.id}">${r.position_name}</option>`).join('') || '<option value="">Member</option>';
+        }
+
         async function loadEmployees() {
+            if (!companyId) { document.getElementById('employeesList').innerHTML = '<p class="text-gray-500">company id is required</p>'; return; }
             try {
-                const response = await fetch(`${API_URL}/companies/${companyId}/employees`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const response = await fetch(`${API_URL}/companies/${companyId}/employees`, { headers: auth() });
                 const data = await response.json();
-                document.getElementById('employeesList').innerHTML = data.employees.map(emp => `<div class="flex items-center justify-between p-4 border rounded-lg"><div class="flex items-center space-x-4"><div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">${emp.user_name?.charAt(0) || 'U'}</div><div><p class="font-semibold">${emp.user_name}</p><p class="text-sm text-gray-600">${emp.position_name}</p>${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}</div></div><button onclick="removeEmployee('${emp.user_id}')" class="text-red-600"><i class="fas fa-trash"></i></button></div>`).join('');
+                const employees = data.employees || [];
+                document.getElementById('employeesList').innerHTML = employees.map(emp => `<div class="flex items-center justify-between p-4 border rounded-lg"><div class="flex items-center space-x-4"><div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">${emp.user_name?.charAt(0) || 'U'}</div><div><p class="font-semibold">${emp.user_name}</p><p class="text-sm text-gray-600">${emp.position_name}</p><p class="text-xs text-gray-500">Роль: ${emp.role_code || 'member'}</p>${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}</div></div><div class="flex items-center gap-2"><select onchange="changeRole('${emp.user_id}', this.value)" class="border rounded px-2 py-1 text-sm">${roles.map(r => `<option value="${r.id}" ${emp.role_id===r.id?'selected':''}>${r.position_name}</option>`).join('')}</select><button onclick="removeEmployee('${emp.user_id}')" class="text-red-600"><i class="fas fa-trash"></i></button></div></div>`).join('') || '<p class="text-gray-500">Пока нет сотрудников</p>';
             } catch (error) { console.error(error); }
         }
-        async function loadFriends() {
-            const response = await fetch(`${API_URL}/friends`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+
+        async function changeRole(userId, roleId) {
+            const role = roles.find(r => r.id === roleId);
+            await fetch(`${API_URL}/companies/${companyId}/employees/${userId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth() }, body: JSON.stringify({ role_id: roleId, position_name: role?.position_name || 'Member' }) });
+            loadEmployees();
+        }
+
+        async function loadMyInvites() {
+            const response = await fetch(`${API_URL}/companies/invites`, { headers: auth() });
             const data = await response.json();
-            document.getElementById('inviteUser').innerHTML = '<option value="">Выберите из друзей</option>' + data.friends.map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`).join('');
+            const invites = data.invites || [];
+            document.getElementById('myInvites').innerHTML = invites.map(inv => `<div class="border rounded-lg p-3 flex items-center justify-between"><div><div class="font-medium text-gray-800">${inv.company_name}</div><div class="text-xs">${inv.position_name}</div></div><button onclick="acceptInvite('${inv.id}')" class="px-3 py-1 bg-green-600 text-white rounded">Принять</button></div>`).join('') || '<div>Нет активных приглашений</div>';
+        }
+
+        async function acceptInvite(inviteId) {
+            const response = await fetch(`${API_URL}/companies/invites/${inviteId}/accept`, { method: 'POST', headers: auth() });
+            if (response.ok) { alert('Приглашение принято'); loadMyInvites(); loadEmployees(); }
+        }
+
+        async function loadFriends() {
+            const response = await fetch(`${API_URL}/friends`, { headers: auth() });
+            const data = await response.json();
+            document.getElementById('inviteUser').innerHTML = '<option value="">Выберите из друзей</option>' + (data.friends || []).map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`).join('');
         }
         async function sendInvite() {
-            const userId = document.getElementById('inviteUser').value, position = document.getElementById('invitePosition').value, department = document.getElementById('inviteDepartment').value;
+            const userId = document.getElementById('inviteUser').value;
+            const position = document.getElementById('invitePosition').value;
+            const department = document.getElementById('inviteDepartment').value;
+            const roleId = document.getElementById('inviteRole').value;
             if (!userId || !position) { alert('Заполните поля'); return; }
-            const response = await fetch(`${API_URL}/companies/${companyId}/invite`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ user_id: userId, position_name: position, department: department || null }) });
-            if (response.ok) { alert('Приглашение отправлено!'); closeInviteModal(); loadEmployees(); } else { alert('Ошибка'); }
+            const response = await fetch(`${API_URL}/companies/${companyId}/invite`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth() }, body: JSON.stringify({ user_id: userId, position_name: position, role_id: roleId || null, department: department || null }) });
+            if (response.ok) { alert('Приглашение отправлено!'); closeInviteModal(); loadEmployees(); } else { const d = await response.json(); alert(d.error || 'Ошибка'); }
         }
         async function removeEmployee(userId) {
             if (!confirm('Уволить сотрудника?')) return;
-            await fetch(`${API_URL}/companies/${companyId}/employees/${userId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+            await fetch(`${API_URL}/companies/${companyId}/employees/${userId}`, { method: 'DELETE', headers: auth() });
             loadEmployees();
         }
-        function showInviteModal() { loadFriends(); document.getElementById('inviteModal').style.display = 'flex'; }
+        function showInviteModal() { loadFriends(); loadRoles(); document.getElementById('inviteModal').style.display = 'flex'; }
         function closeInviteModal() { document.getElementById('inviteModal').style.display = 'none'; }
-        loadEmployees();
+
+        (async function init(){ await loadRoles(); await loadEmployees(); await loadMyInvites(); })();
     </script>
 </body>
 </html>

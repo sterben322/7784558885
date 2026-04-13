@@ -17,6 +17,8 @@ func RegisterAuthRoutes(r *gin.Engine) {
 
 	// Compatibility endpoint requested for external clients.
 	r.POST("/api/register", handlers.Register)
+	r.GET("/api/public/companies/:id", handlers.GetPublicCompany)
+	r.GET("/api/public/companies/:id/news", handlers.GetPublicCompanyNews)
 }
 
 // RegisterProtectedRoutes registers API endpoints that require JWT auth.
@@ -73,6 +75,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/companies/:id/employees", handlers.GetCompanyEmployees)
 		api.POST("/companies/:id/corporate-profiles", handlers.CreateEmployeeCorporateProfile)
 		api.POST("/companies/:id/invite", handlers.InviteToCompany)
+		api.GET("/companies/invites", handlers.GetMyCompanyInvites)
 		api.POST("/companies/invites/:invite_id/accept", handlers.AcceptCompanyInvite)
 		api.PUT("/companies/:id/employees/:user_id", handlers.UpdateEmployeeRole)
 		api.DELETE("/companies/:id/employees/:user_id", handlers.RemoveEmployee)

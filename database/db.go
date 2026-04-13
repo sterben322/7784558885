@@ -216,18 +216,30 @@ func CreateTables() error {
 		`CREATE TABLE IF NOT EXISTS company_roles (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+            role_code VARCHAR(50),
             position_name VARCHAR(100) NOT NULL,
             responsibilities TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
             permissions TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (company_id, position_name),
+            UNIQUE (company_id, role_code)
         )`,
 		`CREATE TABLE IF NOT EXISTS company_employees (
             company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             position_name VARCHAR(100) NOT NULL,
+            role_id UUID REFERENCES company_roles(id) ON DELETE SET NULL,
             department VARCHAR(100),
             hire_date DATE,
             is_active BOOLEAN NOT NULL DEFAULT true,
+            assigned_by UUID REFERENCES users(id),
+            assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (company_id, user_id)
+        )`,
+		`CREATE TABLE IF NOT EXISTS company_user_roles (
+            company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            role_id UUID NOT NULL REFERENCES company_roles(id) ON DELETE CASCADE,
             assigned_by UUID REFERENCES users(id),
             assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (company_id, user_id)
@@ -238,6 +250,7 @@ func CreateTables() error {
             inviter_id UUID REFERENCES users(id) ON DELETE SET NULL,
             invitee_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             position_name VARCHAR(100) NOT NULL,
+            role_id UUID REFERENCES company_roles(id) ON DELETE SET NULL,
             department VARCHAR(100),
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -256,6 +269,11 @@ func CreateTables() error {
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
 		`ALTER TABLE company_invites ADD COLUMN IF NOT EXISTS corporate_profile_id UUID REFERENCES corporate_profiles(id) ON DELETE SET NULL`,
+		`ALTER TABLE company_invites ADD COLUMN IF NOT EXISTS role_id UUID REFERENCES company_roles(id) ON DELETE SET NULL`,
+		`ALTER TABLE company_roles ADD COLUMN IF NOT EXISTS role_code VARCHAR(50)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_company_roles_position ON company_roles(company_id, position_name)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_company_roles_role_code ON company_roles(company_id, role_code) WHERE role_code IS NOT NULL`,
+		`ALTER TABLE company_employees ADD COLUMN IF NOT EXISTS role_id UUID REFERENCES company_roles(id) ON DELETE SET NULL`,
 		`CREATE TABLE IF NOT EXISTS posts (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -388,6 +406,37 @@ func CreateTables() error {
 		}
 	}
 
+	_, _ = DB.Exec(`
+		UPDATE company_employees ce
+		SET role_id = cr.id
+		FROM company_roles cr
+		WHERE ce.company_id = cr.company_id
+		  AND ce.position_name = cr.position_name
+		  AND ce.role_id IS NULL
+	`)
+
+	companyRows, err := DB.Query(`SELECT id, owner_id FROM companies`)
+	if err != nil {
+		return err
+	}
+	defer companyRows.Close()
+
+	for companyRows.Next() {
+		var companyID, ownerID string
+		if err := companyRows.Scan(&companyID, &ownerID); err != nil {
+			return err
+		}
+		if err := EnsureDefaultCompanyRoles(companyID); err != nil {
+			return err
+		}
+		_, _ = DB.Exec(`
+			INSERT INTO company_user_roles (company_id, user_id, role_id, assigned_by)
+			SELECT $1, $2, id, $2 FROM company_roles
+			WHERE company_id = $1 AND role_code = 'owner'
+			ON CONFLICT (company_id, user_id) DO NOTHING
+		`, companyID, ownerID)
+	}
+
 	return nil
 }
 
@@ -412,6 +461,33 @@ func EnsureDefaultCommunityRoles(communityID string) error {
 	}
 	for _, stmt := range statements {
 		if _, err := DB.Exec(stmt, communityID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func EnsureDefaultCompanyRoles(companyID string) error {
+	if DB == nil {
+		return nil
+	}
+
+	statements := []string{
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'owner', 'Owner', ARRAY['Полный доступ'], ARRAY['*'])
+		 ON CONFLICT (company_id, role_code) DO NOTHING`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'admin', 'Admin', ARRAY['Операционное управление'], ARRAY['invite_employees','manage_roles','edit_company_profile','publish_news','manage_employees'])
+		 ON CONFLICT (company_id, role_code) DO NOTHING`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'editor', 'Editor', ARRAY['Редактирование профиля и новостей'], ARRAY['edit_company_profile','publish_news'])
+		 ON CONFLICT (company_id, role_code) DO NOTHING`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'member', 'Member', ARRAY['Базовый доступ'], ARRAY[]::TEXT[])
+		 ON CONFLICT (company_id, role_code) DO NOTHING`,
+	}
+	for _, stmt := range statements {
+		if _, err := DB.Exec(stmt, companyID); err != nil {
 			return err
 		}
 	}

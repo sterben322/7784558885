@@ -15,7 +15,7 @@ import (
 
 func GetCompanyRoles(c *gin.Context) {
 	companyID := c.Param("id")
-	rows, err := database.DB.Query(`SELECT id, position_name, responsibilities, permissions FROM company_roles WHERE company_id = $1 ORDER BY position_name`, companyID)
+	rows, err := database.DB.Query(`SELECT id, company_id, position_name, responsibilities, permissions FROM company_roles WHERE company_id = $1 ORDER BY position_name`, companyID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
@@ -26,7 +26,7 @@ func GetCompanyRoles(c *gin.Context) {
 	for rows.Next() {
 		var role models.CompanyRole
 		var responsibilities, permissions pq.StringArray
-		if err := rows.Scan(&role.ID, &role.PositionName, &responsibilities, &permissions); err != nil {
+		if err := rows.Scan(&role.ID, &role.CompanyID, &role.PositionName, &responsibilities, &permissions); err != nil {
 			jsonError(c, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -40,13 +40,13 @@ func GetCompanyRoles(c *gin.Context) {
 func CreateCompanyRole(c *gin.Context) {
 	companyID := c.Param("id")
 	userID := currentUserID(c)
-	allowed, err := requireCompanyOwner(companyID, userID)
+	allowed, err := requireCompanyPermission(companyID, userID, "manage_roles")
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Company not found")
 		return
 	}
 	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can manage roles")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to manage roles")
 		return
 	}
 
@@ -78,9 +78,10 @@ func GetCompanyEmployees(c *gin.Context) {
 		return
 	}
 	rows, err := database.DB.Query(`
-        SELECT u.id, u.full_name, u.email, u.avatar_url, ce.position_name, ce.department, ce.hire_date::text, ce.is_active, ce.assigned_at
+        SELECT u.id, u.full_name, u.email, u.avatar_url, ce.position_name, ce.role_id, cr.role_code, ce.department, ce.hire_date::text, ce.is_active, ce.assigned_at
         FROM company_employees ce
         JOIN users u ON ce.user_id = u.id
+		LEFT JOIN company_roles cr ON ce.role_id = cr.id
         WHERE ce.company_id = $1 AND ce.is_active = true
         ORDER BY ce.assigned_at DESC
     `, companyID)
@@ -93,8 +94,9 @@ func GetCompanyEmployees(c *gin.Context) {
 	employees := make([]models.CompanyEmployee, 0)
 	for rows.Next() {
 		var emp models.CompanyEmployee
-		var avatar, department, hireDate sql.NullString
-		if err := rows.Scan(&emp.UserID, &emp.UserName, &emp.UserEmail, &avatar, &emp.PositionName, &department, &hireDate, &emp.IsActive, &emp.AssignedAt); err != nil {
+		var avatar, department, hireDate, roleCode sql.NullString
+		var roleID uuid.NullUUID
+		if err := rows.Scan(&emp.UserID, &emp.UserName, &emp.UserEmail, &avatar, &emp.PositionName, &roleID, &roleCode, &department, &hireDate, &emp.IsActive, &emp.AssignedAt); err != nil {
 			jsonError(c, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -106,6 +108,12 @@ func GetCompanyEmployees(c *gin.Context) {
 		}
 		if hireDate.Valid {
 			emp.HireDate = &hireDate.String
+		}
+		if roleID.Valid {
+			emp.RoleID = &roleID.UUID
+		}
+		if roleCode.Valid {
+			emp.RoleCode = &roleCode.String
 		}
 		employees = append(employees, emp)
 	}
@@ -121,13 +129,13 @@ func InviteToCompany(c *gin.Context) {
 		return
 	}
 
-	allowed, err := requireCompanyOwner(companyID, inviterID)
+	allowed, err := requireCompanyPermission(companyID, inviterID, "invite_employees")
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Company not found")
 		return
 	}
 	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can invite")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to invite")
 		return
 	}
 	if !isAcceptedFriend(inviterID, req.UserID) {
@@ -142,32 +150,69 @@ func InviteToCompany(c *gin.Context) {
 		return
 	}
 
+	selectedRoleID := req.RoleID
+	if selectedRoleID == nil {
+		_ = database.DB.QueryRow(`SELECT id FROM company_roles WHERE company_id = $1 AND role_code = 'member'`, companyID).Scan(&selectedRoleID)
+	}
+
 	var profileID uuid.UUID
 	err = database.DB.QueryRow(`
-		SELECT id
-		FROM corporate_profiles
-		WHERE user_id = $1 AND company_id = $2 AND created_by = $3 AND status = 'pending'
-	`, req.UserID, companyID, inviterID).Scan(&profileID)
-	if err == sql.ErrNoRows {
-		jsonError(c, http.StatusBadRequest, "Create employee corporate profile before invitation")
-		return
-	}
+		INSERT INTO corporate_profiles (id, user_id, company_id, created_by, position_name, permissions, status, employment_status)
+		VALUES ($1, $2, $3, $4, $5, $6, 'pending', 'invited')
+		ON CONFLICT (user_id) DO UPDATE
+		SET company_id = EXCLUDED.company_id,
+			created_by = EXCLUDED.created_by,
+			position_name = EXCLUDED.position_name,
+			permissions = EXCLUDED.permissions,
+			status = 'pending',
+			employment_status = 'invited',
+			updated_at = NOW()
+		RETURNING id
+	`, uuid.New(), req.UserID, companyID, inviterID, req.PositionName, pq.Array(req.Permissions)).Scan(&profileID)
 	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to validate employee corporate profile")
+		jsonError(c, http.StatusInternalServerError, "Failed to prepare corporate profile")
 		return
 	}
 
 	inviteID := uuid.New()
 	expiresAt := time.Now().Add(7 * 24 * time.Hour)
 	_, err = database.DB.Exec(`
-		INSERT INTO company_invites (id, company_id, inviter_id, invitee_id, position_name, department, corporate_profile_id, expires_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, inviteID, companyID, inviterID, req.UserID, req.PositionName, req.Department, profileID, expiresAt)
+		INSERT INTO company_invites (id, company_id, inviter_id, invitee_id, position_name, role_id, department, corporate_profile_id, expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, inviteID, companyID, inviterID, req.UserID, req.PositionName, selectedRoleID, req.Department, profileID, expiresAt)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to send invite")
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Invite sent"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Invite sent", "invite_id": inviteID})
+}
+
+func GetMyCompanyInvites(c *gin.Context) {
+	userID := currentUserID(c)
+	rows, err := database.DB.Query(`
+		SELECT ci.id, ci.company_id, co.name, ci.position_name, ci.created_at, ci.expires_at
+		FROM company_invites ci
+		JOIN companies co ON co.id = ci.company_id
+		WHERE ci.invitee_id = $1 AND ci.status = 'pending'
+		ORDER BY ci.created_at DESC
+	`, userID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+	invites := make([]map[string]any, 0)
+	for rows.Next() {
+		var id, companyID uuid.UUID
+		var companyName, position string
+		var createdAt, expiresAt time.Time
+		if err := rows.Scan(&id, &companyID, &companyName, &position, &createdAt, &expiresAt); err != nil {
+			jsonError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		invites = append(invites, map[string]any{"id": id, "company_id": companyID, "company_name": companyName, "position_name": position, "created_at": createdAt, "expires_at": expiresAt})
+	}
+	c.JSON(http.StatusOK, gin.H{"invites": invites})
 }
 
 func CreateEmployeeCorporateProfile(c *gin.Context) {
@@ -178,13 +223,13 @@ func CreateEmployeeCorporateProfile(c *gin.Context) {
 		jsonError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	allowed, err := requireCompanyOwner(companyID, creatorID)
+	allowed, err := requireCompanyPermission(companyID, creatorID, "manage_employees")
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Company not found")
 		return
 	}
 	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can create employee corporate profiles")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to create employee corporate profiles")
 		return
 	}
 	if !isAcceptedFriend(creatorID, req.UserID) {
@@ -221,11 +266,12 @@ func AcceptCompanyInvite(c *gin.Context) {
 	var department sql.NullString
 	var expiresAt time.Time
 	var corporateProfileID uuid.NullUUID
+	var roleID uuid.NullUUID
 	err := database.DB.QueryRow(`
-		SELECT company_id, position_name, department, expires_at, corporate_profile_id
+		SELECT company_id, position_name, department, expires_at, corporate_profile_id, role_id
 		FROM company_invites
 		WHERE id = $1 AND invitee_id = $2 AND status = 'pending'
-	`, inviteID, userID).Scan(&companyID, &positionName, &department, &expiresAt, &corporateProfileID)
+	`, inviteID, userID).Scan(&companyID, &positionName, &department, &expiresAt, &corporateProfileID, &roleID)
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Invite not found")
 		return
@@ -236,18 +282,33 @@ func AcceptCompanyInvite(c *gin.Context) {
 		return
 	}
 
-	_, err = database.DB.Exec(`
-        INSERT INTO company_employees (company_id, user_id, position_name, department, assigned_at)
-        VALUES ($1, $2, $3, $4, NOW())
-        ON CONFLICT (company_id, user_id) DO UPDATE SET position_name = EXCLUDED.position_name, department = EXCLUDED.department, is_active = true, assigned_at = NOW()
-    `, companyID, userID, positionName, department)
+	tx, err := database.DB.Begin()
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to accept invite")
 		return
 	}
-	_, _ = database.DB.Exec(`UPDATE company_invites SET status = 'accepted' WHERE id = $1`, inviteID)
+	defer tx.Rollback()
+
+	_, err = tx.Exec(`
+        INSERT INTO company_employees (company_id, user_id, position_name, role_id, department, assigned_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (company_id, user_id) DO UPDATE SET position_name = EXCLUDED.position_name, role_id = EXCLUDED.role_id, department = EXCLUDED.department, is_active = true, assigned_at = NOW()
+    `, companyID, userID, positionName, roleID, department)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to accept invite")
+		return
+	}
+	_, _ = tx.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
+	if roleID.Valid {
+		_, _ = tx.Exec(`
+			INSERT INTO company_user_roles (company_id, user_id, role_id)
+			VALUES ($1, $2, $3)
+			ON CONFLICT (company_id, user_id) DO UPDATE SET role_id = EXCLUDED.role_id, assigned_at = NOW()
+		`, companyID, userID, roleID.UUID)
+	}
+	_, _ = tx.Exec(`UPDATE company_invites SET status = 'accepted' WHERE id = $1`, inviteID)
 	if corporateProfileID.Valid {
-		_, _ = database.DB.Exec(`
+		_, _ = tx.Exec(`
 			UPDATE corporate_profiles
 			SET status = 'active',
 				employment_status = 'employed',
@@ -256,6 +317,10 @@ func AcceptCompanyInvite(c *gin.Context) {
 			WHERE id = $2 AND user_id = $3
 		`, companyID, corporateProfileID.UUID, userID)
 	}
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to accept invite")
+		return
+	}
 	recalcCompanyEmployeesCount(companyID.String())
 	c.JSON(http.StatusOK, gin.H{"message": "You are now an employee"})
 }
@@ -263,28 +328,36 @@ func AcceptCompanyInvite(c *gin.Context) {
 func UpdateEmployeeRole(c *gin.Context) {
 	companyID := c.Param("id")
 	employeeUserID := c.Param("user_id")
-	ownerID := currentUserID(c)
-	allowed, err := requireCompanyOwner(companyID, ownerID)
+	actorID := currentUserID(c)
+	allowed, err := requireCompanyPermission(companyID, actorID, "manage_roles")
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Company not found")
 		return
 	}
 	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can update roles")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to update roles")
 		return
 	}
 
 	var req struct {
-		PositionName string  `json:"position_name" binding:"required"`
-		Department   *string `json:"department"`
+		PositionName string     `json:"position_name" binding:"required"`
+		RoleID       *uuid.UUID `json:"role_id"`
+		Department   *string    `json:"department"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if _, err := database.DB.Exec(`UPDATE company_employees SET position_name = $1, department = $2 WHERE company_id = $3 AND user_id = $4`, req.PositionName, req.Department, companyID, employeeUserID); err != nil {
+	if _, err := database.DB.Exec(`UPDATE company_employees SET position_name = $1, role_id = $2, department = $3 WHERE company_id = $4 AND user_id = $5`, req.PositionName, req.RoleID, req.Department, companyID, employeeUserID); err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to update employee")
 		return
+	}
+	if req.RoleID != nil {
+		_, _ = database.DB.Exec(`
+			INSERT INTO company_user_roles (company_id, user_id, role_id, assigned_by)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (company_id, user_id) DO UPDATE SET role_id = EXCLUDED.role_id, assigned_by = EXCLUDED.assigned_by, assigned_at = NOW()
+		`, companyID, employeeUserID, *req.RoleID, actorID)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Employee role updated"})
 }
@@ -292,17 +365,26 @@ func UpdateEmployeeRole(c *gin.Context) {
 func RemoveEmployee(c *gin.Context) {
 	companyID := c.Param("id")
 	employeeUserID := c.Param("user_id")
-	ownerID := currentUserID(c)
-	allowed, err := requireCompanyOwner(companyID, ownerID)
+	actorID := currentUserID(c)
+	allowed, err := requireCompanyPermission(companyID, actorID, "manage_employees")
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Company not found")
 		return
 	}
 	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can remove employees")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to remove employees")
 		return
 	}
-	if ownerID.String() == employeeUserID {
+	if actorID.String() == employeeUserID {
+		jsonError(c, http.StatusBadRequest, "Cannot remove yourself")
+		return
+	}
+	targetID, err := uuid.Parse(employeeUserID)
+	if err != nil {
+		jsonError(c, http.StatusBadRequest, "Invalid user id")
+		return
+	}
+	if isCompanyOwner(companyID, targetID) {
 		jsonError(c, http.StatusBadRequest, "Cannot remove company owner")
 		return
 	}
@@ -310,6 +392,7 @@ func RemoveEmployee(c *gin.Context) {
 		jsonError(c, http.StatusInternalServerError, "Failed to remove employee")
 		return
 	}
+	_, _ = database.DB.Exec(`DELETE FROM company_user_roles WHERE company_id = $1 AND user_id = $2`, companyID, employeeUserID)
 	recalcCompanyEmployeesCount(companyID)
 	c.JSON(http.StatusOK, gin.H{"message": "Employee removed"})
 }

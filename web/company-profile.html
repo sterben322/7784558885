@@ -60,6 +60,14 @@
                     <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Сотрудники</h2>
                     <div id="employeesContainer" class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"></div>
                 </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Новости компании</h2>
+                        <button id="openEmployeesPage" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Панель компании</button>
+                    </div>
+                    <div id="companyNewsContainer" class="mt-4 space-y-3"></div>
+                </section>
             </main>
 
             <aside class="space-y-4">
@@ -137,21 +145,61 @@ async function loadCompany() {
     try {
         const params = new URLSearchParams(window.location.search);
         const ownerID = params.get('owner_id');
+        const token = localStorage.getItem('token');
         const endpoint = ownerID ? `${API_URL}/company?owner_id=${encodeURIComponent(ownerID)}` : `${API_URL}/company`;
-        const response = await fetch(endpoint, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
+        let response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` } });
+        let data = await response.json();
+        if ((!data.company || response.status === 401) && ownerID) {
+            const publicByOwnerResponse = await fetch(`${API_URL}/search/companies?q=`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const all = await publicByOwnerResponse.json();
+            const found = (all.companies || []).find((it) => it.owner_id === ownerID);
+            if (found?.id) {
+                response = await fetch(`${API_URL}/public/companies/${found.id}`);
+                data = await response.json();
+            }
+        }
         const company = data.company;
         currentCompany = company;
         renderCompany(company);
         await loadEmployees();
+        await loadCompanyNews();
     } catch (error) {
         console.error('Failed to load company:', error);
         renderCompany(null);
         showToast('Не удалось загрузить данные компании', 'error');
     }
 }
+
+async function loadCompanyNews() {
+    const container = document.getElementById('companyNewsContainer');
+    if (!currentCompany?.id) {
+        container.innerHTML = '<div class="text-sm text-gray-500">Новости появятся после регистрации компании.</div>';
+        return;
+    }
+    const token = localStorage.getItem('token');
+    let response = await fetch(`${API_URL}/feed?type=company&company_id=${currentCompany.id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!response.ok) {
+        response = await fetch(`${API_URL}/public/companies/${currentCompany.id}/news`);
+    }
+    const data = await response.json();
+    const posts = data.posts || [];
+    if (!posts.length) {
+        container.innerHTML = '<div class="text-sm text-gray-500">У компании пока нет опубликованных новостей.</div>';
+        return;
+    }
+    container.innerHTML = posts.map(post => `
+        <article class="rounded-xl border border-[#e6ecef] p-4">
+            <h3 class="font-semibold text-[#2f3d4f]">${post.title || 'Новость'}</h3>
+            <p class="mt-2 text-sm text-[#5f6b79]">${post.short_description || post.content || ''}</p>
+            <div class="mt-2 text-xs text-[#8a97a5]">${new Date(post.created_at).toLocaleString('ru-RU')}</div>
+        </article>
+    `).join('');
+}
+
+document.getElementById('openEmployeesPage').addEventListener('click', () => {
+    if (!currentCompany?.id) return;
+    window.location.href = `/employees.html?id=${encodeURIComponent(currentCompany.id)}`;
+});
 
 async function loadEmployees() {
     try {
