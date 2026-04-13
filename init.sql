@@ -19,6 +19,23 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users(email);
 
+CREATE TABLE IF NOT EXISTS user_friends (
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    friend_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    requester_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    user_low UUID GENERATED ALWAYS AS (LEAST(user_id, friend_id)) STORED,
+    user_high UUID GENERATED ALWAYS AS (GREATEST(user_id, friend_id)) STORED,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id),
+    CHECK (user_id <> friend_id),
+    CHECK (status IN ('pending', 'accepted', 'rejected', 'cancelled'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friends_pair_unique ON user_friends (user_low, user_high);
+CREATE INDEX IF NOT EXISTS idx_user_friends_status ON user_friends(status);
+CREATE INDEX IF NOT EXISTS idx_user_friends_requester_status ON user_friends(requester_id, status);
+
 CREATE TABLE IF NOT EXISTS sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
