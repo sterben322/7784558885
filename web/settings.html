@@ -72,6 +72,7 @@
             <div class="flex flex-wrap gap-3">
                 <button id="saveBtn" class="rounded-xl bg-[#2f7f5e] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Сохранить изменения</button>
                 <a href="/profile.html" class="rounded-xl border border-[#dbe3e8] px-5 py-2.5 text-sm font-medium text-[#4f5e6d]">Вернуться в профиль</a>
+                <button id="logoutBtn" class="rounded-xl border border-[#e7c0c0] px-5 py-2.5 text-sm font-semibold text-[#b54545] hover:bg-[#fff5f5]">Выйти из аккаунта</button>
             </div>
         </main>
     </div>
@@ -104,6 +105,12 @@ themeToggle.addEventListener('change', () => {
   localStorage.setItem(THEME_KEY, nextTheme);
   document.body.classList.toggle('dark-theme', nextTheme === 'dark');
   document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = '/login.html';
 });
 
 document.getElementById('saveBtn').addEventListener('click', () => {
