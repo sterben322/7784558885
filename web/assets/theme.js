@@ -1,17 +1,11 @@
 (function () {
   const THEME_KEY = 'lastop-theme';
   const LAYOUT_KEY = 'lastop-layout-mode';
-  const DEMO_USER_KEY = 'user';
-  const DEMO_TOKEN_KEY = 'token';
-
-  const DEMO_USER = {
-    id: 'demo-user-001',
-    full_name: 'Анна Карпова',
-    email: 'demo@lastop.group',
-    company_name: 'LASTOP GROUP',
-    position: 'Менеджер по развитию бизнеса',
-    phone: '+7 (999) 222-44-11'
-  };
+  const AUTH_USER_KEY = 'user';
+  const AUTH_TOKEN_KEY = 'token';
+  const API_URL = '/api';
+  const AUTH_PAGE_PATHS = ['/login', '/login.html', '/register', '/register.html'];
+  const PUBLIC_PATHS = new Set(['/privacy', '/privacy.html', '/terms', '/terms.html', '/']);
 
   function applyTheme(theme) {
     const isDark = theme === 'dark';
@@ -32,29 +26,71 @@
     return localStorage.getItem(THEME_KEY) || 'light';
   }
 
-  function ensureDemoSession() {
-    const path = window.location.pathname;
-    const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
-    if (isAuthPage) return;
-
-    if (!localStorage.getItem(DEMO_TOKEN_KEY)) {
-      localStorage.setItem(DEMO_TOKEN_KEY, 'demo-token-local');
+  function getStoredUser() {
+    try {
+      return JSON.parse(localStorage.getItem(AUTH_USER_KEY) || '{}');
+    } catch (_) {
+      return {};
     }
+  }
 
-    const storedUser = localStorage.getItem(DEMO_USER_KEY);
-    if (!storedUser) {
-      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(DEMO_USER));
-      return;
-    }
+  function clearAuthState() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+  }
+
+  function isAuthPage(path) {
+    return AUTH_PAGE_PATHS.includes(path);
+  }
+
+  function isPublicPage(path) {
+    if (PUBLIC_PATHS.has(path)) return true;
+    return isAuthPage(path);
+  }
+
+  async function validateSession() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token) return false;
 
     try {
-      const parsed = JSON.parse(storedUser);
-      if (!parsed || !parsed.full_name) {
-        localStorage.setItem(DEMO_USER_KEY, JSON.stringify(DEMO_USER));
+      const response = await fetch(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        clearAuthState();
+        return false;
       }
-    } catch (e) {
-      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(DEMO_USER));
+      const payload = await response.json().catch(() => ({}));
+      if (payload.user) {
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(payload.user));
+      }
+      return true;
+    } catch (_) {
+      return false;
     }
+  }
+
+  async function logout() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (token) {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+    }
+    clearAuthState();
+    window.location.href = '/login.html';
+  }
+
+  function bindLogoutButtons() {
+    document.querySelectorAll('[data-auth-logout], #logoutBtn, #globalLogoutBtn').forEach((button) => {
+      if (button.dataset.logoutBound === '1') return;
+      button.dataset.logoutBound = '1';
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        logout();
+      });
+    });
   }
 
   function logoMarkup() {
@@ -114,7 +150,19 @@
     if (!leftSidebar) return;
 
     const settingsLinks = leftSidebar.querySelectorAll('a[href="/settings.html"]');
-    if (settingsLinks.length > 0) return;
+    const logoutButtons = leftSidebar.querySelectorAll('[data-auth-logout], #logoutBtn');
+    if (settingsLinks.length > 0 && logoutButtons.length === 0) {
+      const settingsContainer = settingsLinks[settingsLinks.length - 1].closest('div');
+      if (settingsContainer) {
+        const button = document.createElement('button');
+        button.setAttribute('data-auth-logout', '');
+        button.className = 'mt-3 w-full rounded-2xl border border-[#e8ecef] px-4 py-2 text-left text-[14px] font-medium text-[#5d6978] hover:bg-[#f6f9f8]';
+        button.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Выйти';
+        settingsContainer.appendChild(button);
+      }
+      return;
+    }
+    if (settingsLinks.length > 0 && logoutButtons.length > 0) return;
 
     const footer = document.createElement('div');
     footer.className = 'mt-auto border-t border-[#e8ecef] px-5 py-5';
@@ -124,6 +172,9 @@
         <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]">Настройки</div></div>
         <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
       </a>
+      <button data-auth-logout class="mt-3 w-full rounded-2xl border border-[#e8ecef] px-4 py-2 text-left text-[14px] font-medium text-[#5d6978] hover:bg-[#f6f9f8]">
+        <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Выйти
+      </button>
     `;
     leftSidebar.appendChild(footer);
   }
@@ -150,6 +201,7 @@
       </nav>
       <div class="sidebar-settings-block">
         <a href="/settings.html" class="global-sidebar__item global-sidebar__item--settings">Настройки</a>
+        <button id="globalLogoutBtn" data-auth-logout class="global-sidebar__item global-sidebar__item--settings mt-2 text-left">Выйти</button>
       </div>
     `;
 
@@ -180,7 +232,7 @@
     const rightUserCard = document.getElementById('globalUserCard');
     if (!rightUserCard) return;
 
-    const user = JSON.parse(localStorage.getItem(DEMO_USER_KEY) || '{}');
+    const user = getStoredUser();
     const name = user.full_name || 'Гость';
     const letter = (name[0] || 'U').toUpperCase();
 
@@ -206,7 +258,7 @@
     if (isAuthPage) return;
     if (document.getElementById('floatingProfileButton')) return;
 
-    const user = JSON.parse(localStorage.getItem(DEMO_USER_KEY) || '{}');
+    const user = getStoredUser();
     const name = user.full_name || 'Гость';
     const letter = (name[0] || 'U').toUpperCase();
 
@@ -221,8 +273,21 @@
     document.body.appendChild(button);
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    ensureDemoSession();
+  document.addEventListener('DOMContentLoaded', async function () {
+    const path = window.location.pathname;
+    const requiresAuth = !isPublicPage(path);
+
+    const validSession = await validateSession();
+    if (isAuthPage(path) && validSession) {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+    if (requiresAuth && !validSession) {
+      clearAuthState();
+      window.location.href = '/login.html';
+      return;
+    }
+
     applyTheme(currentTheme());
     applyLayout(currentLayout());
     createGlobalSidebar();
@@ -231,5 +296,6 @@
     ensureDashboardSidebarAccess();
     moveHeaderUserToRightSidebar();
     ensureFloatingProfileButton();
+    bindLogoutButtons();
   });
 })();
