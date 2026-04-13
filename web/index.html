@@ -59,6 +59,9 @@
                     <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Настройки</div></div>
                     <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
                 </a>
+                <button id="logoutBtn" class="mt-3 w-full rounded-2xl border border-[#e8ecef] px-4 py-2 text-left text-[14px] font-medium text-[#5d6978] hover:bg-[#f6f9f8]">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Выйти
+                </button>
             </div>
         </aside>
 
@@ -109,8 +112,36 @@
         </aside>
     </div>
 </div>
+<div id="authOverlay" class="auth-overlay hidden">
+    <div class="auth-modal">
+        <div class="auth-header">
+            <h2>Добро пожаловать в LASTOP</h2>
+            <p>Войдите или зарегистрируйтесь, чтобы продолжить</p>
+        </div>
+        <div class="auth-tabs">
+            <button id="tabLogin" class="auth-tab auth-tab--active" type="button">Вход</button>
+            <button id="tabRegister" class="auth-tab" type="button">Регистрация</button>
+        </div>
+        <div id="authError" class="auth-error hidden"></div>
+
+        <form id="loginForm" class="auth-form">
+            <label>Email <input id="loginEmail" type="email" required autocomplete="email" /></label>
+            <label>Пароль <input id="loginPassword" type="password" required autocomplete="current-password" /></label>
+            <button id="loginBtn" class="auth-submit" type="submit">Войти</button>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden">
+            <label>Отображаемое имя <input id="registerName" type="text" required autocomplete="name" /></label>
+            <label>Email <input id="registerEmail" type="email" required autocomplete="email" /></label>
+            <label>Пароль <input id="registerPassword" type="password" minlength="8" required autocomplete="new-password" /></label>
+            <label>Подтверждение пароля <input id="registerConfirmPassword" type="password" minlength="8" required autocomplete="new-password" /></label>
+            <button id="registerBtn" class="auth-submit" type="submit">Создать аккаунт</button>
+        </form>
+    </div>
+</div>
 
 <script>
+const API_URL = '/api';
 const FEED_SOURCE = [
     {
         title: 'Рост деловой активности в производственном секторе',
@@ -140,7 +171,7 @@ const FEED_SOURCE = [
 
 function setUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const name = user.full_name || 'Гость';
+    const name = user.full_name || user.name || user.first_name || 'Гость';
     const letter = (name[0] || 'U').toUpperCase();
 
     const sidebarUserName = document.getElementById('userName');
@@ -177,11 +208,149 @@ function createNewsCard(item, idx) {
 
 function renderMainNews() {
     const feed = document.getElementById('mainNewsFeed');
+    feed.innerHTML = '';
     FEED_SOURCE.forEach((item, idx) => feed.appendChild(createNewsCard(item, idx)));
 }
 
-setUserInfo();
-renderMainNews();
+function showAuthError(message) {
+    const authError = document.getElementById('authError');
+    authError.textContent = message;
+    authError.classList.remove('hidden');
+}
+
+function clearAuthError() {
+    const authError = document.getElementById('authError');
+    authError.classList.add('hidden');
+    authError.textContent = '';
+}
+
+function switchAuthTab(isLogin) {
+    document.getElementById('tabLogin').classList.toggle('auth-tab--active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('auth-tab--active', !isLogin);
+    document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+    document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+    clearAuthError();
+}
+
+function setLoading(buttonId, isLoading, idleText, loadingText) {
+    const button = document.getElementById(buttonId);
+    button.disabled = isLoading;
+    button.textContent = isLoading ? loadingText : idleText;
+}
+
+async function authRequest(path, payload) {
+    const response = await fetch(`${API_URL}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        throw new Error(data.error || 'Ошибка авторизации');
+    }
+    return data;
+}
+
+async function tryRestoreSession() {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    const response = await fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return false;
+    }
+    const data = await response.json().catch(() => ({}));
+    if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    return true;
+}
+
+function closeAuthOverlay() {
+    document.getElementById('authOverlay').classList.add('hidden');
+    setUserInfo();
+    renderMainNews();
+}
+
+async function handleLogout() {
+    const token = localStorage.getItem('token');
+    if (token) {
+        await fetch(`${API_URL}/auth/logout`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => null);
+    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    document.getElementById('authOverlay').classList.remove('hidden');
+    switchAuthTab(true);
+}
+
+document.getElementById('tabLogin').addEventListener('click', () => switchAuthTab(true));
+document.getElementById('tabRegister').addEventListener('click', () => switchAuthTab(false));
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAuthError();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) return showAuthError('Введите email и пароль');
+
+    setLoading('loginBtn', true, 'Войти', 'Выполняется вход...');
+    try {
+        const data = await authRequest('/auth/login', { email, password });
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        closeAuthOverlay();
+    } catch (err) {
+        showAuthError(err.message);
+    } finally {
+        setLoading('loginBtn', false, 'Войти', 'Выполняется вход...');
+    }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAuthError();
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    if (!name || !email || !password || !confirmPassword) return showAuthError('Заполните все поля');
+    if (password.length < 8) return showAuthError('Пароль должен быть не менее 8 символов');
+    if (password !== confirmPassword) return showAuthError('Пароли не совпадают');
+
+    setLoading('registerBtn', true, 'Создать аккаунт', 'Регистрация...');
+    try {
+        const data = await authRequest('/auth/register', {
+            name,
+            full_name: name,
+            first_name: name,
+            email,
+            password,
+        });
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        closeAuthOverlay();
+    } catch (err) {
+        showAuthError(err.message);
+    } finally {
+        setLoading('registerBtn', false, 'Создать аккаунт', 'Регистрация...');
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+(async () => {
+    const authorized = await tryRestoreSession();
+    if (authorized) {
+        closeAuthOverlay();
+    } else {
+        document.getElementById('authOverlay').classList.remove('hidden');
+        switchAuthTab(true);
+    }
+})();
 </script>
 </body>
 </html>

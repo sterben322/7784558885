@@ -54,8 +54,8 @@ func Register(c *gin.Context) {
 		jsonError(c, http.StatusBadRequest, "password must be at least 8 characters")
 		return
 	}
-	if firstName == "" || lastName == "" {
-		jsonError(c, http.StatusBadRequest, "first_name and last_name are required")
+	if firstName == "" && displayName == "" {
+		jsonError(c, http.StatusBadRequest, "name is required")
 		return
 	}
 
@@ -94,17 +94,25 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	user := models.User{
+		ID:        userID,
+		FirstName: firstName,
+		LastName:  lastName,
+		FullName:  displayName,
+		Email:     req.Email,
+		AvatarURL: nullIfEmpty(req.AvatarURL),
+		CreatedAt: createdAt,
+	}
+	token, err := createSessionToken(user.ID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to create session")
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
-		"user": gin.H{
-			"id":         userID,
-			"email":      req.Email,
-			"first_name": firstName,
-			"last_name":  lastName,
-			"name":       nullIfEmpty(displayName),
-			"avatar_url": nullIfEmpty(req.AvatarURL),
-			"created_at": createdAt,
-		},
+		"token":   token,
+		"user":    user,
 	})
 }
 
@@ -116,6 +124,13 @@ func Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	req.Password = strings.TrimSpace(req.Password)
+	if req.Email == "" || req.Password == "" {
+		jsonError(c, http.StatusBadRequest, "email and password are required")
 		return
 	}
 
@@ -139,20 +154,27 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateJWT(user.ID)
+	token, err := createSessionToken(user.ID)
 	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to create token")
-		return
-	}
-
-	sessionID := uuid.New()
-	expiresAt := time.Now().Add(24 * time.Hour)
-	if _, err := database.DB.Exec(`INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, $4)`, sessionID, user.ID, token, expiresAt); err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to create session")
 		return
 	}
 
 	c.JSON(http.StatusOK, models.LoginResponse{Token: token, User: user})
+}
+
+func createSessionToken(userID uuid.UUID) (string, error) {
+	token, err := utils.GenerateJWT(userID)
+	if err != nil {
+		return "", err
+	}
+
+	sessionID := uuid.New()
+	expiresAt := time.Now().Add(24 * time.Hour)
+	if _, err := database.DB.Exec(`INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, $4)`, sessionID, userID, token, expiresAt); err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func nullIfEmpty(v string) *string {
