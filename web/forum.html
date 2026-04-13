@@ -78,7 +78,8 @@ function setUserInfo() {
 
     const sidebarUserName = document.getElementById('userName');
     if (sidebarUserName) sidebarUserName.textContent = name;
-    document.getElementById('topUserName').textContent = name;
+    const topUserName = document.getElementById('topUserName');
+    if (topUserName) topUserName.textContent = name;
     ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.textContent = letter;
@@ -86,9 +87,7 @@ function setUserInfo() {
 }
 
 function renderTopics(topics) {
-    const sample = { title: 'Пример темы: первое обсуждение', author_name: 'Модератор', replies_count: 3, created_at: new Date().toISOString(), content: 'Пример обсуждения: делимся опытом, задаём вопросы и предлагаем идеи для развития раздела.' };
-    const merged = [sample, ...topics];
-    document.getElementById('topicsList').innerHTML = merged.map(t => `<div class="rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]"><h3 class="font-semibold text-lg text-[#2f3c4e]">${t.title}</h3><p class="text-sm text-[#7f8a97] mt-1">${t.author_name} • ${t.replies_count} ответов • ${new Date(t.created_at).toLocaleDateString()}</p><p class="text-[#697685] mt-2">${(t.content || '').substring(0, 150)}...</p></div>`).join('') || '<div class="text-center py-8 text-gray-500">Тем пока нет</div>';
+    document.getElementById('topicsList').innerHTML = topics.map(t => `<div class="rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]"><h3 class="font-semibold text-lg text-[#2f3c4e]">${t.title}</h3><p class="text-sm text-[#7f8a97] mt-1">${t.author_name} • ${t.replies_count} ответов • ${new Date(t.created_at).toLocaleDateString()}</p><p class="text-[#697685] mt-2">${(t.content || '').substring(0, 150)}...</p></div>`).join('') || '<div class="text-center py-8 text-gray-500">Тем пока нет</div>';
 }
 
 async function loadTopics() {

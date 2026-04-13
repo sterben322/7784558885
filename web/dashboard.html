@@ -120,44 +120,8 @@
 </div>
 
 <script>
-const FEED_SOURCE = [
-    {
-        title: 'Рост деловой активности в производственном секторе',
-        excerpt: 'Компании расширяют экспортные каналы и ищут партнеров для совместных поставок оборудования и сырья.',
-        category: 'Экономика',
-        author: 'Редакция LASTOP',
-        minutesAgo: 15,
-        tags: ['экспорт', 'партнерство', 'производство']
-    },
-    {
-        title: 'Новые логистические коридоры для малого и среднего бизнеса',
-        excerpt: 'На форуме обсудили альтернативные маршруты и снижение издержек на доставку в страны СНГ и Ближнего Востока.',
-        category: 'Логистика',
-        author: 'Команда аналитики',
-        minutesAgo: 34,
-        tags: ['логистика', 'снг', 'маршруты']
-    },
-    {
-        title: 'Технологические тренды 2026: автоматизация закупок',
-        excerpt: 'Предприниматели внедряют AI-инструменты для прогноза спроса и оптимизации складских запасов.',
-        category: 'Технологии',
-        author: 'LASTOP Insights',
-        minutesAgo: 58,
-        tags: ['ai', 'закупки', 'автоматизация']
-    },
-    {
-        title: 'Подготовка к отраслевым выставкам: чек-лист для участников',
-        excerpt: 'Как подготовить стенд, презентацию и коммерческое предложение, чтобы получить максимум лидов.',
-        category: 'Выставки',
-        author: 'Ивент-редакция',
-        minutesAgo: 85,
-        tags: ['выставки', 'маркетинг', 'продажи']
-    }
-];
-
-let feedIteration = 0;
-let isLoading = false;
-const pageSize = 6;
+const API_URL = '/api';
+const token = localStorage.getItem('token');
 
 function setUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -166,69 +130,89 @@ function setUserInfo() {
 
     const sidebarUserName = document.getElementById('userName');
     if (sidebarUserName) sidebarUserName.textContent = name;
-    document.getElementById('topUserName').textContent = name;
+
+    const topUserName = document.getElementById('topUserName');
+    if (topUserName) topUserName.textContent = name;
+
     ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.textContent = letter;
     });
 }
 
+function formatRelativeTime(ts) {
+    if (!ts) return 'только что';
+    const diffMin = Math.max(1, Math.floor((Date.now() - new Date(ts).getTime()) / 60000));
+    if (diffMin < 60) return `${diffMin} мин назад`;
+    const hours = Math.floor(diffMin / 60);
+    if (hours < 24) return `${hours} ч назад`;
+    return `${Math.floor(hours / 24)} д назад`;
+}
+
 function createNewsCard(item, idx) {
     const article = document.createElement('article');
+    const excerpt = item.short_description || item.content || 'Описание отсутствует';
+    const category = item.tags?.[0] || 'Новости';
+    const tags = Array.isArray(item.tags) ? item.tags : [];
+
     article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
     article.innerHTML = `
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
-                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${item.category}</div>
-                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title}</h3>
-                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${item.excerpt}</p>
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${category}</div>
+                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title || 'Без заголовка'}</h3>
+                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${excerpt}</p>
             </div>
             <div class="text-right text-[13px] text-[#95a1ad]">
-                <div>${item.minutesAgo + feedIteration * 5} мин назад</div>
-                <div class="mt-1 font-medium text-[#61707f]">${item.author}</div>
+                <div>${formatRelativeTime(item.created_at)}</div>
+                <div class="mt-1 font-medium text-[#61707f]">${item.author_name || 'Редакция LASTOP'}</div>
             </div>
         </div>
         <div class="mt-4 flex flex-wrap gap-2.5">
-            ${item.tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
+            ${tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
         </div>
         <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
-            <span>Публикация #${idx + 1 + feedIteration * pageSize}</span>
+            <span>Публикация #${idx + 1}</span>
             <a href="/dashboard.html" class="rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</a>
         </div>
     `;
     return article;
 }
 
-function appendNewsBatch() {
-    if (isLoading) return;
-    isLoading = true;
+function renderNews(posts) {
     const feed = document.getElementById('newsFeed');
     const status = document.getElementById('feedStatus');
-    status.textContent = 'Подгружаем ещё...';
 
-    setTimeout(() => {
-        for (let i = 0; i < pageSize; i++) {
-            const sourceItem = FEED_SOURCE[(i + feedIteration) % FEED_SOURCE.length];
-            feed.appendChild(createNewsCard(sourceItem, i));
-        }
-        feedIteration++;
-        isLoading = false;
-        status.textContent = 'Прокрутите вниз, чтобы загрузить больше новостей';
-    }, 250);
-}
-
-function setupInfiniteScroll() {
-    const status = document.getElementById('feedStatus');
-    const container = document.getElementById('feedScrollContainer');
-
-    function checkScroll() {
-        const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
-        if (remaining <= 280) appendNewsBatch();
+    if (!posts.length) {
+        feed.innerHTML = '<div class="rounded-[22px] border border-[#e8ecee] bg-white px-6 py-10 text-center text-[#7f8a97]">Новостей пока нет</div>';
+        status.textContent = 'Нет доступных публикаций';
+        return;
     }
 
-    container.addEventListener('scroll', checkScroll, { passive: true });
-    window.addEventListener('resize', checkScroll);
-    checkScroll();
+    feed.innerHTML = '';
+    posts.forEach((post, idx) => feed.appendChild(createNewsCard(post, idx)));
+    status.textContent = `Показано публикаций: ${posts.length}`;
+}
+
+async function loadNews() {
+    const status = document.getElementById('feedStatus');
+
+    if (!token) {
+        status.textContent = 'Войдите в аккаунт, чтобы увидеть новости';
+        renderNews([]);
+        return;
+    }
+
+    try {
+        status.textContent = 'Загрузка новостей...';
+        const response = await fetch(`${API_URL}/news`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await response.json();
+        const posts = data.posts || [];
+        renderNews(posts);
+    } catch (e) {
+        status.textContent = 'Не удалось загрузить новости';
+        renderNews([]);
+    }
 }
 
 function setupSearch() {
@@ -242,10 +226,9 @@ function setupSearch() {
     });
 }
 
+
 setUserInfo();
-appendNewsBatch();
-appendNewsBatch();
-setupInfiniteScroll();
+loadNews();
 setupSearch();
 </script>
 </body>
