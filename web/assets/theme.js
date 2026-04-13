@@ -57,50 +57,6 @@
     }
   }
 
-  function createSidebarToggles() {
-    if (document.getElementById('sidebarSwitches')) return;
-    const sidebar =
-      document.querySelector('#globalSidebar') ||
-      document.querySelector('.dashboard-shell > aside.dashboard-sidebar');
-    if (!sidebar) return;
-
-    const settingsBlock = sidebar.querySelector('.sidebar-settings-block, .mt-auto');
-    const host = document.createElement('div');
-    host.id = 'sidebarSwitches';
-    host.className = 'sidebar-switches px-3 pb-3';
-    host.innerHTML = `
-      <button id="layoutToggle" type="button" class="sidebar-toggle" aria-label="Переключить режим экрана">
-        <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
-        <span class="theme-toggle-label">Стандарт / широкоформат</span>
-      </button>
-      <button id="themeToggle" type="button" class="sidebar-toggle" aria-label="Переключить тему">
-        <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
-        <span class="theme-toggle-label">Тёмная тема</span>
-      </button>
-    `;
-
-    if (settingsBlock) {
-      sidebar.insertBefore(host, settingsBlock);
-    } else {
-      sidebar.appendChild(host);
-    }
-
-    const themeToggle = document.getElementById('themeToggle');
-    const layoutToggle = document.getElementById('layoutToggle');
-
-    themeToggle.addEventListener('click', function () {
-      const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
-      localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
-    });
-
-    layoutToggle.addEventListener('click', function () {
-      const next = document.body.classList.contains('widescreen-mode') ? 'standard' : 'wide';
-      localStorage.setItem(LAYOUT_KEY, next);
-      applyLayout(next);
-    });
-  }
-
   function logoMarkup() {
     return '<img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" class="brand-logo" />';
   }
@@ -232,6 +188,5 @@
     applyBranding();
     simplifyLeftSidebar();
     ensureDashboardSidebarAccess();
-    createSidebarToggles();
   });
 })();

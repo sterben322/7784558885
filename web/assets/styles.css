@@ -335,6 +335,17 @@ body.dark-theme div[style*="background:#fff"] {
     background: #1a1f24 !important;
 }
 
+body.dark-theme .global-search,
+body.dark-theme .global-sidebar,
+body.dark-theme .global-right-sidebar,
+body.dark-theme .dashboard-main,
+body.dark-theme .dashboard-main-header,
+body.dark-theme #feedScrollContainer > *,
+body.dark-theme [class*="shadow-"] {
+    background: #1f242b !important;
+    color: #ffffff !important;
+}
+
 body.dark-theme .text-black,
 body.dark-theme .text-\[\#000\],
 body.dark-theme .text-\[\#111111\],
@@ -354,6 +365,21 @@ body.dark-theme .text-\[\#95a1ad\],
 body.dark-theme .text-\[\#a0acb8\],
 body.dark-theme .text-gray-500,
 body.dark-theme .text-gray-600 {
+    color: #ffffff !important;
+}
+
+body.dark-theme a,
+body.dark-theme p,
+body.dark-theme span,
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6,
+body.dark-theme li,
+body.dark-theme label,
+body.dark-theme strong {
     color: #ffffff !important;
 }
 
