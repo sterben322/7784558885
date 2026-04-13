@@ -6,9 +6,11 @@ import (
 
 // AppConfig stores runtime configuration loaded from environment variables.
 type AppConfig struct {
-	Host        string
-	Port        string
-	DatabaseURL string
+	Host               string
+	Port               string
+	DatabaseURL        string
+	JWTSecret          string
+	CORSAllowedOrigins string
 }
 
 // Load reads application configuration from environment variables.
@@ -24,8 +26,10 @@ func Load() (*AppConfig, error) {
 	}
 
 	return &AppConfig{
-		Host:        "0.0.0.0",
-		Port:        port,
-		DatabaseURL: databaseURL,
+		Host:               "0.0.0.0",
+		Port:               port,
+		DatabaseURL:        databaseURL,
+		JWTSecret:          os.Getenv("JWT_SECRET"),
+		CORSAllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
 	}, nil
 }

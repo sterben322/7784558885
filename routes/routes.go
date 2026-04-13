@@ -25,6 +25,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 	api.Use(middleware.AuthMiddleware())
 	{
 		api.POST("/auth/logout", handlers.Logout)
+		api.GET("/auth/me", handlers.GetMe)
 		api.GET("/me", handlers.GetMe)
 		api.PUT("/profile", handlers.UpdateProfile)
 		api.GET("/corporate-profile", handlers.GetMyCorporateProfile)

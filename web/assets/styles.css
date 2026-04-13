@@ -277,6 +277,111 @@ body.dark-theme .text-\[\#273244\] {
     color: #9ca3af !important;
 }
 
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(6px);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.auth-modal {
+    width: min(520px, 100%);
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e5ece9;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    padding: 24px;
+}
+
+.auth-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.auth-header p {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.auth-tabs {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.auth-tab {
+    border-radius: 12px;
+    border: 1px solid #dbe5df;
+    padding: 10px;
+    font-weight: 600;
+    color: #4b5563;
+    background: #f8fbf9;
+}
+
+.auth-tab--active {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+}
+
+.auth-form {
+    margin-top: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.auth-form label {
+    display: grid;
+    gap: 6px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.auth-form input {
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 11px 12px;
+    outline: none;
+}
+
+.auth-form input:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.auth-submit {
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #0f9d58 0%, #22c55e 100%);
+    color: white;
+    font-weight: 600;
+    padding: 12px 14px;
+    margin-top: 4px;
+}
+
+.auth-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-error {
+    margin-top: 12px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
 
 /* Глобальный светлый фон без серых оттенков */
 body {
