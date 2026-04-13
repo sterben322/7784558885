@@ -126,12 +126,25 @@ func CreateTables() error {
 		`CREATE TABLE IF NOT EXISTS user_friends (
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             friend_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            requester_id UUID REFERENCES users(id) ON DELETE SET NULL,
+            user_low UUID GENERATED ALWAYS AS (LEAST(user_id, friend_id)) STORED,
+            user_high UUID GENERATED ALWAYS AS (GREATEST(user_id, friend_id)) STORED,
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (user_id, friend_id),
-            CHECK (user_id <> friend_id)
+            CHECK (user_id <> friend_id),
+            CHECK (status IN ('pending', 'accepted', 'rejected', 'cancelled'))
         )`,
+		`ALTER TABLE user_friends ADD COLUMN IF NOT EXISTS requester_id UUID REFERENCES users(id) ON DELETE SET NULL`,
+		`ALTER TABLE user_friends ADD COLUMN IF NOT EXISTS user_low UUID GENERATED ALWAYS AS (LEAST(user_id, friend_id)) STORED`,
+		`ALTER TABLE user_friends ADD COLUMN IF NOT EXISTS user_high UUID GENERATED ALWAYS AS (GREATEST(user_id, friend_id)) STORED`,
+		`UPDATE user_friends SET requester_id = COALESCE(requester_id, user_id)`,
+		`ALTER TABLE user_friends DROP CONSTRAINT IF EXISTS user_friends_status_check`,
+		`ALTER TABLE user_friends ADD CONSTRAINT user_friends_status_check CHECK (status IN ('pending', 'accepted', 'rejected', 'cancelled'))`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friends_pair_unique ON user_friends ((LEAST(user_id, friend_id)), (GREATEST(user_id, friend_id)))`,
+		`CREATE INDEX IF NOT EXISTS idx_user_friends_status ON user_friends (status)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_friends_requester_status ON user_friends (requester_id, status)`,
 		`CREATE TABLE IF NOT EXISTS communities (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(100) NOT NULL UNIQUE,
