@@ -47,14 +47,9 @@ func scanCompanyBase(rowScanner interface{ Scan(dest ...any) error }, company *m
 func GetCompany(c *gin.Context) {
 	userID := currentUserID(c)
 	targetOwnerID := c.Query("owner_id")
+	targetCompanyID := c.Query("id")
 
-	queryArg := any(userID)
-	if targetOwnerID != "" {
-		queryArg = targetOwnerID
-	}
-
-	var company models.Company
-	err := scanCompanyBase(database.DB.QueryRow(`
+	query := `
         SELECT c.id, c.owner_id, u.full_name, c.name, c.inn, c.description, c.logo_url,
                c.economic_sector, c.is_public, c.search_tags, c.website, c.phone, c.address,
                c.followers_count, c.employee_count,
@@ -62,8 +57,21 @@ func GetCompany(c *gin.Context) {
                c.created_at
         FROM companies c
         JOIN users u ON c.owner_id = u.id
-        WHERE c.owner_id = $2
-    `, userID, queryArg), &company)
+    `
+	args := []any{userID}
+	if targetCompanyID != "" {
+		query += " WHERE c.id = $2"
+		args = append(args, targetCompanyID)
+	} else {
+		query += " WHERE c.owner_id = $2"
+		queryArg := any(userID)
+		if targetOwnerID != "" {
+			queryArg = targetOwnerID
+		}
+		args = append(args, queryArg)
+	}
+	var company models.Company
+	err := scanCompanyBase(database.DB.QueryRow(query, args...), &company)
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusOK, gin.H{"company": nil})
 		return
@@ -95,15 +103,15 @@ func CreateCompany(c *gin.Context) {
 		jsonError(c, http.StatusConflict, "You already have a registered company")
 		return
 	}
-	var hasCorporateProfile bool
-	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM corporate_profiles WHERE user_id = $1)`, userID).Scan(&hasCorporateProfile)
-	if !hasCorporateProfile {
-		jsonError(c, http.StatusForbidden, "Create corporate profile first")
+	companyID := uuid.New()
+	tx, err := database.DB.Begin()
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to create company")
 		return
 	}
+	defer tx.Rollback()
 
-	companyID := uuid.New()
-	_, err := database.DB.Exec(`
+	_, err = tx.Exec(`
         INSERT INTO companies (id, owner_id, name, inn, description, logo_url, economic_sector, is_public, search_tags, website, phone, address)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     `, companyID, userID, req.Name, req.INN, req.Description, req.LogoURL, req.EconomicSector, req.IsPublic, pq.Array(req.SearchTags), req.Website, req.Phone, req.Address)
@@ -111,7 +119,23 @@ func CreateCompany(c *gin.Context) {
 		jsonError(c, http.StatusInternalServerError, "Failed to create company")
 		return
 	}
-	_, _ = database.DB.Exec(`
+	defaultRoleStatements := []string{
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'owner', 'Owner', ARRAY['Полный доступ'], ARRAY['*'])`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'admin', 'Admin', ARRAY['Операционное управление'], ARRAY['invite_employees','manage_roles','edit_company_profile','publish_news','manage_employees'])`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'editor', 'Editor', ARRAY['Редактирование профиля и новостей'], ARRAY['edit_company_profile','publish_news'])`,
+		`INSERT INTO company_roles (company_id, role_code, position_name, responsibilities, permissions)
+		 VALUES ($1, 'member', 'Member', ARRAY['Базовый доступ'], ARRAY[]::TEXT[])`,
+	}
+	for _, stmt := range defaultRoleStatements {
+		if _, err := tx.Exec(stmt, companyID); err != nil {
+			jsonError(c, http.StatusInternalServerError, "Failed to create default roles")
+			return
+		}
+	}
+	_, _ = tx.Exec(`
 		UPDATE corporate_profiles
 		SET company_id = $1,
 			created_by = $2,
@@ -120,7 +144,34 @@ func CreateCompany(c *gin.Context) {
 			updated_at = NOW()
 		WHERE user_id = $2
 	`, companyID, userID)
-	_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
+	_, _ = tx.Exec(`
+		INSERT INTO corporate_profiles (id, user_id, company_id, created_by, position_name, permissions, status, employment_status)
+		VALUES ($1, $2, $3, $2, 'Owner', ARRAY['*']::TEXT[], 'active', 'owner')
+		ON CONFLICT (user_id) DO UPDATE
+		SET company_id = EXCLUDED.company_id,
+			created_by = EXCLUDED.created_by,
+			position_name = EXCLUDED.position_name,
+			permissions = EXCLUDED.permissions,
+			status = 'active',
+			employment_status = 'owner',
+			updated_at = NOW()
+	`, uuid.New(), userID, companyID)
+	_, _ = tx.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
+	_, _ = tx.Exec(`
+		INSERT INTO company_user_roles (company_id, user_id, role_id, assigned_by)
+		SELECT $1, $2, id, $2 FROM company_roles WHERE company_id = $1 AND role_code = 'owner'
+		ON CONFLICT (company_id, user_id) DO UPDATE SET role_id = EXCLUDED.role_id, assigned_by = EXCLUDED.assigned_by, assigned_at = NOW()
+	`, companyID, userID)
+	_, _ = tx.Exec(`
+		INSERT INTO company_employees (company_id, user_id, position_name, role_id, assigned_by)
+		SELECT $1, $2, 'Owner', id, $2 FROM company_roles WHERE company_id = $1 AND role_code = 'owner'
+		ON CONFLICT (company_id, user_id) DO UPDATE SET role_id = EXCLUDED.role_id, is_active = true, position_name = EXCLUDED.position_name
+	`, companyID, userID)
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to save company")
+		return
+	}
+	recalcCompanyEmployeesCount(companyID.String())
 	c.JSON(http.StatusCreated, gin.H{"message": "Company created successfully", "company_id": companyID})
 }
 
@@ -132,12 +183,23 @@ func UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	_, err := database.DB.Exec(`
+	var companyID string
+	if err := database.DB.QueryRow(`SELECT id::text FROM companies WHERE owner_id = $1`, userID).Scan(&companyID); err != nil {
+		jsonError(c, http.StatusNotFound, "Company not found")
+		return
+	}
+	hasPermission, err := requireCompanyPermission(companyID, userID, "edit_company_profile")
+	if err != nil || !hasPermission {
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to edit company")
+		return
+	}
+
+	_, err = database.DB.Exec(`
         UPDATE companies
         SET name = $1, inn = $2, description = $3, logo_url = $4, economic_sector = $5,
             is_public = $6, search_tags = $7, website = $8, phone = $9, address = $10, updated_at = NOW()
-        WHERE owner_id = $11
-    `, req.Name, req.INN, req.Description, req.LogoURL, req.EconomicSector, req.IsPublic, pq.Array(req.SearchTags), req.Website, req.Phone, req.Address, userID)
+        WHERE id = $11
+    `, req.Name, req.INN, req.Description, req.LogoURL, req.EconomicSector, req.IsPublic, pq.Array(req.SearchTags), req.Website, req.Phone, req.Address, companyID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to update company")
 		return
@@ -240,9 +302,9 @@ func RequestJoinCompany(c *gin.Context) {
 func GetCompanyJoinRequests(c *gin.Context) {
 	companyID := c.Param("id")
 	userID := currentUserID(c)
-	allowed, err := requireCompanyOwner(companyID, userID)
+	allowed, err := requireCompanyPermission(companyID, userID, "manage_employees")
 	if err != nil || !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can review requests")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to review requests")
 		return
 	}
 	rows, err := database.DB.Query(`
@@ -285,12 +347,17 @@ func ApproveCompanyJoinRequest(c *gin.Context) {
 		jsonError(c, http.StatusNotFound, "Request not found")
 		return
 	}
-	allowed, err := requireCompanyOwner(companyID.String(), ownerID)
+	allowed, err := requireCompanyPermission(companyID.String(), ownerID, "manage_employees")
 	if err != nil || !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can approve requests")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to approve requests")
 		return
 	}
 	_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, requestUserID)
+	_, _ = database.DB.Exec(`
+		INSERT INTO company_user_roles (company_id, user_id, role_id, assigned_by)
+		SELECT $1, $2, id, $3 FROM company_roles WHERE company_id = $1 AND role_code = 'member'
+		ON CONFLICT (company_id, user_id) DO NOTHING
+	`, companyID, requestUserID, ownerID)
 	_, _ = database.DB.Exec(`UPDATE company_join_requests SET status = 'approved' WHERE id = $1`, requestID)
 	c.JSON(http.StatusOK, gin.H{"message": "Request approved"})
 }
@@ -303,11 +370,87 @@ func RejectCompanyJoinRequest(c *gin.Context) {
 		jsonError(c, http.StatusNotFound, "Request not found")
 		return
 	}
-	allowed, err := requireCompanyOwner(companyID.String(), ownerID)
+	allowed, err := requireCompanyPermission(companyID.String(), ownerID, "manage_employees")
 	if err != nil || !allowed {
-		jsonError(c, http.StatusForbidden, "Only company owner can reject requests")
+		jsonError(c, http.StatusForbidden, "Insufficient permissions to reject requests")
 		return
 	}
 	_, _ = database.DB.Exec(`UPDATE company_join_requests SET status = 'rejected' WHERE id = $1`, requestID)
 	c.JSON(http.StatusOK, gin.H{"message": "Request rejected"})
+}
+
+func GetPublicCompany(c *gin.Context) {
+	companyID := c.Param("id")
+	var company models.Company
+	err := scanCompanyBase(database.DB.QueryRow(`
+		SELECT c.id, c.owner_id, u.full_name, c.name, c.inn, c.description, c.logo_url,
+		       c.economic_sector, c.is_public, c.search_tags, c.website, c.phone, c.address,
+		       c.followers_count, c.employee_count, false AS is_following, c.created_at
+		FROM companies c
+		JOIN users u ON u.id = c.owner_id
+		WHERE c.id = $1
+	`, companyID), &company)
+	if err == sql.ErrNoRows {
+		jsonError(c, http.StatusNotFound, "Company not found")
+		return
+	}
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if !company.IsPublic {
+		jsonError(c, http.StatusForbidden, "Company profile is private")
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"company": company})
+}
+
+func GetPublicCompanyNews(c *gin.Context) {
+	companyID := c.Param("id")
+	rows, err := database.DB.Query(`
+		SELECT p.id, p.author_id, p.author_type, p.author_name, p.author_avatar, p.title, p.content,
+		       p.short_description, p.image_url, p.tags, p.privacy_level, p.target_id,
+		       p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at, false AS is_liked
+		FROM posts p
+		WHERE p.author_type = 'company'
+		  AND p.target_id = $1
+		  AND p.privacy_level = 'public'
+		  AND p.is_hidden = false
+		  AND p.is_unpublished = false
+		ORDER BY p.created_at DESC
+		LIMIT 30
+	`, companyID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	posts := make([]models.Post, 0)
+	for rows.Next() {
+		var post models.Post
+		var title, shortDesc, imageURL, targetID sql.NullString
+		var tags pq.StringArray
+		if err := rows.Scan(&post.ID, &post.AuthorID, &post.AuthorType, &post.AuthorName, &post.AuthorAvatar, &title, &post.Content, &shortDesc, &imageURL, &tags, &post.PrivacyLevel, &targetID, &post.IsHidden, &post.IsUnpublished, &post.LikesCount, &post.CommentsCount, &post.SharesCount, &post.CreatedAt, &post.UpdatedAt, &post.IsLiked); err != nil {
+			jsonError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if title.Valid {
+			post.Title = &title.String
+		}
+		if shortDesc.Valid {
+			post.ShortDescription = &shortDesc.String
+		}
+		if imageURL.Valid {
+			post.ImageURL = &imageURL.String
+		}
+		if targetID.Valid {
+			if parsed, parseErr := uuid.Parse(targetID.String); parseErr == nil {
+				post.TargetID = &parsed
+			}
+		}
+		post.Tags = tags
+		posts = append(posts, post)
+	}
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
 }

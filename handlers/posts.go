@@ -64,6 +64,14 @@ func CreatePost(c *gin.Context) {
 			jsonError(c, http.StatusBadRequest, "Company not found")
 			return
 		}
+		allowed, err := requireCompanyPermission(parsed.String(), userID, "publish_news")
+		if err != nil || !allowed {
+			jsonError(c, http.StatusForbidden, "Insufficient permissions to publish company news")
+			return
+		}
+		if req.PrivacyLevel == "" {
+			req.PrivacyLevel = "public"
+		}
 	default:
 		jsonError(c, http.StatusBadRequest, "Invalid author_type")
 		return

@@ -92,6 +92,30 @@ func requireCompanyOwner(companyID string, userID uuid.UUID) (bool, error) {
 	return ownerID == userID, nil
 }
 
+func isCompanyOwner(companyID string, userID uuid.UUID) bool {
+	ok, err := requireCompanyOwner(companyID, userID)
+	return err == nil && ok
+}
+
+func requireCompanyPermission(companyID string, userID uuid.UUID, permission string) (bool, error) {
+	if isCompanyOwner(companyID, userID) {
+		return true, nil
+	}
+
+	var exists bool
+	err := database.DB.QueryRow(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM company_user_roles cur
+			JOIN company_roles cr ON cr.id = cur.role_id
+			WHERE cur.company_id = $1
+			  AND cur.user_id = $2
+			  AND (cr.permissions @> ARRAY[$3]::TEXT[] OR cr.permissions @> ARRAY['*']::TEXT[])
+		)
+	`, companyID, userID, permission).Scan(&exists)
+	return exists, err
+}
+
 func recalcCommunityMembersCount(communityID string) {
 	_, _ = database.DB.Exec(`
         UPDATE communities

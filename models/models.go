@@ -211,21 +211,24 @@ type CommunityRole struct {
 
 type CompanyRole struct {
 	ID               uuid.UUID `json:"id"`
+	CompanyID        uuid.UUID `json:"company_id,omitempty"`
 	PositionName     string    `json:"position_name"`
 	Responsibilities []string  `json:"responsibilities,omitempty"`
 	Permissions      []string  `json:"permissions,omitempty"`
 }
 
 type CompanyEmployee struct {
-	UserID       uuid.UUID `json:"user_id"`
-	UserName     string    `json:"user_name"`
-	UserEmail    string    `json:"user_email"`
-	UserAvatar   *string   `json:"user_avatar,omitempty"`
-	PositionName string    `json:"position_name"`
-	Department   *string   `json:"department,omitempty"`
-	HireDate     *string   `json:"hire_date,omitempty"`
-	IsActive     bool      `json:"is_active"`
-	AssignedAt   time.Time `json:"assigned_at"`
+	UserID       uuid.UUID  `json:"user_id"`
+	UserName     string     `json:"user_name"`
+	UserEmail    string     `json:"user_email"`
+	UserAvatar   *string    `json:"user_avatar,omitempty"`
+	PositionName string     `json:"position_name"`
+	RoleID       *uuid.UUID `json:"role_id,omitempty"`
+	RoleCode     *string    `json:"role_code,omitempty"`
+	Department   *string    `json:"department,omitempty"`
+	HireDate     *string    `json:"hire_date,omitempty"`
+	IsActive     bool       `json:"is_active"`
+	AssignedAt   time.Time  `json:"assigned_at"`
 }
 
 type CorporateProfile struct {
@@ -301,10 +304,11 @@ type InviteToCommunityRequest struct {
 }
 
 type InviteToCompanyRequest struct {
-	UserID       uuid.UUID `json:"user_id" binding:"required"`
-	PositionName string    `json:"position_name" binding:"required"`
-	Department   *string   `json:"department"`
-	Permissions  []string  `json:"permissions"`
+	UserID       uuid.UUID  `json:"user_id" binding:"required"`
+	PositionName string     `json:"position_name" binding:"required"`
+	RoleID       *uuid.UUID `json:"role_id"`
+	Department   *string    `json:"department"`
+	Permissions  []string   `json:"permissions"`
 }
 
 type CreateCorporateProfileRequest struct {
