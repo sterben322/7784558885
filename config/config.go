@@ -21,9 +21,6 @@ func Load() (*AppConfig, error) {
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" {
-		databaseURL = os.Getenv("POSTGRES_URL")
-	}
 
 	return &AppConfig{
 		Host:               "0.0.0.0",

@@ -19,23 +19,15 @@ func InitDB(databaseURL string) error {
 		return nil
 	}
 
-	host := getenv("DB_HOST", getenv("PGHOST", ""))
-	port := getenv("DB_PORT", getenv("PGPORT", "5432"))
-	user := getenv("DB_USER", getenv("PGUSER", "postgres"))
-	password := getenv("DB_PASSWORD", getenv("PGPASSWORD", "postgres"))
-	dbname := getenv("DB_NAME", getenv("PGDATABASE", "lastop_db"))
+	if databaseURL == "" {
+		databaseURL = os.Getenv("DATABASE_URL")
+	}
 
-	if databaseURL == "" && host == "" {
+	if databaseURL == "" {
 		return fmt.Errorf("DATABASE_URL is not set")
 	}
 
-	connStrings := make([]string, 0, 1)
-	if databaseURL != "" {
-		connStrings = append(connStrings, databaseURL)
-	} else {
-		connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-		connStrings = append(connStrings, connStr)
-	}
+	connStrings := []string{databaseURL}
 
 	var lastErr error
 	for _, connStr := range connStrings {
@@ -67,9 +59,7 @@ func InitDB(databaseURL string) error {
 }
 
 func IsConfigured() bool {
-	return os.Getenv("DATABASE_URL") != "" ||
-		os.Getenv("DB_HOST") != "" ||
-		os.Getenv("PGHOST") != ""
+	return os.Getenv("DATABASE_URL") != ""
 }
 
 func Ping(ctx context.Context) error {
@@ -83,13 +73,6 @@ func CloseDB() {
 	if DB != nil {
 		_ = DB.Close()
 	}
-}
-
-func getenv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }
 
 func CreateTables() error {

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"os"
 
 	"lastop/database"
 
@@ -34,7 +33,7 @@ func ensureDatabase(c *gin.Context) bool {
 	}
 
 	if database.IsConfigured() {
-		if err := database.InitDB(firstNonEmpty(os.Getenv("DATABASE_URL"), os.Getenv("POSTGRES_URL"))); err != nil {
+		if err := database.InitDB(""); err != nil {
 			jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
 			return false
 		}
@@ -49,15 +48,6 @@ func ensureDatabase(c *gin.Context) bool {
 
 	jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
 	return false
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if value != "" {
-			return value
-		}
-	}
-	return ""
 }
 
 func requireChatParticipant(chatID string, userID uuid.UUID) error {
