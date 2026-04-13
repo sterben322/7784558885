@@ -195,10 +195,30 @@
       </a>
     `;
 
-    document.querySelectorAll('#topAvatar').forEach((avatar) => {
-      const headerProfile = avatar.closest('a[href="/profile.html"]');
-      if (headerProfile) headerProfile.remove();
+    document.querySelectorAll('.dashboard-main-header a[href="/profile.html"]').forEach((headerProfile) => {
+      headerProfile.remove();
     });
+  }
+
+  function ensureFloatingProfileButton() {
+    const path = window.location.pathname;
+    const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
+    if (isAuthPage) return;
+    if (document.getElementById('floatingProfileButton')) return;
+
+    const user = JSON.parse(localStorage.getItem(DEMO_USER_KEY) || '{}');
+    const name = user.full_name || 'Гость';
+    const letter = (name[0] || 'U').toUpperCase();
+
+    const button = document.createElement('a');
+    button.id = 'floatingProfileButton';
+    button.href = '/profile.html';
+    button.className = 'floating-profile-btn';
+    button.innerHTML = `
+      <span class="floating-profile-btn__avatar">${letter}</span>
+      <span class="floating-profile-btn__label">${name}</span>
+    `;
+    document.body.appendChild(button);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -210,5 +230,6 @@
     simplifyLeftSidebar();
     ensureDashboardSidebarAccess();
     moveHeaderUserToRightSidebar();
+    ensureFloatingProfileButton();
   });
 })();
