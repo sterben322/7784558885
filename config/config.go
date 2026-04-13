@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -20,9 +19,6 @@ func Load() (*AppConfig, error) {
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" && os.Getenv("TEST_MODE") != "1" {
-		return nil, fmt.Errorf("DATABASE_URL is required")
-	}
 
 	return &AppConfig{
 		Host:        "0.0.0.0",
