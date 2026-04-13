@@ -491,6 +491,10 @@ body.dark-theme [class*="border-"] {
         margin-right: 8px;
     }
 
+    .global-sidebar .brand-link {
+        width: auto;
+    }
+
     .global-sidebar__nav {
         display: inline-flex;
         align-items: center;
@@ -516,6 +520,23 @@ body.dark-theme [class*="border-"] {
     max-height: 44px;
     width: auto;
     object-fit: contain;
+}
+
+.global-sidebar .brand-link {
+    display: flex;
+    width: 100%;
+    min-height: 0;
+}
+
+.global-sidebar .global-sidebar__brand {
+    padding: 6px 10px 12px;
+}
+
+.global-sidebar .global-sidebar__brand .brand-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
 }
 
 .with-global-sidebar-right {
