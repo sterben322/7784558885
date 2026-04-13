@@ -122,3 +122,36 @@ VALUES (
     'https://i.pravatar.cc/300?img=12'
 )
 ON CONFLICT (email) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS forum_sections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(180) NOT NULL UNIQUE,
+    description TEXT NOT NULL DEFAULT '',
+    creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    topics_count INT NOT NULL DEFAULT 0,
+    posts_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS forum_topics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID NOT NULL REFERENCES forum_sections(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    posts_count INT NOT NULL DEFAULT 0,
+    views_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_forum_topics_section_updated ON forum_topics(section_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS forum_posts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_forum_posts_topic_created ON forum_posts(topic_id, created_at ASC);

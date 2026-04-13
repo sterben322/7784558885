@@ -155,26 +155,54 @@ type Comment struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-type ForumTopic struct {
-	ID           uuid.UUID `json:"id"`
-	Title        string    `json:"title"`
-	Content      string    `json:"content"`
-	Category     string    `json:"category"`
-	AuthorID     uuid.UUID `json:"author_id"`
-	AuthorName   string    `json:"author_name"`
-	RepliesCount int       `json:"replies_count"`
-	ViewsCount   int       `json:"views_count"`
-	CreatedAt    time.Time `json:"created_at"`
-	LastActivity time.Time `json:"last_activity"`
+type ForumSection struct {
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	CreatorID   uuid.UUID `json:"creator_id"`
+	CreatorName string    `json:"creator_name"`
+	TopicsCount int       `json:"topics_count"`
+	PostsCount  int       `json:"posts_count"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type ForumReply struct {
+type ForumTopicListItem struct {
+	ID             uuid.UUID  `json:"id"`
+	SectionID      uuid.UUID  `json:"section_id"`
+	Title          string     `json:"title"`
+	AuthorID       uuid.UUID  `json:"author_id"`
+	AuthorName     string     `json:"author_name"`
+	PostsCount     int        `json:"posts_count"`
+	ViewsCount     int        `json:"views_count"`
+	LastPostAuthor string     `json:"last_post_author"`
+	LastPostAt     *time.Time `json:"last_post_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+}
+
+type ForumTopic struct {
+	ID           uuid.UUID `json:"id"`
+	SectionID    uuid.UUID `json:"section_id"`
+	SectionTitle string    `json:"section_title"`
+	Title        string    `json:"title"`
+	AuthorID     uuid.UUID `json:"author_id"`
+	AuthorName   string    `json:"author_name"`
+	PostsCount   int       `json:"posts_count"`
+	ViewsCount   int       `json:"views_count"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type ForumPost struct {
 	ID         uuid.UUID `json:"id"`
 	TopicID    uuid.UUID `json:"topic_id"`
 	AuthorID   uuid.UUID `json:"author_id"`
 	AuthorName string    `json:"author_name"`
 	Content    string    `json:"content"`
+	CanEdit    bool      `json:"can_edit"`
 	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type Chat struct {

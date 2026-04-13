@@ -366,14 +366,34 @@ func CreateTables() error {
             likes_count INT NOT NULL DEFAULT 0,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`CREATE TABLE IF NOT EXISTS forum_sections (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            title VARCHAR(180) NOT NULL UNIQUE,
+            description TEXT NOT NULL DEFAULT '',
+            creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            topics_count INT NOT NULL DEFAULT 0,
+            posts_count INT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
 		`CREATE TABLE IF NOT EXISTS forum_topics (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            section_id UUID REFERENCES forum_sections(id) ON DELETE CASCADE,
             title VARCHAR(200) NOT NULL,
-            content TEXT NOT NULL,
+            content TEXT,
             category VARCHAR(50) NOT NULL DEFAULT '',
             author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             replies_count INT NOT NULL DEFAULT 0,
+            posts_count INT NOT NULL DEFAULT 0,
             views_count INT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
+		`CREATE TABLE IF NOT EXISTS forum_posts (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+            author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content TEXT NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
@@ -384,6 +404,8 @@ func CreateTables() error {
             content TEXT NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_topics_section_updated ON forum_topics(section_id, updated_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_posts_topic_created ON forum_posts(topic_id, created_at ASC)`,
 		`CREATE TABLE IF NOT EXISTS chats (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(100),
@@ -427,6 +449,67 @@ func CreateTables() error {
 		  AND ce.position_name = cr.position_name
 		  AND ce.role_id IS NULL
 	`)
+
+	_, _ = DB.Exec(`
+		INSERT INTO forum_sections (title, description, creator_id)
+		SELECT 'Общий раздел', 'Раздел по умолчанию', id
+		FROM users
+		ORDER BY created_at ASC
+		LIMIT 1
+		ON CONFLICT (title) DO NOTHING
+	`)
+
+	_, _ = DB.Exec(`
+		UPDATE forum_topics
+		SET section_id = (SELECT id FROM forum_sections ORDER BY created_at ASC LIMIT 1)
+		WHERE section_id IS NULL
+	`)
+
+	_, _ = DB.Exec(`
+		INSERT INTO forum_posts (id, topic_id, author_id, content, created_at, updated_at)
+		SELECT gen_random_uuid(), t.id, t.author_id, t.content, t.created_at, COALESCE(t.updated_at, t.created_at)
+		FROM forum_topics t
+		WHERE t.content IS NOT NULL
+		  AND NOT EXISTS (SELECT 1 FROM forum_posts p WHERE p.topic_id = t.id)
+	`)
+
+	_, _ = DB.Exec(`
+		INSERT INTO forum_posts (id, topic_id, author_id, content, created_at, updated_at)
+		SELECT fr.id, fr.topic_id, fr.author_id, fr.content, fr.created_at, fr.created_at
+		FROM forum_replies fr
+		WHERE NOT EXISTS (SELECT 1 FROM forum_posts fp WHERE fp.id = fr.id)
+	`)
+
+	_, _ = DB.Exec(`
+		UPDATE forum_topics t
+		SET posts_count = sub.cnt,
+		    updated_at = COALESCE(sub.last_at, t.updated_at)
+		FROM (
+			SELECT topic_id, COUNT(*)::int AS cnt, MAX(created_at) AS last_at
+			FROM forum_posts
+			GROUP BY topic_id
+		) sub
+		WHERE t.id = sub.topic_id
+	`)
+
+	_, _ = DB.Exec(`
+		UPDATE forum_sections s
+		SET topics_count = sub.topics_count,
+		    posts_count = sub.posts_count,
+		    updated_at = COALESCE(sub.last_at, s.updated_at)
+		FROM (
+			SELECT t.section_id,
+			       COUNT(DISTINCT t.id)::int AS topics_count,
+			       COUNT(p.id)::int AS posts_count,
+			       MAX(COALESCE(p.created_at, t.updated_at)) AS last_at
+			FROM forum_topics t
+			LEFT JOIN forum_posts p ON p.topic_id = t.id
+			GROUP BY t.section_id
+		) sub
+		WHERE s.id = sub.section_id
+	`)
+
+	_, _ = DB.Exec(`ALTER TABLE forum_topics ALTER COLUMN section_id SET NOT NULL`)
 
 	companyRows, err := DB.Query(`SELECT id, owner_id FROM companies`)
 	if err != nil {
