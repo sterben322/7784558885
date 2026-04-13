@@ -16,7 +16,7 @@
             <div>
                 <a href="/dashboard.html" class="text-sm text-[#7f8b98] hover:text-[#2c394b]"><i class="fa-solid fa-arrow-left mr-2"></i>Назад в ленту</a>
                 <h1 class="mt-2 text-[30px] font-semibold tracking-[-0.02em] text-[#2c394b]">Компании LASTOP</h1>
-                <p class="text-[#7e8a97]">Каталог компаний с быстрым поиском и фильтрацией.</p>
+                <p class="text-[#7e8a97]">Каталог компаний с удобной фильтрацией и сортировкой.</p>
             </div>
             <div class="flex gap-3">
                 <a href="/create-company.html" class="rounded-2xl border border-[#dbe4e9] bg-white px-4 py-2.5 text-sm font-medium text-[#3f5163] hover:bg-[#f4f8fa]">
@@ -29,11 +29,7 @@
         </header>
 
         <section class="border-b border-[#e8ecef] px-6 py-5 bg-[#fbfcfc]">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px_220px]">
-                <label class="flex items-center gap-3 rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3">
-                    <i class="fa-solid fa-magnifying-glass text-[#95a1ad]"></i>
-                    <input id="companySearch" class="w-full bg-transparent outline-none text-[15px]" placeholder="Поиск по названию, отрасли или тегам" />
-                </label>
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <select id="companySectorFilter" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
                     <option value="all">Все отрасли</option>
                     <option value="Логистика">Логистика</option>
@@ -143,15 +139,12 @@ function companyCard(company) {
 }
 
 function filteredCompanies() {
-    const q = document.getElementById('companySearch').value.trim().toLowerCase();
     const sector = document.getElementById('companySectorFilter').value;
     const sort = document.getElementById('companySort').value;
 
     const filtered = companies.filter((company) => {
-        const haystack = `${company.name} ${company.economic_sector || ''} ${getCompanyTags(company).join(' ')} ${company.description || ''}`.toLowerCase();
-        const byQuery = !q || haystack.includes(q);
         const bySector = sector === 'all' || (company.economic_sector || '').toLowerCase() === sector.toLowerCase();
-        return byQuery && bySector;
+        return bySector;
     });
 
     filtered.sort((a, b) => {
@@ -198,7 +191,7 @@ async function tryLoadFromAPI() {
 }
 
 function wireActions() {
-    ['companySearch', 'companySectorFilter', 'companySort'].forEach((id) => {
+    ['companySectorFilter', 'companySort'].forEach((id) => {
         document.getElementById(id).addEventListener('input', renderCompanies);
         document.getElementById(id).addEventListener('change', renderCompanies);
     });
