@@ -29,8 +29,9 @@
         }
         async function loadFriends() {
             const response = await fetch(`${API_URL}/friends`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
-            const data = await response.json();
-            document.getElementById('inviteUser').innerHTML = '<option value="">Выберите из друзей</option>' + data.friends.map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`).join('');
+            const payload = await response.json();
+            const friends = payload?.data?.friends || payload?.friends || [];
+            document.getElementById('inviteUser').innerHTML = '<option value="">Выберите из друзей</option>' + friends.map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`).join('');
         }
         async function sendInvite() {
             const userId = document.getElementById('inviteUser').value, position = document.getElementById('invitePosition').value, department = document.getElementById('inviteDepartment').value;
