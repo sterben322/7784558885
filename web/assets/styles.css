@@ -27,22 +27,23 @@
 
 /* Скроллбар */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
+    background: #ecfdf3;
+    border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 10px;
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+    border: 2px solid #ecfdf3;
+    border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
 }
 
 /* Зеленая тема интерфейса */
@@ -116,6 +117,14 @@ body.widescreen-mode {
     display: flex;
     flex-direction: column;
     min-height: 100%;
+}
+
+.app-header .search-strip {
+    overflow: hidden;
+}
+
+.app-header .search-strip input {
+    min-width: 0;
 }
 
 .dashboard-main-header,

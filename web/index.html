@@ -63,20 +63,15 @@
         </aside>
 
         <main class="dashboard-main app-main relative flex h-full flex-col bg-white">
-            <header class="dashboard-main-header app-header sticky top-0 z-20 flex h-[82px] items-center justify-between border-b border-[#e8ecef] bg-white px-7">
-                <div class="flex w-full max-w-[770px] items-center gap-3 rounded-2xl border border-[#edf0f2] bg-white px-4 py-3">
+            <header class="dashboard-main-header app-header sticky top-0 z-20 flex h-[82px] items-center justify-between gap-4 border-b border-[#e8ecef] bg-white px-7">
+                <div class="search-strip flex min-w-0 w-full max-w-[770px] items-center gap-3 rounded-2xl border border-[#edf0f2] bg-white px-4 py-3">
                     <i class="fa-solid fa-magnifying-glass h-5 w-5 text-[#95a1ad]"></i>
                     <input class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск по разделам" />
                 </div>
 
-                <div class="ml-5 flex items-center gap-4">
+                <div class="ml-2 flex shrink-0 items-center gap-4">
                     <a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-bell h-5 w-5"></i></a>
                     <a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-envelope"></i></a>
-                    <a href="/profile.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
-                        <div class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white" id="topAvatar">U</div>
-                        <div class="text-[15px] font-semibold text-[#445164]" id="topUserName">Гость</div>
-                        <i class="fa-solid fa-chevron-down h-4 w-4 text-[#9aa7b3]"></i>
-                    </a>
                 </div>
             </header>
 
@@ -102,7 +97,13 @@
         </main>
 
         <aside class="dashboard-sidebar app-aside h-full overflow-y-auto border-l border-[#e7ebed] bg-white px-6 py-6">
-            <div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
+            <a href="/profile.html" class="flex items-center gap-3 rounded-2xl border border-[#e8ecee] bg-white px-3 py-3 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
+                <div class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white" id="topAvatar">U</div>
+                <div class="min-w-0 flex-1 text-[15px] font-semibold text-[#445164] truncate" id="topUserName">Гость</div>
+                <i class="fa-solid fa-chevron-right h-4 w-4 text-[#9aa7b3]"></i>
+            </a>
+
+            <div class="mt-6 rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
                 <h3 class="text-[18px] font-semibold text-[#334153]">Быстрые переходы</h3>
                 <div class="mt-4 space-y-3 text-[15px] text-[#5f6b79]">
                     <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/dashboard.html">Все новости</a>
