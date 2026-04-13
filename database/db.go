@@ -19,11 +19,11 @@ func InitDB(databaseURL string) error {
 		return nil
 	}
 
-	host := getenv("DB_HOST", "")
-	port := getenv("DB_PORT", "5432")
-	user := getenv("DB_USER", "postgres")
-	password := getenv("DB_PASSWORD", "postgres")
-	dbname := getenv("DB_NAME", "lastop_db")
+	host := getenv("DB_HOST", getenv("PGHOST", ""))
+	port := getenv("DB_PORT", getenv("PGPORT", "5432"))
+	user := getenv("DB_USER", getenv("PGUSER", "postgres"))
+	password := getenv("DB_PASSWORD", getenv("PGPASSWORD", "postgres"))
+	dbname := getenv("DB_NAME", getenv("PGDATABASE", "lastop_db"))
 
 	if databaseURL == "" && host == "" {
 		return fmt.Errorf("DATABASE_URL is not set")
@@ -67,7 +67,9 @@ func InitDB(databaseURL string) error {
 }
 
 func IsConfigured() bool {
-	return os.Getenv("DATABASE_URL") != ""
+	return os.Getenv("DATABASE_URL") != "" ||
+		os.Getenv("DB_HOST") != "" ||
+		os.Getenv("PGHOST") != ""
 }
 
 func Ping(ctx context.Context) error {
@@ -90,10 +92,10 @@ func getenv(key, fallback string) string {
 	return fallback
 }
 
-func CreateTables() {
+func CreateTables() error {
 	if DB == nil {
 		log.Println("database not initialized: skipping table creation")
-		return
+		return fmt.Errorf("database is not initialized")
 	}
 
 	queries := []string{
@@ -374,9 +376,11 @@ func CreateTables() {
 
 	for _, query := range queries {
 		if _, err := DB.Exec(query); err != nil {
-			log.Fatalf("error creating tables: %v\nquery: %s", err, query)
+			return fmt.Errorf("error creating tables: %w", err)
 		}
 	}
+
+	return nil
 }
 
 func EnsureDefaultCommunityRoles(communityID string) error {
