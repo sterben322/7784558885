@@ -157,7 +157,8 @@
     right.id = 'globalRightSidebar';
     right.className = 'global-right-sidebar';
     right.innerHTML = `
-      <div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
+      <div id="globalUserCard" class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]"></div>
+      <div class="mt-5 rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
         <h3 class="text-[18px] font-semibold text-[#334153]">Быстрые переходы</h3>
         <div class="mt-4 space-y-3 text-[15px] text-[#5f6b79]">
           <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/dashboard.html">Новости</a>
@@ -166,18 +167,38 @@
         </div>
       </div>`;
 
-    const search = document.createElement('div');
-    search.id = 'globalSearchBar';
-    search.className = 'global-search';
-    search.innerHTML = '<i class="fa-solid fa-magnifying-glass h-5 w-5 text-[#95a1ad]"></i><input class="w-full bg-transparent text-[15px] text-[#324154] outline-none placeholder:text-[#a1acb5]" placeholder="Поиск по разделам" />';
-
-    document.body.classList.add('with-global-sidebar', 'with-global-sidebar-right', 'with-global-search');
+    document.body.classList.add('with-global-sidebar', 'with-global-sidebar-right');
     if (document.querySelector('.dashboard-shell')) {
       document.body.classList.add('use-global-sidebars');
     }
     document.body.appendChild(wrapper);
     document.body.appendChild(right);
-    document.body.appendChild(search);
+  }
+
+
+  function moveHeaderUserToRightSidebar() {
+    const rightUserCard = document.getElementById('globalUserCard');
+    if (!rightUserCard) return;
+
+    const user = JSON.parse(localStorage.getItem(DEMO_USER_KEY) || '{}');
+    const name = user.full_name || 'Гость';
+    const letter = (name[0] || 'U').toUpperCase();
+
+    rightUserCard.innerHTML = `
+      <a href="/profile.html" class="flex items-center gap-3 rounded-2xl border border-[#edf0f2] px-3 py-3 hover:bg-[#f8fafb]">
+        <div class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white">${letter}</div>
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-[15px] font-semibold text-[#445164]">${name}</div>
+          <div class="text-xs text-[#95a1ad]">Профиль пользователя</div>
+        </div>
+        <i class="fa-solid fa-chevron-right h-4 w-4 text-[#9aa7b3]"></i>
+      </a>
+    `;
+
+    document.querySelectorAll('#topAvatar').forEach((avatar) => {
+      const headerProfile = avatar.closest('a[href="/profile.html"]');
+      if (headerProfile) headerProfile.remove();
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -188,5 +209,6 @@
     applyBranding();
     simplifyLeftSidebar();
     ensureDashboardSidebarAccess();
+    moveHeaderUserToRightSidebar();
   });
 })();
