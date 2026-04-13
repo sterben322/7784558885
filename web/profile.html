@@ -56,38 +56,37 @@
 
 <script>
 const DEMO_USERS = {
-  me: {
-    full_name: 'Анна Карпова',
-    company: 'LASTOP GROUP',
-    role: 'Менеджер по развитию бизнеса',
-    about: 'Развиваю B2B-партнёрства в строительной и логистической сфере. Более 8 лет в управлении проектами и запуске совместных программ.'
-  },
-  ivan: {
-    full_name: 'Иван Петров',
-    company: 'Логистик Про',
-    role: 'CEO',
-    about: 'Управляю цепочками поставок и развиваю экспортные маршруты для промышленного сектора.'
-  },
-  maria: {
-    full_name: 'Мария Козлова',
-    company: 'ТекстильПро',
-    role: 'Руководитель экспортного отдела',
-    about: 'Специализируюсь на международных продажах, контрактном производстве и выставочной деятельности.'
-  },
-  artem: {
-    full_name: 'Артём Смирнов',
-    company: 'BuildNova',
-    role: 'Операционный директор',
-    about: 'Координирую развитие строительных проектов и цифровизацию закупок в региональных филиалах.'
-  }
+    ivan: {
+        full_name: 'Иван Петров',
+        company: 'Логистик Про',
+        role: 'CEO',
+        about: 'Управляю цепочками поставок и развиваю экспортные маршруты для промышленного сектора.'
+    },
+    maria: {
+        full_name: 'Мария Козлова',
+        company: 'ТекстильПро',
+        role: 'Руководитель экспортного отдела',
+        about: 'Специализируюсь на международных продажах, контрактном производстве и выставочной деятельности.'
+    },
+    artem: {
+        full_name: 'Артём Смирнов',
+        company: 'BuildNova',
+        role: 'Операционный директор',
+        about: 'Координирую развитие строительных проектов и цифровизацию закупок в региональных филиалах.'
+    }
 };
 
 function renderProfile(user) {
-  const fullName = user.full_name;
-  document.getElementById('mainAvatar').textContent = (fullName[0] || 'U').toUpperCase();
-  document.getElementById('profileName').textContent = fullName;
-  document.getElementById('profileRole').textContent = `${user.role} · ${user.company}`;
-  document.getElementById('aboutText').textContent = user.about;
+    const fullName = user.full_name || 'Пользователь';
+    const avatar = document.getElementById('mainAvatar');
+    if (user.avatar_url) {
+        avatar.innerHTML = `<img src="${user.avatar_url}" alt="Аватар пользователя" class="h-full w-full rounded-full object-cover">`;
+    } else {
+        avatar.textContent = (fullName[0] || 'U').toUpperCase();
+    }
+    document.getElementById('profileName').textContent = fullName;
+    document.getElementById('profileRole').textContent = `${user.role || 'Участник сообщества'} · ${user.company || 'LASTOP'}`;
+    document.getElementById('aboutText').textContent = user.about || `Публичный профиль ${fullName}.`;
 }
 
 function renderFriends() {
@@ -104,18 +103,45 @@ function renderFriends() {
   }).join('');
 }
 
-const params = new URLSearchParams(window.location.search);
-const demoId = params.get('demo') || 'me';
-const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-const baseUser = DEMO_USERS[demoId] || {
-  full_name: storedUser.full_name || DEMO_USERS.me.full_name,
-  company: storedUser.company_name || DEMO_USERS.me.company,
-  role: storedUser.position || DEMO_USERS.me.role,
-  about: DEMO_USERS.me.about
-};
+async function loadCurrentUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
 
-renderProfile(baseUser);
-renderFriends();
+    try {
+        const response = await fetch('/api/me', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.user || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+async function initProfile() {
+    const params = new URLSearchParams(window.location.search);
+    const demoId = params.get('demo');
+
+    if (demoId && DEMO_USERS[demoId]) {
+        renderProfile(DEMO_USERS[demoId]);
+        renderFriends();
+        return;
+    }
+
+    const apiUser = await loadCurrentUser();
+    const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const source = apiUser || localUser;
+    renderProfile({
+        full_name: source.full_name || [source.first_name, source.last_name].filter(Boolean).join(' '),
+        company: source.company_name,
+        role: source.position,
+        avatar_url: source.avatar_url
+    });
+    renderFriends();
+}
+
+initProfile();
 </script>
 </body>
 </html>
