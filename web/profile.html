@@ -26,12 +26,17 @@
                                     <p id="profileLocation" class="text-sm text-[#8793a0]"><i class="fa-solid fa-location-dot mr-1"></i>Москва, Россия</p>
                                 </div>
                             </div>
-                            <span class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Верифицирован</span>
+                            <div class="flex items-center gap-2">
+                                <a id="registerButton" href="/register.html" class="hidden rounded-xl bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#246f52]">
+                                    Зарегистрироваться
+                                </a>
+                                <span id="verifiedBadge" class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Верифицирован</span>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                <section id="aboutSection" class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
                     <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О себе</h2>
                     <p id="aboutText" class="mt-3 text-[16px] leading-7 text-[#667585]"></p>
                 </section>
@@ -44,7 +49,7 @@
             </main>
 
             <aside class="space-y-4">
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                <section id="statsSection" class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
                     <div class="text-sm text-[#7f8d9b]">Просмотры профиля за 7 дней</div>
                     <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]">247</div>
                     <div class="mt-1 text-sm font-semibold text-[#3e8c6f]">+18% к прошлой неделе</div>
@@ -89,6 +94,20 @@ function renderProfile(user) {
     document.getElementById('aboutText').textContent = user.about || `Публичный профиль ${fullName}.`;
 }
 
+function toggleGuestView(isAuthenticated) {
+    const registerButton = document.getElementById('registerButton');
+    const verifiedBadge = document.getElementById('verifiedBadge');
+    const aboutSection = document.getElementById('aboutSection');
+    const friendsSection = document.getElementById('friends');
+    const statsSection = document.getElementById('statsSection');
+
+    registerButton.classList.toggle('hidden', isAuthenticated);
+    verifiedBadge.classList.toggle('hidden', !isAuthenticated);
+    aboutSection.classList.toggle('hidden', !isAuthenticated);
+    friendsSection.classList.toggle('hidden', !isAuthenticated);
+    statsSection.classList.toggle('hidden', !isAuthenticated);
+}
+
 function renderFriends() {
   const friends = [
     { id: 'ivan', label: 'ИП' },
@@ -124,6 +143,7 @@ async function initProfile() {
     const demoId = params.get('demo');
 
     if (demoId && DEMO_USERS[demoId]) {
+        toggleGuestView(true);
         renderProfile(DEMO_USERS[demoId]);
         renderFriends();
         return;
@@ -132,6 +152,9 @@ async function initProfile() {
     const apiUser = await loadCurrentUser();
     const localUser = JSON.parse(localStorage.getItem('user') || '{}');
     const source = apiUser || localUser;
+    const isAuthenticated = Boolean(apiUser || localStorage.getItem('token'));
+
+    toggleGuestView(isAuthenticated);
     renderProfile({
         full_name: source.full_name || [source.first_name, source.last_name].filter(Boolean).join(' '),
         company: source.company_name,
