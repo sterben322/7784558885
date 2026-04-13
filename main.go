@@ -67,6 +67,8 @@ func main() {
 		api.POST("/auth/logout", handlers.Logout)
 		api.GET("/me", handlers.GetMe)
 		api.PUT("/profile", handlers.UpdateProfile)
+		api.GET("/corporate-profile", handlers.GetMyCorporateProfile)
+		api.POST("/corporate-profile", handlers.CreateCorporateProfile)
 
 		api.GET("/friends", handlers.GetFriends)
 		api.GET("/friends/requests", handlers.GetFriendRequests)
@@ -108,6 +110,7 @@ func main() {
 		api.GET("/companies/:id/roles", handlers.GetCompanyRoles)
 		api.POST("/companies/:id/roles", handlers.CreateCompanyRole)
 		api.GET("/companies/:id/employees", handlers.GetCompanyEmployees)
+		api.POST("/companies/:id/corporate-profiles", handlers.CreateEmployeeCorporateProfile)
 		api.POST("/companies/:id/invite", handlers.InviteToCompany)
 		api.POST("/companies/invites/:invite_id/accept", handlers.AcceptCompanyInvite)
 		api.PUT("/companies/:id/employees/:user_id", handlers.UpdateEmployeeRole)

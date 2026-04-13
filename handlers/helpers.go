@@ -140,3 +140,16 @@ func isCompanyMember(companyID string, userID uuid.UUID) bool {
 	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM company_employees WHERE company_id = $1 AND user_id = $2 AND is_active = true)`, companyID, userID).Scan(&exists)
 	return exists
 }
+
+func isAcceptedFriend(userID uuid.UUID, friendID uuid.UUID) bool {
+	var exists bool
+	_ = database.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1
+			FROM user_friends
+			WHERE ((user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1))
+			  AND status = 'accepted'
+		)
+	`, userID, friendID).Scan(&exists)
+	return exists
+}
