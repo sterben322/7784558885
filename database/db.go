@@ -102,6 +102,8 @@ func CreateTables() error {
 		`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`,
 		`CREATE TABLE IF NOT EXISTS users (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            first_name VARCHAR(100),
+            last_name VARCHAR(100),
             full_name VARCHAR(100) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
@@ -114,6 +116,12 @@ func CreateTables() error {
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100)`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100)`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100)`,
+		`UPDATE users
+		 SET first_name = COALESCE(NULLIF(first_name, ''), split_part(full_name, ' ', 1)),
+		     last_name = COALESCE(NULLIF(last_name, ''), NULLIF(trim(substr(full_name, length(split_part(full_name, ' ', 1)) + 1)), ''))
+		 WHERE first_name IS NULL OR first_name = '' OR last_name IS NULL OR last_name = ''`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users (email)`,
 		`CREATE TABLE IF NOT EXISTS user_friends (
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

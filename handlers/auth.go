@@ -28,9 +28,14 @@ func Register(c *gin.Context) {
 	}
 
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	firstName := strings.TrimSpace(req.FirstName)
+	lastName := strings.TrimSpace(req.LastName)
 	displayName := strings.TrimSpace(req.Name)
 	if displayName == "" {
 		displayName = strings.TrimSpace(req.FullName)
+	}
+	if displayName == "" {
+		displayName = strings.TrimSpace(strings.Join([]string{firstName, lastName}, " "))
 	}
 
 	if req.Email == "" {
@@ -47,6 +52,10 @@ func Register(c *gin.Context) {
 	}
 	if len(req.Password) < 8 {
 		jsonError(c, http.StatusBadRequest, "password must be at least 8 characters")
+		return
+	}
+	if firstName == "" || lastName == "" {
+		jsonError(c, http.StatusBadRequest, "first_name and last_name are required")
 		return
 	}
 
@@ -73,9 +82,9 @@ func Register(c *gin.Context) {
 
 	createdAt := time.Now().UTC()
 	_, err = database.DB.Exec(`
-		INSERT INTO users (id, full_name, name, email, password_hash, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $6)
-	`, userID, displayName, nullIfEmpty(displayName), req.Email, string(hashedPassword), createdAt)
+		INSERT INTO users (id, first_name, last_name, full_name, name, email, password_hash, avatar_url, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
+	`, userID, firstName, lastName, displayName, nullIfEmpty(displayName), req.Email, string(hashedPassword), nullIfEmpty(req.AvatarURL), createdAt)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "duplicate key") {
 			jsonError(c, http.StatusConflict, "User with this email already exists")
@@ -90,7 +99,10 @@ func Register(c *gin.Context) {
 		"user": gin.H{
 			"id":         userID,
 			"email":      req.Email,
+			"first_name": firstName,
+			"last_name":  lastName,
 			"name":       nullIfEmpty(displayName),
+			"avatar_url": nullIfEmpty(req.AvatarURL),
 			"created_at": createdAt,
 		},
 	})
@@ -110,9 +122,9 @@ func Login(c *gin.Context) {
 	var user models.User
 	var passwordHash string
 	err := database.DB.QueryRow(`
-        SELECT id, full_name, email, company_name, phone, position, avatar_url, created_at, password_hash
+        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, created_at, password_hash
         FROM users WHERE email = $1
-    `, req.Email).Scan(&user.ID, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt, &passwordHash)
+    `, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt, &passwordHash)
 	if err == sql.ErrNoRows {
 		jsonError(c, http.StatusUnauthorized, "Invalid credentials")
 		return
@@ -176,9 +188,9 @@ func GetMe(c *gin.Context) {
 	userID := currentUserID(c)
 	var user models.User
 	err := database.DB.QueryRow(`
-        SELECT id, full_name, email, company_name, phone, position, avatar_url, created_at
+        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, created_at
         FROM users WHERE id = $1
-    `, userID).Scan(&user.ID, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt)
+    `, userID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt)
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "User not found")
 		return
@@ -193,6 +205,8 @@ func UpdateProfile(c *gin.Context) {
 
 	userID := currentUserID(c)
 	var req struct {
+		FirstName   string  `json:"first_name"`
+		LastName    string  `json:"last_name"`
 		FullName    string  `json:"full_name"`
 		CompanyName *string `json:"company_name"`
 		Phone       *string `json:"phone"`
@@ -203,15 +217,25 @@ func UpdateProfile(c *gin.Context) {
 		jsonError(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	req.FirstName = strings.TrimSpace(req.FirstName)
+	req.LastName = strings.TrimSpace(req.LastName)
+	req.FullName = strings.TrimSpace(req.FullName)
+	if req.FirstName == "" || req.LastName == "" {
+		jsonError(c, http.StatusBadRequest, "first_name and last_name are required")
+		return
+	}
+	if req.FullName == "" {
+		req.FullName = strings.TrimSpace(strings.Join([]string{req.FirstName, req.LastName}, " "))
+	}
 	if req.FullName == "" {
 		jsonError(c, http.StatusBadRequest, "full_name is required")
 		return
 	}
 	_, err := database.DB.Exec(`
         UPDATE users
-        SET full_name = $1, company_name = $2, phone = $3, position = $4, avatar_url = $5, updated_at = NOW()
-        WHERE id = $6
-    `, req.FullName, req.CompanyName, req.Phone, req.Position, req.AvatarURL, userID)
+        SET first_name = $1, last_name = $2, full_name = $3, company_name = $4, phone = $5, position = $6, avatar_url = $7, updated_at = NOW()
+        WHERE id = $8
+    `, req.FirstName, req.LastName, req.FullName, req.CompanyName, req.Phone, req.Position, req.AvatarURL, userID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to update profile")
 		return

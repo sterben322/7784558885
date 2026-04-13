@@ -8,6 +8,8 @@ import (
 
 type User struct {
 	ID          uuid.UUID `json:"id"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
 	FullName    string    `json:"full_name"`
 	Email       string    `json:"email"`
 	CompanyName *string   `json:"company_name,omitempty"`
@@ -18,11 +20,14 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Terms    bool   `json:"terms"`
+	Name      string `json:"name"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	FullName  string `json:"full_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	AvatarURL string `json:"avatar_url"`
+	Terms     bool   `json:"terms"`
 }
 
 type LoginRequest struct {
