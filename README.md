@@ -31,6 +31,12 @@ go mod tidy
 go run .
 ```
 
+Если используете внешний PostgreSQL (например Railway), достаточно указать `DATABASE_URL` в `.env`:
+```bash
+DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<db_name>
+```
+Приложение автоматически выставит `sslmode=require` для удалённого хоста, если параметр не указан в URL.
+
 
 ## Тестовый пользователь (создается автоматически)
 При первом запуске PostgreSQL через `docker compose up --build` в БД добавляется тестовый профиль:

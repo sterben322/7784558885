@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -27,7 +29,7 @@ func InitDB(databaseURL string) error {
 		return fmt.Errorf("DATABASE_URL is not set")
 	}
 
-	connStrings := []string{databaseURL}
+	connStrings := []string{withDefaultSSLMode(databaseURL)}
 
 	var lastErr error
 	for _, connStr := range connStrings {
@@ -56,6 +58,28 @@ func InitDB(databaseURL string) error {
 	}
 
 	return fmt.Errorf("database is unavailable: %w", lastErr)
+}
+
+func withDefaultSSLMode(rawURL string) string {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+
+	query := parsed.Query()
+	if query.Get("sslmode") != "" {
+		return rawURL
+	}
+
+	host := strings.ToLower(parsed.Hostname())
+	switch host {
+	case "", "localhost", "127.0.0.1":
+		query.Set("sslmode", "disable")
+	default:
+		query.Set("sslmode", "require")
+	}
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
 }
 
 func IsConfigured() bool {
