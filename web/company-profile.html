@@ -9,132 +9,184 @@
     <link href="/assets/styles.css" rel="stylesheet">
     <script src="/assets/theme.js" defer></script>
 </head>
-<body class="bg-white">
-    <header class="bg-white border-b">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-            <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
+<body class="bg-white text-[#273244]">
+<div class="min-h-screen p-4 md:p-6">
+    <div class="mx-auto w-full max-w-[1460px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
+        <header class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecef] bg-white px-5 py-4 md:px-7">
+            <a href="/" class="brand-link"><img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" class="brand-logo"></a>
+            <nav class="flex items-center gap-3 text-sm text-[#5b6777]">
+                <a href="/dashboard.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Главная</a>
+                <a href="/company-profile.html" class="rounded-xl bg-[#eef5f1] px-3 py-2 font-semibold text-[#4c8d78]">Компания</a>
+                <a href="/company.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Каталог</a>
+                <a href="/profile.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Профиль</a>
             </nav>
-        </div>
-    </header>
+        </header>
 
-    <div class="max-w-6xl mx-auto p-4">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 h-32"></div>
-            <div class="px-6 pb-6">
-                <div class="flex items-end justify-between">
-                    <div class="flex items-end space-x-4">
-                        <div class="w-28 h-28 bg-white rounded-2xl flex items-center justify-center shadow-lg -mt-14" id="companyLogo"><i class="fas fa-building text-5xl text-blue-600"></i></div>
-                        <div class="mb-2"><h1 class="text-2xl font-bold" id="companyName">Загрузка...</h1><div class="flex items-center space-x-2 mt-1"><span id="companyStats" class="text-sm text-gray-500"></span></div></div>
+        <div class="grid gap-5 p-4 md:grid-cols-[minmax(0,1fr)_320px] md:p-6">
+            <main class="space-y-4">
+                <section class="rounded-[24px] border border-[#e7ecef] bg-white shadow-[0_10px_22px_rgba(178,190,198,0.10)]">
+                    <div class="h-[220px] rounded-t-[24px] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_40%),linear-gradient(110deg,#1f6a4d_0%,#2b8662_48%,#41936f_100%)]"></div>
+                    <div class="relative px-5 pb-5 pt-0 md:px-7 md:pb-6">
+                        <div class="-mt-12 flex flex-wrap items-end justify-between gap-4">
+                            <div class="flex items-end gap-4">
+                                <div id="companyLogo" class="avatar-circle grid h-24 w-24 place-items-center border-4 border-white bg-[#3f8566] text-4xl font-bold text-white shadow"><i class="fas fa-building"></i></div>
+                                <div class="pb-2">
+                                    <h1 id="companyName" class="text-3xl font-semibold text-[#273244]">Компания</h1>
+                                    <p id="companyMeta" class="text-[16px] text-[#607080]"></p>
+                                    <p id="companyOwner" class="text-sm text-[#8793a0]"><i class="fa-solid fa-user mr-1"></i>Владелец: —</p>
+                                </div>
+                            </div>
+                            <span id="companyPrivacy" class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Публичная</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-sm mt-6 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="col-span-2">
-                    <h3 class="font-semibold text-lg mb-3">О компании</h3>
-                    <p class="text-gray-600" id="companyDescription"></p>
-                    <h3 class="font-semibold text-lg mt-6 mb-3">Контакты</h3>
-                    <div class="space-y-2"><p id="companyPhone" class="text-gray-600"><i class="fas fa-phone mr-2"></i></p><p id="companyEmail" class="text-gray-600"><i class="fas fa-envelope mr-2"></i></p><p id="companyWebsite" class="text-gray-600"><i class="fas fa-globe mr-2"></i></p><p id="companyAddress" class="text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i></p></div>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h3 class="font-semibold mb-3">Статистика</h3>
-                    <div class="space-y-3"><div><p class="text-sm text-gray-500">Сотрудников</p><p class="text-2xl font-bold" id="employeeCount">0</p></div><div><p class="text-sm text-gray-500">Подписчиков</p><p class="text-2xl font-bold" id="followersCount">0</p></div><div><p class="text-sm text-gray-500">ИНН</p><p class="font-medium" id="companyInn">—</p></div></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-xl shadow-sm mt-6 p-6">
-            <h3 class="font-semibold text-lg mb-4">Сотрудники</h3>
-            <div id="employeesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О компании</h2>
+                    <p id="companyDescription" class="mt-3 text-[16px] leading-7 text-[#667585]"></p>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Контакты компании</h2>
+                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div id="companyPhone" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-phone mr-2"></i>Не указан</div>
+                        <div id="companyEmail" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-envelope mr-2"></i>Не указан</div>
+                        <div id="companyWebsite" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-globe mr-2"></i>Не указан</div>
+                        <div id="companyAddress" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-map-marker-alt mr-2"></i>Не указан</div>
+                    </div>
+                </section>
+
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Сотрудники</h2>
+                    <div id="employeesContainer" class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"></div>
+                </section>
+            </main>
+
+            <aside class="space-y-4">
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <div class="text-sm text-[#7f8d9b]">Сотрудников</div>
+                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]" id="employeeCount">0</div>
+                </section>
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <div class="text-sm text-[#7f8d9b]">Подписчиков</div>
+                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]" id="followersCount">0</div>
+                </section>
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <div class="text-sm text-[#7f8d9b]">Реквизиты</div>
+                    <div class="mt-2 text-sm text-[#607080]">ИНН: <span class="font-semibold text-[#2f3d4f]" id="companyInn">—</span></div>
+                </section>
+            </aside>
         </div>
     </div>
-    
-    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg hidden transition-all z-50 bg-gray-800 text-white"></div>
+</div>
 
-    <script>
-        const API_URL = '/api';
-        let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        let currentCompany = null;
-        
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all z-50 ${colors[type]}`;
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+<div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg hidden transition-all z-50 bg-gray-800 text-white"></div>
+
+<script>
+const API_URL = '/api';
+let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+let currentCompany = null;
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all z-50 ${colors[type]}`;
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+function setText(id, icon, value, fallback = 'Не указан') {
+    document.getElementById(id).innerHTML = `<i class="${icon} mr-2"></i>${value || fallback}`;
+}
+
+function renderCompany(company) {
+    const fallbackName = currentUser.company_name || 'Моя компания';
+    const name = company?.name || fallbackName;
+    const description = company?.description || 'Информация о компании пока не заполнена.';
+    const sector = company?.economic_sector || 'Отрасль не указана';
+
+    document.getElementById('companyName').textContent = name;
+    document.getElementById('companyMeta').textContent = `${sector} · профиль компании`;
+    document.getElementById('companyOwner').innerHTML = `<i class="fa-solid fa-user mr-1"></i>Владелец: ${company?.owner_name || currentUser.full_name || 'Не указан'}`;
+    document.getElementById('companyDescription').textContent = description;
+    document.getElementById('employeeCount').textContent = company?.employee_count || 0;
+    document.getElementById('followersCount').textContent = company?.followers_count || 0;
+    document.getElementById('companyInn').textContent = company?.inn || '—';
+
+    setText('companyPhone', 'fas fa-phone', company?.phone);
+    setText('companyEmail', 'fas fa-envelope', currentUser.email);
+    setText('companyWebsite', 'fas fa-globe', company?.website);
+    setText('companyAddress', 'fas fa-map-marker-alt', company?.address);
+
+    const privacyBadge = document.getElementById('companyPrivacy');
+    if (company?.is_public === false) {
+        privacyBadge.className = 'rounded-full bg-[#fff1f2] px-3 py-1 text-sm font-semibold text-[#be123c]';
+        privacyBadge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i>Приватная';
+    }
+
+    const logo = document.getElementById('companyLogo');
+    if (company?.logo_url) {
+        logo.innerHTML = `<img src="${company.logo_url}" alt="Логотип ${name}" class="h-full w-full object-cover">`;
+    } else {
+        logo.innerHTML = `<span>${(name[0] || 'C').toUpperCase()}</span>`;
+    }
+}
+
+async function loadCompany() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const ownerID = params.get('owner_id');
+        const endpoint = ownerID ? `${API_URL}/company?owner_id=${encodeURIComponent(ownerID)}` : `${API_URL}/company`;
+        const response = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        const company = data.company;
+        currentCompany = company;
+        renderCompany(company);
+        await loadEmployees();
+    } catch (error) {
+        console.error('Failed to load company:', error);
+        renderCompany(null);
+        showToast('Не удалось загрузить данные компании', 'error');
+    }
+}
+
+async function loadEmployees() {
+    try {
+        if (!currentCompany) {
+            document.getElementById('employeesContainer').innerHTML = '<div class="text-center py-8 text-gray-500">Сотрудники появятся после регистрации компании.</div>';
+            return;
         }
-        
-        async function loadCompany() {
-            try {
-                const params = new URLSearchParams(window.location.search);
-                const ownerID = params.get('owner_id');
-                const endpoint = ownerID ? `${API_URL}/company?owner_id=${encodeURIComponent(ownerID)}` : `${API_URL}/company`;
-                const response = await fetch(endpoint, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
-                const data = await response.json();
-                const company = data.company;
-                currentCompany = company;
-                
-                if (!company) {
-                    document.body.innerHTML = '<div class="text-center py-12"><p class="text-gray-500">Компания не найдена</p><a href="/create-company.html" class="text-blue-600">Создать компанию</a></div>';
-                    return;
-                }
-                
-                document.getElementById('companyName').textContent = company.name;
-                document.getElementById('companyDescription').textContent = company.description || 'Описание не добавлено';
-                document.getElementById('employeeCount').textContent = company.employee_count || 0;
-                document.getElementById('followersCount').textContent = company.followers_count || 0;
-                document.getElementById('companyInn').textContent = company.inn || '—';
-                document.getElementById('companyPhone').innerHTML = `<i class="fas fa-phone mr-2"></i>${company.phone || 'Не указан'}`;
-                document.getElementById('companyEmail').innerHTML = `<i class="fas fa-envelope mr-2"></i>${currentUser.email || 'Не указан'}`;
-                document.getElementById('companyWebsite').innerHTML = `<i class="fas fa-globe mr-2"></i>${company.website || 'Не указан'}`;
-                document.getElementById('companyAddress').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${company.address || 'Не указан'}`;
-                
-                if (company.logo_url) {
-                    document.getElementById('companyLogo').innerHTML = `<img src="${company.logo_url}" class="w-full h-full rounded-2xl object-cover">`;
-                }
-                
-                await loadEmployees();
-            } catch (error) {
-                console.error('Failed to load company:', error);
-                showToast('Ошибка загрузки', 'error');
-            }
+
+        const response = await fetch(`${API_URL}/companies/${currentCompany.id}/employees`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        const container = document.getElementById('employeesContainer');
+
+        if (!data.employees || data.employees.length === 0) {
+            container.innerHTML = '<div class="md:col-span-2 text-center py-8 text-gray-500">Пока нет сотрудников</div>';
+            return;
         }
-        
-        async function loadEmployees() {
-            try {
-                if (!currentCompany) return;
-                const response = await fetch(`${API_URL}/companies/${currentCompany.id}/employees`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
-                const data = await response.json();
-                const container = document.getElementById('employeesContainer');
-                if (!data.employees || data.employees.length === 0) {
-                    container.innerHTML = '<div class="col-span-3 text-center py-8 text-gray-500">Нет сотрудников</div>';
-                    return;
-                }
-                container.innerHTML = data.employees.map(emp => `
-                    <div class="flex items-center space-x-3 p-3 border rounded-lg">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">${emp.user_name?.charAt(0) || 'U'}</div>
-                        <div><p class="font-semibold">${emp.user_name}</p><p class="text-sm text-gray-600">${emp.position_name}</p>${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}</div>
-                    </div>
-                `).join('');
-            } catch (error) { console.error(error); }
-        }
-        
-        loadCompany();
-    </script>
+
+        container.innerHTML = data.employees.map(emp => `
+            <div class="flex items-center space-x-3 rounded-2xl border border-[#e6ecef] p-3">
+                <div class="avatar-circle grid h-10 w-10 place-items-center bg-[#5fa786] text-sm font-bold text-white">${emp.user_name?.charAt(0) || 'U'}</div>
+                <div>
+                    <p class="font-semibold">${emp.user_name}</p>
+                    <p class="text-sm text-gray-600">${emp.position_name || 'Сотрудник'}</p>
+                    ${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+loadCompany();
+</script>
 </body>
 </html>

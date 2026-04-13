@@ -551,3 +551,9 @@ body.use-global-sidebars .dashboard-shell {
 body.use-global-sidebars .dashboard-shell > aside {
     display: none !important;
 }
+
+.avatar-circle {
+    border-radius: 9999px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
