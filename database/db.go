@@ -232,6 +232,19 @@ func CreateTables() {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             expires_at TIMESTAMP NOT NULL
         )`,
+		`CREATE TABLE IF NOT EXISTS corporate_profiles (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+            company_id UUID REFERENCES companies(id) ON DELETE SET NULL,
+            created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+            position_name VARCHAR(100),
+            permissions TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            employment_status VARCHAR(20) NOT NULL DEFAULT 'independent',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`,
+		`ALTER TABLE company_invites ADD COLUMN IF NOT EXISTS corporate_profile_id UUID REFERENCES corporate_profiles(id) ON DELETE SET NULL`,
 		`CREATE TABLE IF NOT EXISTS posts (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

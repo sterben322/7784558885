@@ -130,6 +130,10 @@ func InviteToCompany(c *gin.Context) {
 		jsonError(c, http.StatusForbidden, "Only company owner can invite")
 		return
 	}
+	if !isAcceptedFriend(inviterID, req.UserID) {
+		jsonError(c, http.StatusForbidden, "You can invite only users from friends list")
+		return
+	}
 
 	var isEmployee bool
 	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM company_employees WHERE company_id = $1 AND user_id = $2 AND is_active = true)`, companyID, req.UserID).Scan(&isEmployee)
@@ -138,14 +142,74 @@ func InviteToCompany(c *gin.Context) {
 		return
 	}
 
+	var profileID uuid.UUID
+	err = database.DB.QueryRow(`
+		SELECT id
+		FROM corporate_profiles
+		WHERE user_id = $1 AND company_id = $2 AND created_by = $3 AND status = 'pending'
+	`, req.UserID, companyID, inviterID).Scan(&profileID)
+	if err == sql.ErrNoRows {
+		jsonError(c, http.StatusBadRequest, "Create employee corporate profile before invitation")
+		return
+	}
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to validate employee corporate profile")
+		return
+	}
+
 	inviteID := uuid.New()
 	expiresAt := time.Now().Add(7 * 24 * time.Hour)
-	_, err = database.DB.Exec(`INSERT INTO company_invites (id, company_id, inviter_id, invitee_id, position_name, department, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`, inviteID, companyID, inviterID, req.UserID, req.PositionName, req.Department, expiresAt)
+	_, err = database.DB.Exec(`
+		INSERT INTO company_invites (id, company_id, inviter_id, invitee_id, position_name, department, corporate_profile_id, expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, inviteID, companyID, inviterID, req.UserID, req.PositionName, req.Department, profileID, expiresAt)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to send invite")
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Invite sent"})
+}
+
+func CreateEmployeeCorporateProfile(c *gin.Context) {
+	companyID := c.Param("id")
+	creatorID := currentUserID(c)
+	var req models.CreateEmployeeCorporateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	allowed, err := requireCompanyOwner(companyID, creatorID)
+	if err != nil {
+		jsonError(c, http.StatusNotFound, "Company not found")
+		return
+	}
+	if !allowed {
+		jsonError(c, http.StatusForbidden, "Only company owner can create employee corporate profiles")
+		return
+	}
+	if !isAcceptedFriend(creatorID, req.UserID) {
+		jsonError(c, http.StatusForbidden, "You can create employee profiles only for friends")
+		return
+	}
+
+	profileID := uuid.New()
+	_, err = database.DB.Exec(`
+		INSERT INTO corporate_profiles (id, user_id, company_id, created_by, position_name, permissions, status, employment_status)
+		VALUES ($1, $2, $3, $4, $5, $6, 'pending', 'invited')
+		ON CONFLICT (user_id) DO UPDATE
+		SET company_id = EXCLUDED.company_id,
+			created_by = EXCLUDED.created_by,
+			position_name = EXCLUDED.position_name,
+			permissions = EXCLUDED.permissions,
+			status = 'pending',
+			employment_status = 'invited',
+			updated_at = NOW()
+	`, profileID, req.UserID, companyID, creatorID, req.PositionName, pq.Array(req.Permissions))
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to create employee corporate profile")
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Employee corporate profile created"})
 }
 
 func AcceptCompanyInvite(c *gin.Context) {
@@ -156,7 +220,12 @@ func AcceptCompanyInvite(c *gin.Context) {
 	var positionName string
 	var department sql.NullString
 	var expiresAt time.Time
-	err := database.DB.QueryRow(`SELECT company_id, position_name, department, expires_at FROM company_invites WHERE id = $1 AND invitee_id = $2 AND status = 'pending'`, inviteID, userID).Scan(&companyID, &positionName, &department, &expiresAt)
+	var corporateProfileID uuid.NullUUID
+	err := database.DB.QueryRow(`
+		SELECT company_id, position_name, department, expires_at, corporate_profile_id
+		FROM company_invites
+		WHERE id = $1 AND invitee_id = $2 AND status = 'pending'
+	`, inviteID, userID).Scan(&companyID, &positionName, &department, &expiresAt, &corporateProfileID)
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "Invite not found")
 		return
@@ -177,6 +246,16 @@ func AcceptCompanyInvite(c *gin.Context) {
 		return
 	}
 	_, _ = database.DB.Exec(`UPDATE company_invites SET status = 'accepted' WHERE id = $1`, inviteID)
+	if corporateProfileID.Valid {
+		_, _ = database.DB.Exec(`
+			UPDATE corporate_profiles
+			SET status = 'active',
+				employment_status = 'employed',
+				company_id = $1,
+				updated_at = NOW()
+			WHERE id = $2 AND user_id = $3
+		`, companyID, corporateProfileID.UUID, userID)
+	}
 	recalcCompanyEmployeesCount(companyID.String())
 	c.JSON(http.StatusOK, gin.H{"message": "You are now an employee"})
 }

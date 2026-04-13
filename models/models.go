@@ -222,6 +222,19 @@ type CompanyEmployee struct {
 	AssignedAt   time.Time `json:"assigned_at"`
 }
 
+type CorporateProfile struct {
+	ID               uuid.UUID  `json:"id"`
+	UserID           uuid.UUID  `json:"user_id"`
+	CompanyID        *uuid.UUID `json:"company_id,omitempty"`
+	CreatedBy        *uuid.UUID `json:"created_by,omitempty"`
+	PositionName     *string    `json:"position_name,omitempty"`
+	Permissions      []string   `json:"permissions"`
+	Status           string     `json:"status"`
+	EmploymentStatus string     `json:"employment_status"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
+}
+
 type Resume struct {
 	ID                 uuid.UUID `json:"id"`
 	UserID             uuid.UUID `json:"user_id"`
@@ -285,4 +298,15 @@ type InviteToCompanyRequest struct {
 	UserID       uuid.UUID `json:"user_id" binding:"required"`
 	PositionName string    `json:"position_name" binding:"required"`
 	Department   *string   `json:"department"`
+	Permissions  []string  `json:"permissions"`
+}
+
+type CreateCorporateProfileRequest struct {
+	PositionName *string `json:"position_name"`
+}
+
+type CreateEmployeeCorporateProfileRequest struct {
+	UserID       uuid.UUID `json:"user_id" binding:"required"`
+	PositionName string    `json:"position_name" binding:"required"`
+	Permissions  []string  `json:"permissions"`
 }

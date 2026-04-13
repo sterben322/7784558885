@@ -95,6 +95,12 @@ func CreateCompany(c *gin.Context) {
 		jsonError(c, http.StatusConflict, "You already have a registered company")
 		return
 	}
+	var hasCorporateProfile bool
+	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM corporate_profiles WHERE user_id = $1)`, userID).Scan(&hasCorporateProfile)
+	if !hasCorporateProfile {
+		jsonError(c, http.StatusForbidden, "Create corporate profile first")
+		return
+	}
 
 	companyID := uuid.New()
 	_, err := database.DB.Exec(`
@@ -105,6 +111,15 @@ func CreateCompany(c *gin.Context) {
 		jsonError(c, http.StatusInternalServerError, "Failed to create company")
 		return
 	}
+	_, _ = database.DB.Exec(`
+		UPDATE corporate_profiles
+		SET company_id = $1,
+			created_by = $2,
+			status = 'active',
+			employment_status = 'owner',
+			updated_at = NOW()
+		WHERE user_id = $2
+	`, companyID, userID)
 	_, _ = database.DB.Exec(`INSERT INTO company_members (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, companyID, userID)
 	c.JSON(http.StatusCreated, gin.H{"message": "Company created successfully", "company_id": companyID})
 }
