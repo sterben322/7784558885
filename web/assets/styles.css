@@ -1167,3 +1167,18 @@ body.app-modern {
     font-size: 13px;
     color: #8b98aa;
 }
+
+.forum-card {
+    border: 1px solid #e7ecef;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(178, 190, 198, 0.1);
+}
+
+@media (max-width: 760px) {
+    #sectionsView form,
+    #topicsView form,
+    #discussionView form {
+        padding: 12px;
+    }
+}

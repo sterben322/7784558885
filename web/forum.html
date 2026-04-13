@@ -13,101 +13,193 @@
 <div class="min-h-screen p-6 font-sans">
     <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)_330px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
         <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
-            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8">
-                <a href="/" class="flex items-center gap-3">
-                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div>
-                    <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
-                </a>
-            </div>
-            <div class="px-4 py-5">
-                <div class="space-y-1.5">
-                    <a href="/" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-house"></i></span><span class="text-[15px] font-medium">Главная</span></a>
-                    <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-newspaper"></i></span><span class="text-[15px] font-medium">Новости</span></a>
-                    <a href="/projects.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-folder-tree"></i></span><span class="text-[15px] font-medium">Проекты</span></a>
-                    <a href="/exhibitions.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-briefcase"></i></span><span class="text-[15px] font-medium">Выставки</span></a>
-                    <a href="/events.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-calendar-days"></i></span><span class="text-[15px] font-medium">Мероприятия</span></a>
-                    <a href="/forum.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition bg-[#eff7f3] text-[#4c8d78]"><span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-regular fa-message"></i></span><span class="text-[15px] font-semibold">Форум</span></a>
-                    <a href="/company-profile.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-building"></i></span><span class="text-[15px] font-medium">Компании</span></a>
-                    <a href="/jobs.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]"><span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-briefcase"></i></span><span class="text-[15px] font-medium">Резюме и вакансии</span></a>
-                </div>
-            </div>
-            <div class="mt-auto border-t border-[#e8ecef] px-5 py-5">
-                <a href="/settings.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
-                    <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div>
-                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Настройки</div></div>
-                    <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
-                </a>
-            </div>
+            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8"><a href="/" class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</a></div>
+            <div class="px-4 py-5"><div class="space-y-1.5"><a href="/forum.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 bg-[#eff7f3] text-[#4c8d78]"><i class="fa-regular fa-message"></i><span>Форум</span></a></div></div>
         </aside>
 
         <main class="dashboard-main relative bg-white">
-            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]"></div>
-            <div class="absolute inset-y-0 right-0 w-[42%] bg-white"></div>
-            <header class="dashboard-main-header relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
-                <div class="ml-5 flex items-center gap-4">
-                    <a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-bell h-5 w-5"></i></a>
-                    <a href="/chat.html" class="text-[#95a1ad]"><i class="fa-regular fa-envelope"></i></a>
-                </div>
-            </header>
-
             <div class="relative z-10 px-8 py-6">
-                <div class="mb-5 rounded-[24px] border border-[#e7ecef] bg-white p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur">
-                    <h1 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Форум</h1>
-                    <p class="mt-2 text-[16px] text-[#7e8a97]">Обсуждения и вопросы сообщества.</p>
+                <div class="mb-5 rounded-[24px] border border-[#e7ecef] bg-white p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)]">
+                    <h1 class="text-[28px] font-semibold text-[#2c394b]">Форум</h1>
+                    <p class="mt-2 text-[16px] text-[#7e8a97]">Модель: раздел → тема → обсуждение</p>
                 </div>
-                <section id="topicsList" class="space-y-4"><div class="text-center py-8 text-gray-500">Загрузка...</div></section>
+
+                <div id="forumError" class="hidden mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700"></div>
+
+                <div id="sectionsView" class="space-y-4">
+                    <form id="createSectionForm" class="forum-card p-4 space-y-2">
+                        <h2 class="font-semibold text-lg">Создать раздел</h2>
+                        <input id="sectionTitle" class="w-full rounded-xl border px-3 py-2" placeholder="Название раздела" required>
+                        <textarea id="sectionDescription" class="w-full rounded-xl border px-3 py-2" rows="2" placeholder="Описание"></textarea>
+                        <button class="rounded-xl bg-[#4c8d78] px-4 py-2 text-white" type="submit">Создать раздел</button>
+                    </form>
+                    <div id="sectionsList" class="space-y-3"></div>
+                </div>
+
+                <div id="topicsView" class="hidden space-y-4">
+                    <button class="text-sm text-[#4c8d78]" onclick="goToSections()"><i class="fa-solid fa-arrow-left"></i> К разделам</button>
+                    <div id="sectionHeader" class="forum-card p-4"></div>
+                    <form id="createTopicForm" class="forum-card p-4 space-y-2">
+                        <h3 class="font-semibold">Создать тему</h3>
+                        <input id="topicTitle" class="w-full rounded-xl border px-3 py-2" placeholder="Заголовок темы" required>
+                        <textarea id="topicContent" class="w-full rounded-xl border px-3 py-2" rows="4" placeholder="Первое сообщение" required></textarea>
+                        <button class="rounded-xl bg-[#4c8d78] px-4 py-2 text-white" type="submit">Опубликовать тему</button>
+                    </form>
+                    <div id="topicsList" class="space-y-3"></div>
+                </div>
+
+                <div id="discussionView" class="hidden space-y-4">
+                    <button class="text-sm text-[#4c8d78]" onclick="goBackToTopics()"><i class="fa-solid fa-arrow-left"></i> К темам</button>
+                    <div id="topicHeader" class="forum-card p-4"></div>
+                    <div id="postsList" class="space-y-3"></div>
+                    <form id="replyForm" class="forum-card p-4 space-y-2">
+                        <h3 class="font-semibold">Ответить</h3>
+                        <textarea id="replyContent" class="w-full rounded-xl border px-3 py-2" rows="4" placeholder="Ваш ответ" required></textarea>
+                        <button class="rounded-xl bg-[#4c8d78] px-4 py-2 text-white" type="submit">Отправить</button>
+                    </form>
+                </div>
             </div>
         </main>
 
         <aside class="dashboard-sidebar border-l border-[#e7ebed] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)] px-6 py-6">
-            <div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
-                <h3 class="text-[18px] font-semibold text-[#334153]">Раздел форума</h3>
-                <p class="mt-3 text-[15px] text-[#5f6b79]">Если тем пока нет, раздел всё равно открывается корректно и остаётся доступным для новых публикаций.</p>
-            </div>
+            <div class="forum-card p-4 text-sm text-[#5f6b79]">Редактировать можно только свои сообщения.</div>
         </aside>
     </div>
 </div>
+
 <script>
 const API_URL = '/api';
 const token = localStorage.getItem('token');
+let currentSection = null;
+let currentTopic = null;
 
-function setUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const name = user.full_name || 'Гость';
-    const letter = (name[0] || 'U').toUpperCase();
+if (!token) window.location.href = '/login.html';
 
-    const sidebarUserName = document.getElementById('userName');
-    if (sidebarUserName) sidebarUserName.textContent = name;
-    const topUserName = document.getElementById('topUserName');
-    if (topUserName) topUserName.textContent = name;
-    ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = letter;
-    });
+function headers() { return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }; }
+function showError(msg) {
+    const box = document.getElementById('forumError');
+    box.textContent = msg;
+    box.classList.remove('hidden');
+}
+function clearError() { document.getElementById('forumError').classList.add('hidden'); }
+
+async function api(path, options = {}) {
+    clearError();
+    const res = await fetch(`${API_URL}${path}`, options);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Ошибка API');
+    return data;
 }
 
-function renderTopics(topics) {
-    document.getElementById('topicsList').innerHTML = topics.map(t => `<div class="rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]"><h3 class="font-semibold text-lg text-[#2f3c4e]">${t.title}</h3><p class="text-sm text-[#7f8a97] mt-1">${t.author_name} • ${t.replies_count} ответов • ${new Date(t.created_at).toLocaleDateString()}</p><p class="text-[#697685] mt-2">${(t.content || '').substring(0, 150)}...</p></div>`).join('') || '<div class="text-center py-8 text-gray-500">Тем пока нет</div>';
+function routeTo(state) {
+    history.pushState(state, '', state);
 }
 
-async function loadTopics() {
-    if (!token) {
-        renderTopics([]);
-        return;
-    }
+async function loadSections() {
+    const data = await api('/forum/sections', { headers: headers() });
+    const list = document.getElementById('sectionsList');
+    list.innerHTML = (data.sections || []).map(s => `
+        <button class="forum-card p-4 w-full text-left" onclick="openSection('${s.id}')">
+            <div class="font-semibold text-lg">${s.title}</div>
+            <div class="text-sm text-[#728091] mt-1">${s.description || ''}</div>
+            <div class="text-xs text-[#8f9baa] mt-2">Тем: ${s.topics_count} • Сообщений: ${s.posts_count}</div>
+        </button>`).join('') || '<div class="text-gray-500">Разделов пока нет</div>';
+}
 
+async function openSection(sectionId) {
+    currentSection = sectionId;
+    routeTo(`/forum.html?section=${sectionId}`);
+    document.getElementById('sectionsView').classList.add('hidden');
+    document.getElementById('discussionView').classList.add('hidden');
+    document.getElementById('topicsView').classList.remove('hidden');
+    const data = await api(`/forum/sections/${sectionId}/topics`, { headers: headers() });
+    document.getElementById('sectionHeader').innerHTML = `<h2 class="font-semibold text-xl">${data.section.title}</h2><p class="text-sm text-[#728091] mt-1">${data.section.description || ''}</p>`;
+    document.getElementById('topicsList').innerHTML = (data.topics || []).map(t => `
+        <button class="forum-card p-4 w-full text-left" onclick="openTopic('${t.id}')">
+            <div class="font-semibold">${t.title}</div>
+            <div class="text-xs text-[#8f9baa] mt-2">Автор: ${t.author_name} • Сообщений: ${t.posts_count} • Просмотров: ${t.views_count}</div>
+        </button>`).join('') || '<div class="text-gray-500">Тем пока нет</div>';
+}
+
+async function openTopic(topicId) {
+    currentTopic = topicId;
+    routeTo(`/forum.html?section=${currentSection}&topic=${topicId}`);
+    document.getElementById('topicsView').classList.add('hidden');
+    document.getElementById('discussionView').classList.remove('hidden');
+    const data = await api(`/forum/topics/${topicId}`, { headers: headers() });
+    document.getElementById('topicHeader').innerHTML = `<h2 class="font-semibold text-xl">${data.topic.title}</h2><p class="text-xs text-[#8f9baa] mt-1">Раздел: ${data.topic.section_title}</p>`;
+    renderPosts(data.posts || []);
+}
+
+function renderPosts(posts) {
+    document.getElementById('postsList').innerHTML = posts.map(p => `
+      <div class="forum-card p-4">
+        <div class="flex items-center justify-between"><div class="font-semibold">${p.author_name}</div><div class="text-xs text-[#8f9baa]">${new Date(p.created_at).toLocaleString()}</div></div>
+        <div class="mt-2 whitespace-pre-wrap" id="post-content-${p.id}">${p.content}</div>
+        ${p.can_edit ? `<div class="mt-3"><button class="text-sm text-[#4c8d78]" onclick="editPost('${p.id}')">Редактировать</button></div>` : ''}
+      </div>
+    `).join('');
+}
+
+async function editPost(postId) {
+    const oldText = document.getElementById(`post-content-${postId}`).textContent;
+    const updated = prompt('Обновите сообщение', oldText);
+    if (updated === null) return;
+    await api(`/forum/posts/${postId}`, { method: 'PUT', headers: headers(), body: JSON.stringify({ content: updated }) });
+    await openTopic(currentTopic);
+}
+
+function goToSections() {
+    currentSection = null;
+    currentTopic = null;
+    routeTo('/forum.html');
+    document.getElementById('topicsView').classList.add('hidden');
+    document.getElementById('discussionView').classList.add('hidden');
+    document.getElementById('sectionsView').classList.remove('hidden');
+    loadSections().catch(e => showError(e.message));
+}
+
+function goBackToTopics() { openSection(currentSection).catch(e => showError(e.message)); }
+
+document.getElementById('createSectionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
     try {
-        const response = await fetch(`${API_URL}/topics`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await response.json();
-        const topics = data.topics || [];
-        renderTopics(topics);
-    } catch (e) {
-        renderTopics([]);
-    }
-}
+        await api('/forum/sections', { method: 'POST', headers: headers(), body: JSON.stringify({ title: sectionTitle.value, description: sectionDescription.value }) });
+        sectionTitle.value = ''; sectionDescription.value = '';
+        await loadSections();
+    } catch (err) { showError(err.message); }
+});
 
-setUserInfo();
-loadTopics();
+document.getElementById('createTopicForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await api(`/forum/sections/${currentSection}/topics`, { method: 'POST', headers: headers(), body: JSON.stringify({ title: topicTitle.value, content: topicContent.value }) });
+        topicTitle.value = ''; topicContent.value = '';
+        await openSection(currentSection);
+    } catch (err) { showError(err.message); }
+});
+
+document.getElementById('replyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await api(`/forum/topics/${currentTopic}/posts`, { method: 'POST', headers: headers(), body: JSON.stringify({ content: replyContent.value }) });
+        replyContent.value = '';
+        await openTopic(currentTopic);
+    } catch (err) { showError(err.message); }
+});
+
+(async function init() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const section = params.get('section');
+        const topic = params.get('topic');
+        if (section && topic) { currentSection = section; await openTopic(topic); return; }
+        if (section) { await openSection(section); return; }
+        await loadSections();
+    } catch (err) {
+        showError(err.message);
+    }
+})();
 </script>
 </body>
 </html>
