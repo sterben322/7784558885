@@ -32,10 +32,11 @@ func main() {
 		log.Printf("database init failed, starting in degraded mode: %v", err)
 	} else if err := database.Ping(context.Background()); err != nil {
 		log.Printf("database ping failed, starting in degraded mode: %v", err)
+	} else if err := database.CreateTables(); err != nil {
+		log.Printf("database schema init failed, starting in degraded mode: %v", err)
 	} else {
 		dbReady = true
 		defer database.CloseDB()
-		database.CreateTables()
 	}
 
 	r := gin.Default()
@@ -48,11 +49,18 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	if dbReady {
-		routes.RegisterAuthRoutes(r)
-	}
+	routes.RegisterAuthRoutes(r)
 
 	r.GET("/api/health", func(c *gin.Context) {
+		if database.DB == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "degraded",
+				"database": "down",
+				"error":    "database connection is not initialized",
+			})
+			return
+		}
+
 		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second)
 		defer cancel()
 		if err := database.Ping(ctx); err != nil {
@@ -150,6 +158,9 @@ func main() {
 
 func buildAllowedOrigins() []string {
 	defaults := []string{"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:3000", "http://127.0.0.1:3000"}
+	if railwayDomain := strings.TrimSpace(os.Getenv("RAILWAY_PUBLIC_DOMAIN")); railwayDomain != "" {
+		defaults = append(defaults, "https://"+railwayDomain)
+	}
 	raw := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
 	if raw == "" {
 		return defaults
