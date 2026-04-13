@@ -3,6 +3,8 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"net/mail"
+	"strings"
 	"time"
 
 	"lastop/database"
@@ -24,8 +26,27 @@ func Register(c *gin.Context) {
 		jsonError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if !req.Terms {
-		jsonError(c, http.StatusBadRequest, "Terms must be accepted")
+
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	displayName := strings.TrimSpace(req.Name)
+	if displayName == "" {
+		displayName = strings.TrimSpace(req.FullName)
+	}
+
+	if req.Email == "" {
+		jsonError(c, http.StatusBadRequest, "email is required")
+		return
+	}
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		jsonError(c, http.StatusBadRequest, "email format is invalid")
+		return
+	}
+	if strings.TrimSpace(req.Password) == "" {
+		jsonError(c, http.StatusBadRequest, "password is required")
+		return
+	}
+	if len(req.Password) < 8 {
+		jsonError(c, http.StatusBadRequest, "password must be at least 8 characters")
 		return
 	}
 
@@ -46,13 +67,33 @@ func Register(c *gin.Context) {
 	}
 
 	userID := uuid.New()
-	_, err = database.DB.Exec(`INSERT INTO users (id, full_name, email, password_hash) VALUES ($1, $2, $3, $4)`, userID, req.FullName, req.Email, string(hashedPassword))
+	if displayName == "" {
+		displayName = req.Email
+	}
+
+	createdAt := time.Now().UTC()
+	_, err = database.DB.Exec(`
+		INSERT INTO users (id, full_name, name, email, password_hash, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $6)
+	`, userID, displayName, nullIfEmpty(displayName), req.Email, string(hashedPassword), createdAt)
 	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate key") {
+			jsonError(c, http.StatusConflict, "User with this email already exists")
+			return
+		}
 		jsonError(c, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user_id": userID})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User registered successfully",
+		"user": gin.H{
+			"id":         userID,
+			"email":      req.Email,
+			"name":       nullIfEmpty(displayName),
+			"created_at": createdAt,
+		},
+	})
 }
 
 func Login(c *gin.Context) {
@@ -100,6 +141,14 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.LoginResponse{Token: token, User: user})
+}
+
+func nullIfEmpty(v string) *string {
+	if strings.TrimSpace(v) == "" {
+		return nil
+	}
+	value := strings.TrimSpace(v)
+	return &value
 }
 
 func Logout(c *gin.Context) {

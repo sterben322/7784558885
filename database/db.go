@@ -13,13 +13,12 @@ import (
 
 var DB *sql.DB
 
-func InitDB() {
+func InitDB(databaseURL string) error {
 	if os.Getenv("TEST_MODE") == "1" {
 		log.Println("TEST_MODE=1: database initialization skipped")
-		return
+		return nil
 	}
 
-	databaseURL := os.Getenv("DATABASE_URL")
 	host := getenv("DB_HOST", "")
 	port := getenv("DB_PORT", "5432")
 	user := getenv("DB_USER", "postgres")
@@ -27,8 +26,7 @@ func InitDB() {
 	dbname := getenv("DB_NAME", "lastop_db")
 
 	if databaseURL == "" && host == "" {
-		log.Println("DB_HOST / DATABASE_URL is not set: database initialization skipped")
-		return
+		return fmt.Errorf("DATABASE_URL is not set")
 	}
 
 	connStrings := make([]string, 0, 1)
@@ -62,14 +60,14 @@ func InitDB() {
 
 		DB = db
 		log.Println("database connected")
-		return
+		return nil
 	}
 
-	log.Printf("warning: database is unavailable, running without DB: %v", lastErr)
+	return fmt.Errorf("database is unavailable: %w", lastErr)
 }
 
 func IsConfigured() bool {
-	return os.Getenv("DATABASE_URL") != "" || os.Getenv("DB_HOST") != ""
+	return os.Getenv("DATABASE_URL") != ""
 }
 
 func Ping(ctx context.Context) error {
@@ -105,6 +103,7 @@ func CreateTables() {
             full_name VARCHAR(100) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
+            name VARCHAR(100),
             company_name VARCHAR(200),
             phone VARCHAR(20),
             position VARCHAR(100),
@@ -112,6 +111,8 @@ func CreateTables() {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users (email)`,
 		`CREATE TABLE IF NOT EXISTS user_friends (
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             friend_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

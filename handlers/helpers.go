@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 
 	"lastop/database"
 
@@ -33,7 +34,10 @@ func ensureDatabase(c *gin.Context) bool {
 	}
 
 	if database.IsConfigured() {
-		database.InitDB()
+		if err := database.InitDB(os.Getenv("DATABASE_URL")); err != nil {
+			jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
+			return false
+		}
 		if database.DB != nil {
 			database.CreateTables()
 			return true
