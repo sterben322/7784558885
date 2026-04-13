@@ -273,20 +273,6 @@ function closeAuthOverlay() {
     renderMainNews();
 }
 
-async function handleLogout() {
-    const token = localStorage.getItem('token');
-    if (token) {
-        await fetch(`${API_URL}/auth/logout`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-        }).catch(() => null);
-    }
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    document.getElementById('authOverlay').classList.remove('hidden');
-    switchAuthTab(true);
-}
-
 document.getElementById('tabLogin').addEventListener('click', () => switchAuthTab(true));
 document.getElementById('tabRegister').addEventListener('click', () => switchAuthTab(false));
 
@@ -339,8 +325,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         setLoading('registerBtn', false, 'Создать аккаунт', 'Регистрация...');
     }
 });
-
-document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
 (async () => {
     const authorized = await tryRestoreSession();
