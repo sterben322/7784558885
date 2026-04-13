@@ -27,16 +27,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	dbReady := false
 	if err := database.InitDB(cfg.DatabaseURL); err != nil {
-		log.Fatal(err)
+		log.Printf("database init failed, starting in degraded mode: %v", err)
+	} else if err := database.Ping(context.Background()); err != nil {
+		log.Printf("database ping failed, starting in degraded mode: %v", err)
+	} else {
+		dbReady = true
+		defer database.CloseDB()
+		database.CreateTables()
 	}
-	defer database.CloseDB()
-
-	if err := database.Ping(context.Background()); err != nil {
-		log.Fatalf("database ping failed: %v", err)
-	}
-
-	database.CreateTables()
 
 	r := gin.Default()
 	allowedOrigins := buildAllowedOrigins()
@@ -48,7 +48,9 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	routes.RegisterAuthRoutes(r)
+	if dbReady {
+		routes.RegisterAuthRoutes(r)
+	}
 
 	r.GET("/api/health", func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second)
@@ -65,7 +67,9 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "database": "up"})
 	})
 
-	routes.RegisterProtectedRoutes(r)
+	if dbReady {
+		routes.RegisterProtectedRoutes(r)
+	}
 
 	r.Static("/assets", "./web/assets")
 
