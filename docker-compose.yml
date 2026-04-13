@@ -28,11 +28,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: lastop_db
+      DATABASE_URL: ${{ Postgres.DATABASE_URL }}
       JWT_SECRET: super-secret-jwt-key-change-this-in-production-2026
       JWT_EXPIRE_HOURS: 24
       PORT: 8080
