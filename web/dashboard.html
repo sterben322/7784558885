@@ -215,21 +215,8 @@ async function loadNews() {
     }
 }
 
-function setupSearch() {
-    const searchInput = document.getElementById('newsSearch');
-    if (!searchInput) return;
-    searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim().toLowerCase();
-        document.querySelectorAll('#newsFeed article').forEach((card) => {
-            card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
-    });
-}
-
-
 setUserInfo();
 loadNews();
-setupSearch();
 </script>
 </body>
 </html>
