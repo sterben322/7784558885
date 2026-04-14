@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	"lastop/database"
 
@@ -28,25 +30,29 @@ func jsonError(c *gin.Context, status int, msg string) {
 }
 
 func ensureDatabase(c *gin.Context) bool {
-	if database.DB != nil {
+	if database.IsReady() {
 		return true
 	}
 
-	if database.IsConfigured() {
-		if err := database.InitDB(""); err != nil {
-			jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
-			return false
-		}
-		if database.DB != nil {
-			if err := database.CreateTables(); err != nil {
-				jsonError(c, http.StatusServiceUnavailable, "Database schema initialization failed")
-				return false
-			}
+	if !database.IsConfigured() {
+		jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. DATABASE_URL is not configured.")
+		return false
+	}
+
+	if database.DB != nil {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+		err := database.Ping(ctx)
+		cancel()
+		if err == nil && database.IsReady() {
 			return true
 		}
 	}
 
-	jsonError(c, http.StatusServiceUnavailable, "Database is unavailable. Please configure DB connection and try again.")
+	msg := database.LastError()
+	if msg == "" {
+		msg = "Database is initializing. Please retry in a few seconds."
+	}
+	jsonError(c, http.StatusServiceUnavailable, msg)
 	return false
 }
 

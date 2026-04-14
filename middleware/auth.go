@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strings"
@@ -46,6 +47,26 @@ func AuthMiddleware() gin.HandlerFunc {
 			abortUnauthorized(c, "Invalid token")
 			return
 		}
+
+		if !database.IsReady() {
+			if !database.IsConfigured() {
+				c.JSON(http.StatusServiceUnavailable, gin.H{"error": "DATABASE_URL is not configured"})
+				c.Abort()
+				return
+			}
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database is initializing, retry shortly"})
+			c.Abort()
+			return
+		}
+
+		pingCtx, pingCancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+		if err := database.Ping(pingCtx); err != nil {
+			pingCancel()
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database is unavailable"})
+			c.Abort()
+			return
+		}
+		pingCancel()
 
 		var sessionUserID string
 		var expiresAt time.Time
