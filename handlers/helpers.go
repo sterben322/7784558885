@@ -58,7 +58,7 @@ func ensureDatabase(c *gin.Context) bool {
 func requireConversationParticipant(chatID uuid.UUID, userID uuid.UUID) error {
 	var exists bool
 	err := database.DB.QueryRow(`
-        SELECT EXISTS(SELECT 1 FROM chat_participants WHERE chat_id = $1 AND user_id = $2)
+        SELECT EXISTS(SELECT 1 FROM chat_participants WHERE chat_id = $1::uuid AND user_id = $2::uuid)
     `, chatID, userID).Scan(&exists)
 	if err != nil {
 		return err

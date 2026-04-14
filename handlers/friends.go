@@ -111,7 +111,7 @@ func SendFriendRequest(c *gin.Context) {
 	case err == sql.ErrNoRows:
 		_, err = database.DB.Exec(`
 			INSERT INTO user_friends (user_id, friend_id, requester_id, status)
-			VALUES ($1, $2, $1, 'pending')
+			VALUES ($1::uuid, $2::uuid, $1::uuid, 'pending')
 		`, requesterID, targetID)
 		if err != nil {
 			friendDBError(c, http.StatusInternalServerError, "Failed to send friend request", err)
@@ -177,7 +177,7 @@ func AcceptFriendRequest(c *gin.Context) {
 		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
 		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
-		  AND requester_id = $2
+			  AND requester_id = $2::uuid
 	`, currentUser, requesterID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
@@ -209,7 +209,7 @@ func RejectFriendRequest(c *gin.Context) {
 		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
 		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
-		  AND requester_id = $2
+			  AND requester_id = $2::uuid
 	`, currentUser, requesterID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
@@ -241,7 +241,7 @@ func CancelFriendRequest(c *gin.Context) {
 		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
 		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
-		  AND requester_id = $1
+			  AND requester_id = $1::uuid
 	`, currentUser, targetID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
