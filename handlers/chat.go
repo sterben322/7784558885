@@ -158,8 +158,13 @@ func StartChatConversation(c *gin.Context) {
 		return
 	}
 
-	if !isAcceptedFriend(userID, friendID) {
-		jsonError(c, http.StatusForbidden, "You can start a chat only with friends")
+	exists, err := userExists(friendID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to validate user")
+		return
+	}
+	if !exists {
+		jsonError(c, http.StatusNotFound, "User not found")
 		return
 	}
 
