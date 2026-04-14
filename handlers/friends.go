@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"strings"
 
@@ -24,6 +25,11 @@ func friendError(c *gin.Context, status int, message string) {
 
 func friendSuccess(c *gin.Context, status int, message string, data interface{}) {
 	c.JSON(status, friendAPIResponse{Success: true, Message: message, Data: data})
+}
+
+func friendDBError(c *gin.Context, status int, publicMessage string, err error) {
+	log.Printf("friends db error: %v", err)
+	friendError(c, status, publicMessage)
 }
 
 func parseFriendID(c *gin.Context) (uuid.UUID, bool) {
@@ -84,7 +90,7 @@ func SendFriendRequest(c *gin.Context) {
 
 	exists, err := userExists(targetID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Database error")
+		friendDBError(c, http.StatusInternalServerError, "Database error", err)
 		return
 	}
 	if !exists {
@@ -108,13 +114,13 @@ func SendFriendRequest(c *gin.Context) {
 			VALUES ($1, $2, $1, 'pending')
 		`, requesterID, targetID)
 		if err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to send friend request")
+			friendDBError(c, http.StatusInternalServerError, "Failed to send friend request", err)
 			return
 		}
 		friendSuccess(c, http.StatusCreated, "Заявка в друзья отправлена", gin.H{"status": "pending"})
 		return
 	case err != nil:
-		friendError(c, http.StatusInternalServerError, "Database error")
+		friendDBError(c, http.StatusInternalServerError, "Database error", err)
 		return
 	}
 
@@ -133,7 +139,7 @@ func SendFriendRequest(c *gin.Context) {
 			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		`, requesterID, targetID)
 		if err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to accept reciprocal request")
+			friendDBError(c, http.StatusInternalServerError, "Failed to accept reciprocal request", err)
 			return
 		}
 		friendSuccess(c, http.StatusOK, "Встречная заявка найдена, пользователи стали друзьями", gin.H{"status": "accepted"})
@@ -145,7 +151,7 @@ func SendFriendRequest(c *gin.Context) {
 			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		`, requesterID, targetID)
 		if err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to send friend request")
+			friendDBError(c, http.StatusInternalServerError, "Failed to send friend request", err)
 			return
 		}
 		friendSuccess(c, http.StatusOK, "Заявка в друзья отправлена", gin.H{"status": "pending"})
@@ -175,7 +181,7 @@ func AcceptFriendRequest(c *gin.Context) {
 	`, currentUser, requesterID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to accept friend request")
+		friendDBError(c, http.StatusInternalServerError, "Failed to accept friend request", err)
 		return
 	}
 	if rows == 0 {
@@ -207,7 +213,7 @@ func RejectFriendRequest(c *gin.Context) {
 	`, currentUser, requesterID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to reject friend request")
+		friendDBError(c, http.StatusInternalServerError, "Failed to reject friend request", err)
 		return
 	}
 	if rows == 0 {
@@ -239,7 +245,7 @@ func CancelFriendRequest(c *gin.Context) {
 	`, currentUser, targetID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to cancel friend request")
+		friendDBError(c, http.StatusInternalServerError, "Failed to cancel friend request", err)
 		return
 	}
 	if rows == 0 {
@@ -269,7 +275,7 @@ func RemoveFriend(c *gin.Context) {
 	`, currentUser, targetID)
 	rows, err := rowsAffectedOrError(res, err)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to remove friend")
+		friendDBError(c, http.StatusInternalServerError, "Failed to remove friend", err)
 		return
 	}
 	if rows == 0 {
@@ -295,7 +301,7 @@ func GetFriends(c *gin.Context) {
 		ORDER BY uf.updated_at DESC
 	`, userID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to load friends")
+		friendDBError(c, http.StatusInternalServerError, "Failed to load friends", err)
 		return
 	}
 	defer rows.Close()
@@ -305,7 +311,7 @@ func GetFriends(c *gin.Context) {
 		var friend models.Friend
 		var avatar sql.NullString
 		if err := rows.Scan(&friend.FriendID, &friend.FriendName, &friend.FriendEmail, &avatar, &friend.CreatedAt); err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to read friends")
+			friendDBError(c, http.StatusInternalServerError, "Failed to read friends", err)
 			return
 		}
 		if avatar.Valid {
@@ -334,7 +340,7 @@ func GetIncomingFriendRequests(c *gin.Context) {
 		ORDER BY uf.created_at DESC
 	`, userID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to load incoming requests")
+		friendDBError(c, http.StatusInternalServerError, "Failed to load incoming requests", err)
 		return
 	}
 	defer rows.Close()
@@ -344,7 +350,7 @@ func GetIncomingFriendRequests(c *gin.Context) {
 		var req models.Friend
 		var avatar sql.NullString
 		if err := rows.Scan(&req.UserID, &req.FriendName, &req.FriendEmail, &avatar, &req.CreatedAt); err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to read incoming requests")
+			friendDBError(c, http.StatusInternalServerError, "Failed to read incoming requests", err)
 			return
 		}
 		if avatar.Valid {
@@ -372,7 +378,7 @@ func GetOutgoingFriendRequests(c *gin.Context) {
 		ORDER BY uf.created_at DESC
 	`, userID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to load outgoing requests")
+		friendDBError(c, http.StatusInternalServerError, "Failed to load outgoing requests", err)
 		return
 	}
 	defer rows.Close()
@@ -382,7 +388,7 @@ func GetOutgoingFriendRequests(c *gin.Context) {
 		var req models.Friend
 		var avatar sql.NullString
 		if err := rows.Scan(&req.FriendID, &req.FriendName, &req.FriendEmail, &avatar, &req.CreatedAt); err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to read outgoing requests")
+			friendDBError(c, http.StatusInternalServerError, "Failed to read outgoing requests", err)
 			return
 		}
 		if avatar.Valid {
@@ -418,7 +424,7 @@ func GetAddableUsers(c *gin.Context) {
 		LIMIT 50
 	`, userID, search)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to load users")
+		friendDBError(c, http.StatusInternalServerError, "Failed to load users", err)
 		return
 	}
 	defer rows.Close()
@@ -427,7 +433,7 @@ func GetAddableUsers(c *gin.Context) {
 	for rows.Next() {
 		var u models.User
 		if err := rows.Scan(&u.ID, &u.FullName, &u.Email, &u.AvatarURL, &u.CreatedAt); err != nil {
-			friendError(c, http.StatusInternalServerError, "Failed to read users")
+			friendDBError(c, http.StatusInternalServerError, "Failed to read users", err)
 			return
 		}
 		users = append(users, u)
@@ -454,7 +460,7 @@ func GetFriendStatus(c *gin.Context) {
 
 	exists, err := userExists(targetID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Database error")
+		friendDBError(c, http.StatusInternalServerError, "Database error", err)
 		return
 	}
 	if !exists {
@@ -464,7 +470,7 @@ func GetFriendStatus(c *gin.Context) {
 
 	status, err := relationshipStatus(currentUser, targetID)
 	if err != nil {
-		friendError(c, http.StatusInternalServerError, "Failed to load friendship status")
+		friendDBError(c, http.StatusInternalServerError, "Failed to load friendship status", err)
 		return
 	}
 	friendSuccess(c, http.StatusOK, "Статус связи получен", gin.H{"status": status})
