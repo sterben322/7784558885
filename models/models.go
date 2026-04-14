@@ -7,16 +7,17 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID `json:"id"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	FullName    string    `json:"full_name"`
-	Email       string    `json:"email"`
-	CompanyName *string   `json:"company_name,omitempty"`
-	Phone       *string   `json:"phone,omitempty"`
-	Position    *string   `json:"position,omitempty"`
-	AvatarURL   *string   `json:"avatar_url,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID               uuid.UUID `json:"id"`
+	FirstName        string    `json:"first_name"`
+	LastName         string    `json:"last_name"`
+	FullName         string    `json:"full_name"`
+	Email            string    `json:"email"`
+	CompanyName      *string   `json:"company_name,omitempty"`
+	Phone            *string   `json:"phone,omitempty"`
+	Position         *string   `json:"position,omitempty"`
+	AvatarURL        *string   `json:"avatar_url,omitempty"`
+	IsPrivateProfile bool      `json:"is_private_profile"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 type RegisterRequest struct {

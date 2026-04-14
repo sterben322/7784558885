@@ -14,9 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(20),
     position VARCHAR(100),
     avatar_url TEXT,
+    is_private_profile BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_private_profile BOOLEAN NOT NULL DEFAULT false;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users(email);
 
 CREATE TABLE IF NOT EXISTS user_friends (
