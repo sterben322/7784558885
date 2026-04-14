@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
@@ -32,8 +31,8 @@ func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message
 		FROM chats c
 		WHERE c.type = 'direct'
-		  AND c.direct_user_low = LEAST($1::uuid, $2::uuid)
-		  AND c.direct_user_high = GREATEST($1::uuid, $2::uuid)
+		  AND c.direct_user_low = LEAST($1, $2)
+		  AND c.direct_user_high = GREATEST($1, $2)
 	`, userID, friendID)
 
 	var chat models.Chat
@@ -44,7 +43,6 @@ func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Printf("db error: %v", err)
 		return nil, err
 	}
 	if name.Valid {
@@ -63,11 +61,10 @@ func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) 
 	chatID := uuid.New()
 	_, err := database.DB.Exec(`
 		INSERT INTO chats (id, type, direct_user_low, direct_user_high)
-		VALUES ($1, 'direct', LEAST($2::uuid, $3::uuid), GREATEST($2::uuid, $3::uuid))
+		VALUES ($1, 'direct', LEAST($2, $3), GREATEST($2, $3))
 		ON CONFLICT (direct_user_low, direct_user_high) WHERE type = 'direct' DO NOTHING
 	`, chatID, userID, friendID)
 	if err != nil {
-		log.Printf("db error: %v", err)
 		return nil, err
 	}
 
@@ -77,8 +74,8 @@ func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) 
 		FROM chats c
 		CROSS JOIN (VALUES ($1::uuid), ($2::uuid)) AS p(user_id)
 		WHERE c.type = 'direct'
-		  AND c.direct_user_low = LEAST($1::uuid, $2::uuid)
-		  AND c.direct_user_high = GREATEST($1::uuid, $2::uuid)
+		  AND c.direct_user_low = LEAST($1, $2)
+		  AND c.direct_user_high = GREATEST($1, $2)
 		ON CONFLICT (chat_id, user_id) DO NOTHING
 	`, userID, friendID)
 
@@ -101,16 +98,15 @@ func GetChatConversations(c *gin.Context) {
 			u.id,
 			u.avatar_url
 		FROM chats c
-		JOIN chat_participants cp ON cp.chat_id = c.id AND cp.user_id = $1::uuid
+		JOIN chat_participants cp ON cp.chat_id = c.id AND cp.user_id = $1
 		LEFT JOIN users u ON c.type = 'direct' AND u.id = CASE
-			WHEN c.direct_user_low = $1::uuid THEN c.direct_user_high
-			WHEN c.direct_user_high = $1::uuid THEN c.direct_user_low
+			WHEN c.direct_user_low = $1 THEN c.direct_user_high
+			WHEN c.direct_user_high = $1 THEN c.direct_user_low
 			ELSE NULL
 		END
 		ORDER BY c.last_message_at DESC NULLS LAST, c.updated_at DESC, c.created_at DESC
 	`, userID)
 	if err != nil {
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to load conversations")
 		return
 	}
@@ -125,7 +121,6 @@ func GetChatConversations(c *gin.Context) {
 		var peerID sql.NullString
 		var peerAvatar sql.NullString
 		if err := rows.Scan(&chat.ID, &chatName, &chat.Type, &lastMessage, &lastTime, &chat.UnreadCount, &peerID, &peerAvatar); err != nil {
-			log.Printf("db error: %v", err)
 			jsonError(c, http.StatusInternalServerError, "Failed to parse conversations")
 			return
 		}
@@ -170,14 +165,12 @@ func StartChatConversation(c *gin.Context) {
 
 	chat, err := getDirectConversation(userID, friendID)
 	if err != nil {
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to load conversation")
 		return
 	}
 	if chat == nil {
 		chat, err = createDirectConversation(userID, friendID)
 		if err != nil {
-			log.Printf("db error: %v", err)
 			jsonError(c, http.StatusInternalServerError, "Failed to create conversation")
 			return
 		}
@@ -201,7 +194,6 @@ func GetChatConversation(c *gin.Context) {
 			jsonError(c, http.StatusForbidden, "Access denied")
 			return
 		}
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
 		return
 	}
@@ -219,10 +211,10 @@ func GetChatConversation(c *gin.Context) {
 			c.last_message_at,
 			cp.unread_count
 		FROM chats c
-		JOIN chat_participants cp ON cp.chat_id = c.id AND cp.user_id = $2::uuid
+		JOIN chat_participants cp ON cp.chat_id = c.id AND cp.user_id = $2
 		LEFT JOIN users u ON c.type = 'direct' AND u.id = CASE
-			WHEN c.direct_user_low = $2::uuid THEN c.direct_user_high
-			WHEN c.direct_user_high = $2::uuid THEN c.direct_user_low
+			WHEN c.direct_user_low = $2 THEN c.direct_user_high
+			WHEN c.direct_user_high = $2 THEN c.direct_user_low
 			ELSE NULL
 		END
 		WHERE c.id = $1
@@ -232,7 +224,6 @@ func GetChatConversation(c *gin.Context) {
 			jsonError(c, http.StatusNotFound, "Conversation not found")
 			return
 		}
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to load conversation")
 		return
 	}
@@ -264,7 +255,6 @@ func GetConversationMessages(c *gin.Context) {
 			jsonError(c, http.StatusForbidden, "Access denied")
 			return
 		}
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
 		return
 	}
@@ -277,7 +267,6 @@ func GetConversationMessages(c *gin.Context) {
 		ORDER BY m.created_at ASC
 	`, conversationID)
 	if err != nil {
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to load messages")
 		return
 	}
@@ -287,7 +276,6 @@ func GetConversationMessages(c *gin.Context) {
 	for rows.Next() {
 		var msg models.Message
 		if err := rows.Scan(&msg.ID, &msg.ChatID, &msg.Content, &msg.SenderID, &msg.SenderName, &msg.Read, &msg.CreatedAt); err != nil {
-			log.Printf("db error: %v", err)
 			jsonError(c, http.StatusInternalServerError, "Failed to parse messages")
 			return
 		}
@@ -315,7 +303,6 @@ func SendConversationMessage(c *gin.Context) {
 			jsonError(c, http.StatusForbidden, "Access denied")
 			return
 		}
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
 		return
 	}
@@ -338,7 +325,6 @@ func SendConversationMessage(c *gin.Context) {
 		INSERT INTO messages (id, chat_id, sender_id, content)
 		VALUES ($1, $2, $3, $4)
 	`, messageID, conversationID, senderID, req.Content); err != nil {
-		log.Printf("db error: %v", err)
 		jsonError(c, http.StatusInternalServerError, "Failed to send message")
 		return
 	}

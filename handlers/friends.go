@@ -28,7 +28,6 @@ func friendSuccess(c *gin.Context, status int, message string, data interface{})
 }
 
 func friendDBError(c *gin.Context, status int, publicMessage string, err error) {
-	log.Printf("db error: %v", err)
 	log.Printf("friends db error: %v", err)
 	friendError(c, status, publicMessage)
 }
@@ -54,8 +53,8 @@ func relationshipStatus(currentUserID, targetUserID uuid.UUID) (string, error) {
 	err := database.DB.QueryRow(`
 		SELECT status, requester_id
 		FROM user_friends
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 	`, currentUserID, targetUserID).Scan(&status, &requesterID)
 	if err == sql.ErrNoRows {
 		return "none", nil
@@ -104,8 +103,8 @@ func SendFriendRequest(c *gin.Context) {
 	err = database.DB.QueryRow(`
 		SELECT status, requester_id
 		FROM user_friends
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 	`, requesterID, targetID).Scan(&status, &existingRequester)
 
 	switch {
@@ -135,9 +134,9 @@ func SendFriendRequest(c *gin.Context) {
 		}
 		_, err = database.DB.Exec(`
 			UPDATE user_friends
-			SET status = 'accepted', requester_id = $1::uuid, updated_at = NOW()
-			WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-			  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+			SET status = 'accepted', requester_id = $1, updated_at = NOW()
+			WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		`, requesterID, targetID)
 		if err != nil {
 			friendDBError(c, http.StatusInternalServerError, "Failed to accept reciprocal request", err)
@@ -147,9 +146,9 @@ func SendFriendRequest(c *gin.Context) {
 	case "rejected", "cancelled":
 		_, err = database.DB.Exec(`
 			UPDATE user_friends
-			SET user_id = $1::uuid, friend_id = $2::uuid, requester_id = $1::uuid, status = 'pending', updated_at = NOW()
-			WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-			  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+			SET user_id = $1, friend_id = $2, requester_id = $1, status = 'pending', updated_at = NOW()
+			WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		`, requesterID, targetID)
 		if err != nil {
 			friendDBError(c, http.StatusInternalServerError, "Failed to send friend request", err)
@@ -175,8 +174,8 @@ func AcceptFriendRequest(c *gin.Context) {
 	res, err := database.DB.Exec(`
 		UPDATE user_friends
 		SET status = 'accepted', updated_at = NOW()
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
 			  AND requester_id = $2::uuid
 	`, currentUser, requesterID)
@@ -207,8 +206,8 @@ func RejectFriendRequest(c *gin.Context) {
 	res, err := database.DB.Exec(`
 		UPDATE user_friends
 		SET status = 'rejected', updated_at = NOW()
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
 			  AND requester_id = $2::uuid
 	`, currentUser, requesterID)
@@ -239,8 +238,8 @@ func CancelFriendRequest(c *gin.Context) {
 	res, err := database.DB.Exec(`
 		UPDATE user_friends
 		SET status = 'cancelled', updated_at = NOW()
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'pending'
 			  AND requester_id = $1::uuid
 	`, currentUser, targetID)
@@ -270,8 +269,8 @@ func RemoveFriend(c *gin.Context) {
 
 	res, err := database.DB.Exec(`
 		DELETE FROM user_friends
-		WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-		  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+		WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+		  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 		  AND status = 'accepted'
 	`, currentUser, targetID)
 	rows, err := rowsAffectedOrError(res, err)
@@ -296,8 +295,8 @@ func GetFriends(c *gin.Context) {
 	rows, err := database.DB.Query(`
 		SELECT u.id, u.full_name, u.email, u.avatar_url, uf.updated_at
 		FROM user_friends uf
-		JOIN users u ON u.id = CASE WHEN uf.user_id = $1::uuid THEN uf.friend_id ELSE uf.user_id END
-		WHERE $1::uuid IN (uf.user_id, uf.friend_id)
+		JOIN users u ON u.id = CASE WHEN uf.user_id = $1 THEN uf.friend_id ELSE uf.user_id END
+		WHERE $1 IN (uf.user_id, uf.friend_id)
 		  AND uf.status = 'accepted'
 		ORDER BY uf.updated_at DESC
 	`, userID)
@@ -336,8 +335,8 @@ func GetIncomingFriendRequests(c *gin.Context) {
 		FROM user_friends uf
 		JOIN users u ON u.id = uf.requester_id
 		WHERE uf.status = 'pending'
-		  AND uf.requester_id <> $1::uuid
-		  AND $1::uuid IN (uf.user_id, uf.friend_id)
+		  AND uf.requester_id <> $1
+		  AND $1 IN (uf.user_id, uf.friend_id)
 		ORDER BY uf.created_at DESC
 	`, userID)
 	if err != nil {
@@ -372,10 +371,10 @@ func GetOutgoingFriendRequests(c *gin.Context) {
 	rows, err := database.DB.Query(`
 		SELECT u.id, u.full_name, u.email, u.avatar_url, uf.created_at
 		FROM user_friends uf
-		JOIN users u ON u.id = CASE WHEN uf.user_id = $1::uuid THEN uf.friend_id ELSE uf.user_id END
+		JOIN users u ON u.id = CASE WHEN uf.user_id = $1 THEN uf.friend_id ELSE uf.user_id END
 		WHERE uf.status = 'pending'
-		  AND uf.requester_id = $1::uuid
-		  AND $1::uuid IN (uf.user_id, uf.friend_id)
+		  AND uf.requester_id = $1
+		  AND $1 IN (uf.user_id, uf.friend_id)
 		ORDER BY uf.created_at DESC
 	`, userID)
 	if err != nil {
@@ -417,8 +416,8 @@ func GetAddableUsers(c *gin.Context) {
 		  AND NOT EXISTS (
 			SELECT 1
 			FROM user_friends uf
-			WHERE LEAST(uf.user_id, uf.friend_id) = LEAST($1::uuid, u.id)
-			  AND GREATEST(uf.user_id, uf.friend_id) = GREATEST($1::uuid, u.id)
+			WHERE LEAST(uf.user_id, uf.friend_id) = LEAST($1, u.id)
+			  AND GREATEST(uf.user_id, uf.friend_id) = GREATEST($1, u.id)
 			  AND uf.status IN ('accepted', 'pending')
 		)
 		ORDER BY u.full_name ASC
