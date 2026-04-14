@@ -137,7 +137,18 @@ func Login(c *gin.Context) {
 	var user models.User
 	var passwordHash string
 	err := database.DB.QueryRow(`
-        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at, password_hash
+        SELECT id,
+               COALESCE(first_name, '') AS first_name,
+               COALESCE(last_name, '') AS last_name,
+               full_name,
+               email,
+               COALESCE(company_name, '') AS company_name,
+               COALESCE(phone, '') AS phone,
+               COALESCE(position, '') AS position,
+               COALESCE(avatar_url, '') AS avatar_url,
+               is_private_profile,
+               created_at,
+               password_hash
         FROM users WHERE email = $1
     `, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.IsPrivateProfile, &user.CreatedAt, &passwordHash)
 	if err == sql.ErrNoRows {
@@ -210,7 +221,17 @@ func GetMe(c *gin.Context) {
 	userID := currentUserID(c)
 	var user models.User
 	err := database.DB.QueryRow(`
-        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at
+        SELECT id,
+               COALESCE(first_name, '') AS first_name,
+               COALESCE(last_name, '') AS last_name,
+               full_name,
+               email,
+               COALESCE(company_name, '') AS company_name,
+               COALESCE(phone, '') AS phone,
+               COALESCE(position, '') AS position,
+               COALESCE(avatar_url, '') AS avatar_url,
+               is_private_profile,
+               created_at
         FROM users WHERE id = $1
     `, userID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.IsPrivateProfile, &user.CreatedAt)
 	if err != nil {

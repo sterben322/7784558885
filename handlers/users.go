@@ -22,7 +22,17 @@ func GetUsers(c *gin.Context) {
 	search := strings.TrimSpace(c.Query("q"))
 
 	rows, err := database.DB.Query(`
-		SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at
+		SELECT id,
+		       COALESCE(first_name, '') AS first_name,
+		       COALESCE(last_name, '') AS last_name,
+		       full_name,
+		       email,
+		       COALESCE(company_name, '') AS company_name,
+		       COALESCE(phone, '') AS phone,
+		       COALESCE(position, '') AS position,
+		       COALESCE(avatar_url, '') AS avatar_url,
+		       is_private_profile,
+		       created_at
 		FROM users
 		WHERE id <> $1
 		  AND ($2 = '' OR full_name ILIKE '%' || $2 || '%' OR email ILIKE '%' || $2 || '%')
@@ -65,7 +75,17 @@ func GetUserProfile(c *gin.Context) {
 
 	var user models.User
 	err = database.DB.QueryRow(`
-		SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at
+		SELECT id,
+		       COALESCE(first_name, '') AS first_name,
+		       COALESCE(last_name, '') AS last_name,
+		       full_name,
+		       email,
+		       COALESCE(company_name, '') AS company_name,
+		       COALESCE(phone, '') AS phone,
+		       COALESCE(position, '') AS position,
+		       COALESCE(avatar_url, '') AS avatar_url,
+		       is_private_profile,
+		       created_at
 		FROM users
 		WHERE id = $1
 	`, targetID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.IsPrivateProfile, &user.CreatedAt)
