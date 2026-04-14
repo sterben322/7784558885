@@ -2,49 +2,258 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>LASTOP | Чат</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASTOP | Чаты</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
     <script src="/assets/theme.js" defer></script>
 </head>
-<body class="bg-white">
-    <header class="bg-white border-b">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-            <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-                <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-                <a href="/dashboard.html#communities" class="text-gray-600 hover:text-black">Сообщества</a>
-                <a href="/company-profile.html" class="text-gray-600 hover:text-black">Компании</a>
-                <a href="/jobs.html" class="text-gray-600 hover:text-black">Резюме и вакансии</a>
-                <a href="/forum.html" class="text-gray-600 hover:text-black">Форум</a>
-                <a href="/chat.html" class="text-gray-600 hover:text-black">Чат</a>
-                <a href="/settings.html" class="text-gray-600 hover:text-black">Настройки</a>
-            </nav>
-        </div>
-    </header>
-    <div class="max-w-4xl mx-auto p-8">
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h1 class="text-2xl font-bold mb-6">Чаты</h1>
-            <div class="space-y-4" id="chatsList"><div class="text-center py-8 text-gray-500">Загрузка...</div></div>
-        </div>
+<body class="bg-[#f6f8fa] text-[#273244]">
+<header class="bg-white border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
+        <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
+            <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
+            <a href="/profile.html" class="text-gray-600 hover:text-black">Профиль</a>
+            <a href="/chat.html" class="font-semibold text-[#2b8662]">Чаты</a>
+        </nav>
     </div>
-    <script>
-        const API_URL = '/api';
-        const token = localStorage.getItem('token');
-        if (!token) window.location.href = '/login.html';
+</header>
 
-        async function loadChats() {
-            try {
-                const response = await fetch(`${API_URL}/chats`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                const chats = data.chats || [];
-                document.getElementById('chatsList').innerHTML = chats.map(c => `<div class="border rounded-lg p-4 flex justify-between items-center"><div><h3 class="font-semibold">${c.name || 'Диалог'}</h3>${c.last_message ? `<p class="text-sm text-gray-500">${c.last_message}</p>` : ''}</div>${c.unread_count > 0 ? `<span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs">${c.unread_count}</span>` : ''}</div>`).join('') || '<div class="text-center py-8 text-gray-500">Чатов пока нет</div>';
-            } catch (e) {
-                document.getElementById('chatsList').innerHTML = '<div class="text-center py-8 text-red-500">Ошибка загрузки</div>';
-            }
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+    <div id="chatMessage" class="hidden mb-4 rounded-xl px-3 py-2 text-sm"></div>
+    <div class="grid gap-4 md:grid-cols-[320px_minmax(0,1fr)]">
+        <aside class="rounded-2xl border border-[#e4eaee] bg-white p-4 space-y-4">
+            <h2 class="text-lg font-semibold">Чаты</h2>
+
+            <div class="rounded-xl border border-[#edf2f4] p-3 space-y-2">
+                <div class="text-sm font-semibold">Новый чат с другом</div>
+                <select id="friendsSelect" class="w-full rounded-lg border border-[#dbe4e8] px-2 py-2 text-sm">
+                    <option value="">Выберите друга</option>
+                </select>
+                <button id="startChatBtn" class="w-full rounded-lg bg-[#2b8662] px-3 py-2 text-sm font-semibold text-white hover:bg-[#246f52] disabled:opacity-60 disabled:cursor-not-allowed">
+                    Начать чат
+                </button>
+            </div>
+
+            <div id="chatsList" class="space-y-2"></div>
+            <p id="chatsEmpty" class="hidden text-sm text-[#8a97a5]">Диалогов пока нет.</p>
+        </aside>
+
+        <section class="rounded-2xl border border-[#e4eaee] bg-white p-4 flex flex-col min-h-[560px]">
+            <div id="chatHeader" class="border-b border-[#edf2f4] pb-3 mb-3 text-lg font-semibold">Выберите диалог</div>
+            <div id="messagesList" class="flex-1 overflow-auto space-y-2 pr-1">
+                <div class="text-sm text-[#8a97a5]">Сообщения появятся здесь после выбора чата.</div>
+            </div>
+            <form id="messageForm" class="mt-3 border-t border-[#edf2f4] pt-3 flex gap-2">
+                <input id="messageInput" type="text" placeholder="Введите сообщение" class="flex-1 rounded-lg border border-[#dbe4e8] px-3 py-2 text-sm" disabled>
+                <button id="sendBtn" type="submit" class="rounded-lg bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white hover:bg-[#246f52] disabled:opacity-60" disabled>
+                    Отправить
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
+
+const state = {
+    conversations: [],
+    friends: [],
+    activeConversationId: null,
+    sending: false,
+};
+
+function setMessage(text, ok = true) {
+    const el = document.getElementById('chatMessage');
+    el.textContent = text;
+    el.className = `mb-4 rounded-xl px-3 py-2 text-sm ${ok ? 'bg-[#e9f7ef] text-[#2a7d5b]' : 'bg-[#fdeeee] text-[#b94242]'}`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 3200);
+}
+
+async function api(path, options = {}) {
+    const response = await fetch(path, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            ...(options.headers || {})
         }
-        loadChats();
-    </script>
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        throw new Error(payload.message || payload.error || 'Ошибка запроса');
+    }
+    return payload;
+}
+
+function formatTime(value) {
+    if (!value) return '';
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return '';
+    return dt.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderChats() {
+    const list = document.getElementById('chatsList');
+    const empty = document.getElementById('chatsEmpty');
+    if (!state.conversations.length) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = state.conversations.map(c => {
+        const active = c.id === state.activeConversationId;
+        return `
+        <button data-open-chat="${c.id}" class="w-full text-left rounded-xl border px-3 py-2 ${active ? 'border-[#2b8662] bg-[#eff7f3]' : 'border-[#edf2f4] hover:bg-[#f8fbfb]'}">
+            <div class="flex items-center justify-between gap-2">
+                <div class="font-semibold text-sm truncate">${c.name || 'Диалог'}</div>
+                ${c.unread_count > 0 ? `<span class="rounded-full bg-[#dd4d4d] px-2 py-0.5 text-xs font-semibold text-white">${c.unread_count}</span>` : ''}
+            </div>
+            <div class="mt-1 text-xs text-[#8a97a5] truncate">${c.last_message || 'Пока нет сообщений'}</div>
+            <div class="mt-1 text-[11px] text-[#9aa7b5]">${formatTime(c.last_time)}</div>
+        </button>`;
+    }).join('');
+}
+
+function renderFriendsSelect() {
+    const select = document.getElementById('friendsSelect');
+    const options = ['<option value="">Выберите друга</option>']
+        .concat(state.friends.map(f => `<option value="${f.friend_id}">${f.friend_name}</option>`));
+    select.innerHTML = options.join('');
+}
+
+async function loadConversations() {
+    const data = await api('/api/chat/conversations');
+    state.conversations = data.conversations || [];
+    renderChats();
+}
+
+async function loadFriends() {
+    const data = await api('/api/friends');
+    state.friends = data.data?.friends || [];
+    renderFriendsSelect();
+}
+
+function renderMessages(messages) {
+    const list = document.getElementById('messagesList');
+    if (!messages.length) {
+        list.innerHTML = '<div class="text-sm text-[#8a97a5]">Пока нет сообщений. Напишите первое сообщение.</div>';
+        return;
+    }
+    list.innerHTML = messages.map(m => `
+        <div class="rounded-xl border border-[#edf2f4] px-3 py-2">
+            <div class="flex items-center justify-between gap-2">
+                <div class="text-sm font-semibold">${m.sender_name || 'Пользователь'}</div>
+                <div class="text-xs text-[#95a1ad]">${formatTime(m.created_at)}</div>
+            </div>
+            <div class="mt-1 text-sm">${m.content}</div>
+        </div>
+    `).join('');
+    list.scrollTop = list.scrollHeight;
+}
+
+async function openConversation(id) {
+    state.activeConversationId = id;
+    renderChats();
+    document.getElementById('messageInput').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+
+    const details = await api(`/api/chat/conversations/${id}`);
+    document.getElementById('chatHeader').textContent = details.conversation?.name || 'Диалог';
+
+    const data = await api(`/api/chat/conversations/${id}/messages`);
+    renderMessages(data.messages || []);
+    await loadConversations();
+}
+
+async function startConversationWithFriend(friendId) {
+    const data = await api(`/api/chat/conversations/start/${friendId}`, { method: 'POST' });
+    const conversationId = data.conversation?.id;
+    if (!conversationId) throw new Error('Не удалось создать чат');
+    await loadConversations();
+    await openConversation(conversationId);
+}
+
+async function onSendMessage(event) {
+    event.preventDefault();
+    if (!state.activeConversationId || state.sending) return;
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
+    if (!content) return;
+
+    state.sending = true;
+    document.getElementById('sendBtn').disabled = true;
+    try {
+        await api(`/api/chat/conversations/${state.activeConversationId}/messages`, {
+            method: 'POST',
+            body: JSON.stringify({ content })
+        });
+        input.value = '';
+        const data = await api(`/api/chat/conversations/${state.activeConversationId}/messages`);
+        renderMessages(data.messages || []);
+        await loadConversations();
+    } finally {
+        state.sending = false;
+        document.getElementById('sendBtn').disabled = false;
+    }
+}
+
+function bindEvents() {
+    document.getElementById('chatsList').addEventListener('click', async (event) => {
+        const btn = event.target.closest('[data-open-chat]');
+        if (!btn) return;
+        try {
+            await openConversation(btn.dataset.openChat);
+        } catch (e) {
+            setMessage(e.message, false);
+        }
+    });
+
+    document.getElementById('startChatBtn').addEventListener('click', async () => {
+        const friendId = document.getElementById('friendsSelect').value;
+        if (!friendId) {
+            setMessage('Сначала выберите друга', false);
+            return;
+        }
+        const btn = document.getElementById('startChatBtn');
+        btn.disabled = true;
+        try {
+            await startConversationWithFriend(friendId);
+        } catch (e) {
+            setMessage(e.message, false);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById('messageForm').addEventListener('submit', async (event) => {
+        try {
+            await onSendMessage(event);
+        } catch (e) {
+            setMessage(e.message, false);
+        }
+    });
+}
+
+(async function init() {
+    try {
+        bindEvents();
+        await Promise.all([loadConversations(), loadFriends()]);
+        const params = new URLSearchParams(window.location.search);
+        const initialConversation = params.get('conversation');
+        if (initialConversation) {
+            await openConversation(initialConversation);
+        }
+    } catch (e) {
+        setMessage(e.message, false);
+    }
+})();
+</script>
 </body>
 </html>

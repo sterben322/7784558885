@@ -206,12 +206,14 @@ type ForumPost struct {
 }
 
 type Chat struct {
-	ID          uuid.UUID  `json:"id"`
-	Name        *string    `json:"name,omitempty"`
-	Type        string     `json:"type"`
-	LastMessage *string    `json:"last_message,omitempty"`
-	LastTime    *time.Time `json:"last_time,omitempty"`
-	UnreadCount int        `json:"unread_count"`
+	ID            uuid.UUID  `json:"id"`
+	Name          *string    `json:"name,omitempty"`
+	Type          string     `json:"type"`
+	LastMessage   *string    `json:"last_message,omitempty"`
+	LastTime      *time.Time `json:"last_time,omitempty"`
+	UnreadCount   int        `json:"unread_count"`
+	PeerUserID    *string    `json:"peer_user_id,omitempty"`
+	PeerAvatarURL *string    `json:"peer_avatar_url,omitempty"`
 }
 
 type Message struct {
