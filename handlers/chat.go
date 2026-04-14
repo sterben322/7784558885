@@ -94,7 +94,7 @@ func GetChatConversations(c *gin.Context) {
 	rows, err := database.DB.Query(`
 		SELECT c.id,
 			COALESCE(c.name, u.full_name, 'Диалог') AS chat_name,
-			COALESCE(c.type, 'dialog') AS type,
+			c.type,
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
 			c.last_message_at,
 			COALESCE(cp.unread_count, 0) AS unread_count,
@@ -214,7 +214,7 @@ func GetChatConversation(c *gin.Context) {
 	err := database.DB.QueryRow(`
 		SELECT c.id,
 			COALESCE(c.name, u.full_name, 'Диалог') AS chat_name,
-			COALESCE(c.type, 'dialog') AS type,
+			c.type,
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
 			c.last_message_at,
 			COALESCE(cp.unread_count, 0) AS unread_count
