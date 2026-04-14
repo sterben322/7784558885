@@ -182,8 +182,8 @@ func isAcceptedFriend(userID uuid.UUID, friendID uuid.UUID) bool {
 		SELECT EXISTS(
 			SELECT 1
 			FROM user_friends
-			WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)
-			  AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)
+			WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 			  AND status = 'accepted'
 		)
 	`, userID, friendID).Scan(&exists)
