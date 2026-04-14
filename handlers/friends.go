@@ -43,7 +43,7 @@ func userExists(userID uuid.UUID) (bool, error) {
 
 func relationshipStatus(currentUserID, targetUserID uuid.UUID) (string, error) {
 	var status string
-	var requesterID uuid.UUID
+	var requesterID sql.NullString
 	err := database.DB.QueryRow(`
 		SELECT status, requester_id
 		FROM user_friends
@@ -57,7 +57,7 @@ func relationshipStatus(currentUserID, targetUserID uuid.UUID) (string, error) {
 	}
 
 	if status == "pending" {
-		if requesterID == currentUserID {
+		if requesterID.Valid && requesterID.String == currentUserID.String() {
 			return "outgoing_pending", nil
 		}
 		return "incoming_pending", nil
@@ -92,7 +92,7 @@ func SendFriendRequest(c *gin.Context) {
 	}
 
 	var status string
-	var existingRequester uuid.UUID
+	var existingRequester sql.NullString
 	err = database.DB.QueryRow(`
 		SELECT status, requester_id
 		FROM user_friends
@@ -120,7 +120,7 @@ func SendFriendRequest(c *gin.Context) {
 	case "accepted":
 		friendError(c, http.StatusBadRequest, "Уже в друзьях")
 	case "pending":
-		if existingRequester == requesterID {
+		if existingRequester.Valid && existingRequester.String == requesterID.String() {
 			friendError(c, http.StatusConflict, "Заявка уже отправлена")
 			return
 		}
