@@ -27,7 +27,10 @@ func parseUUIDParam(c *gin.Context, key string) (uuid.UUID, bool) {
 
 func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 	row := database.DB.QueryRow(`
-		SELECT c.id, c.name, c.type, c.last_message_at,
+		SELECT c.id,
+			c.name,
+			COALESCE(c.type, 'direct') AS type,
+			c.last_message_at,
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message
 		FROM chats c
 		WHERE c.type = 'direct'
@@ -90,11 +93,11 @@ func GetChatConversations(c *gin.Context) {
 	userID := currentUserID(c)
 	rows, err := database.DB.Query(`
 		SELECT c.id,
-			COALESCE(c.name, CASE WHEN c.type = 'direct' THEN u.full_name ELSE 'Диалог' END) AS chat_name,
-			c.type,
+			COALESCE(c.name, u.full_name, 'Диалог') AS chat_name,
+			COALESCE(c.type, 'dialog') AS type,
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
 			c.last_message_at,
-			cp.unread_count,
+			COALESCE(cp.unread_count, 0) AS unread_count,
 			u.id,
 			u.avatar_url
 		FROM chats c
@@ -210,11 +213,11 @@ func GetChatConversation(c *gin.Context) {
 	var unreadCount int
 	err := database.DB.QueryRow(`
 		SELECT c.id,
-			COALESCE(c.name, CASE WHEN c.type = 'direct' THEN u.full_name ELSE 'Диалог' END) AS chat_name,
-			c.type,
+			COALESCE(c.name, u.full_name, 'Диалог') AS chat_name,
+			COALESCE(c.type, 'dialog') AS type,
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
 			c.last_message_at,
-			cp.unread_count
+			COALESCE(cp.unread_count, 0) AS unread_count
 		FROM chats c
 		JOIN chat_participants cp ON cp.chat_id = c.id AND cp.user_id = $2
 		LEFT JOIN users u ON c.type = 'direct' AND u.id = CASE
