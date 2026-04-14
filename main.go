@@ -47,7 +47,7 @@ func main() {
 
 	r.GET("/api/health", func(c *gin.Context) {
 		if !database.IsConfigured() {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"status":   "degraded",
 				"database": "down",
 				"error":    "DATABASE_URL is not configured",
