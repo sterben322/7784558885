@@ -188,12 +188,14 @@ func CreateTables() error {
             phone VARCHAR(20),
             position VARCHAR(100),
             avatar_url TEXT,
+            is_private_profile BOOLEAN NOT NULL DEFAULT false,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100)`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100)`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100)`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_private_profile BOOLEAN NOT NULL DEFAULT false`,
 		`UPDATE users
 		 SET first_name = COALESCE(NULLIF(first_name, ''), split_part(full_name, ' ', 1)),
 		     last_name = COALESCE(NULLIF(last_name, ''), NULLIF(trim(substr(full_name, length(split_part(full_name, ' ', 1)) + 1)), ''))

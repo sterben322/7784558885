@@ -50,7 +50,7 @@
             <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
                 <h2 class="text-xl font-semibold">Конфиденциальность и безопасность</h2>
                 <div class="mt-4 space-y-3 text-[#4e5d6c]">
-                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Закрытый профиль</span><input type="checkbox" class="h-4 w-4"></label>
+                    <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Закрытый профиль</span><input id="privateProfileToggle" type="checkbox" class="h-4 w-4"></label>
                     <label class="flex items-center justify-between rounded-xl border border-[#edf1f4] px-3 py-2.5"><span>Показывать email в профиле</span><input type="checkbox" class="h-4 w-4"></label>
                 </div>
                 <button onclick="window.location.href='/change-password.html'" class="mt-4 rounded-xl border border-[#dbe3e8] px-4 py-2.5 text-sm font-medium text-[#4f5e6d] hover:bg-[#f5f8f9]">Сменить пароль</button>
@@ -88,9 +88,11 @@ const fullNameInput = document.getElementById('fullNameInput');
 const companyInput = document.getElementById('companyInput');
 const layoutWideToggle = document.getElementById('layoutWideToggle');
 const themeToggle = document.getElementById('themeDarkToggle');
+const privateProfileToggle = document.getElementById('privateProfileToggle');
 
 fullNameInput.value = user.full_name || '';
 companyInput.value = user.company_name || '';
+privateProfileToggle.checked = Boolean(user.is_private_profile);
 layoutWideToggle.checked = (localStorage.getItem(LAYOUT_KEY) || 'standard') === 'wide';
 themeToggle.checked = (localStorage.getItem(THEME_KEY) || 'light') === 'dark';
 
@@ -113,14 +115,53 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   window.location.href = '/login.html';
 });
 
-document.getElementById('saveBtn').addEventListener('click', () => {
-  const updatedUser = {
-    ...user,
-    full_name: fullNameInput.value.trim(),
-    company_name: companyInput.value.trim()
-  };
-  localStorage.setItem('user', JSON.stringify(updatedUser));
-  alert('Настройки сохранены');
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const token = localStorage.getItem('token');
+  const fullName = fullNameInput.value.trim();
+  const parts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = parts[0] || '';
+  const lastName = parts.slice(1).join(' ') || '-';
+  const company = companyInput.value.trim();
+
+  try {
+    if (token) {
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          first_name: firstName || 'User',
+          last_name: lastName,
+          full_name: fullName || `${firstName} ${lastName}`.trim(),
+          company_name: company || null,
+          phone: user.phone || null,
+          position: user.position || null,
+          avatar_url: user.avatar_url || null
+        })
+      });
+      await fetch('/api/profile/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_private_profile: privateProfileToggle.checked })
+      });
+    }
+
+    const updatedUser = {
+      ...user,
+      full_name: fullName,
+      company_name: company,
+      is_private_profile: privateProfileToggle.checked
+    };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    alert('Настройки сохранены');
+  } catch {
+    alert('Не удалось сохранить настройки');
+  }
 });
 </script>
 </body>

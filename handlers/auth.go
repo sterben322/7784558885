@@ -82,8 +82,8 @@ func Register(c *gin.Context) {
 
 	createdAt := time.Now().UTC()
 	_, err = database.DB.Exec(`
-		INSERT INTO users (id, first_name, last_name, full_name, name, email, password_hash, avatar_url, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
+		INSERT INTO users (id, first_name, last_name, full_name, name, email, password_hash, avatar_url, is_private_profile, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $9)
 	`, userID, firstName, lastName, displayName, nullIfEmpty(displayName), req.Email, string(hashedPassword), nullIfEmpty(req.AvatarURL), createdAt)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "duplicate key") {
@@ -137,9 +137,9 @@ func Login(c *gin.Context) {
 	var user models.User
 	var passwordHash string
 	err := database.DB.QueryRow(`
-        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, created_at, password_hash
+        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at, password_hash
         FROM users WHERE email = $1
-    `, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt, &passwordHash)
+    `, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.IsPrivateProfile, &user.CreatedAt, &passwordHash)
 	if err == sql.ErrNoRows {
 		jsonError(c, http.StatusUnauthorized, "Invalid credentials")
 		return
@@ -210,9 +210,9 @@ func GetMe(c *gin.Context) {
 	userID := currentUserID(c)
 	var user models.User
 	err := database.DB.QueryRow(`
-        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, created_at
+        SELECT id, first_name, last_name, full_name, email, company_name, phone, position, avatar_url, is_private_profile, created_at
         FROM users WHERE id = $1
-    `, userID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.CreatedAt)
+    `, userID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.FullName, &user.Email, &user.CompanyName, &user.Phone, &user.Position, &user.AvatarURL, &user.IsPrivateProfile, &user.CreatedAt)
 	if err != nil {
 		jsonError(c, http.StatusNotFound, "User not found")
 		return

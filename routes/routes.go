@@ -30,6 +30,9 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/auth/me", handlers.GetMe)
 		api.GET("/me", handlers.GetMe)
 		api.PUT("/profile", handlers.UpdateProfile)
+		api.PUT("/profile/settings", handlers.UpdateProfileSettings)
+		api.GET("/users", handlers.GetUsers)
+		api.GET("/users/:id", handlers.GetUserProfile)
 		api.GET("/corporate-profile", handlers.GetMyCorporateProfile)
 		api.POST("/corporate-profile", handlers.CreateCorporateProfile)
 

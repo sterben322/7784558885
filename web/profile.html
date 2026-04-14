@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Мой профиль</title>
+    <title>LASTOP | Профиль</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/styles.css" rel="stylesheet">
@@ -11,8 +11,8 @@
 </head>
 <body class="bg-white text-[#273244]">
 <div class="min-h-screen p-4 md:p-6">
-    <div class="mx-auto w-full max-w-[1460px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
-        <div class="grid gap-5 p-4 md:grid-cols-[minmax(0,1fr)_320px] md:p-6">
+    <div class="mx-auto w-full max-w-[1200px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
+        <div class="grid gap-5 p-4 md:grid-cols-[minmax(0,1fr)_360px] md:p-6">
             <main class="space-y-4">
                 <section class="rounded-[24px] border border-[#e7ecef] bg-white shadow-[0_10px_22px_rgba(178,190,198,0.10)]">
                     <div class="h-[220px] rounded-t-[24px] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_40%),linear-gradient(110deg,#1f6a4d_0%,#2b8662_48%,#41936f_100%)]"></div>
@@ -26,36 +26,29 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <a id="registerButton" href="/register.html" class="hidden rounded-xl bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#246f52]">Зарегистрироваться</a>
-                                <span id="verifiedBadge" class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Верифицирован</span>
+                                <a href="/settings.html" id="settingsBtn" class="hidden rounded-xl border border-[#dbe4e8] px-4 py-2 text-sm font-semibold text-[#4f5e6d] hover:bg-[#f8fbfb]">Настройки</a>
+                                <button id="writeBtn" class="hidden rounded-xl bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#246f52]">Написать</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <section id="aboutSection" class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О себе</h2>
+                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О пользователе</h2>
                     <p id="aboutText" class="mt-3 text-[16px] leading-7 text-[#667585]"></p>
+                </section>
+
+                <section id="privateSection" class="hidden rounded-[20px] border border-[#f1d8d8] bg-[#fff8f8] px-5 py-6 text-[#9b3f3f] shadow-[0_8px_16px_rgba(220,140,140,0.08)]">
+                    <h2 class="text-[22px] font-semibold">Профиль закрыт</h2>
+                    <p class="mt-2 text-[15px]">Этот пользователь включил приватность профиля. Данные недоступны.</p>
                 </section>
 
                 <section id="friends" class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)] space-y-5">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Друзья</h2>
-                        <button id="friendsRefresh" class="rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm text-[#4f5e6d] hover:bg-[#f8fbfb]">
-                            <i class="fa-solid fa-rotate mr-1"></i>Обновить
-                        </button>
+                        <button id="friendsRefresh" class="rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm text-[#4f5e6d] hover:bg-[#f8fbfb]"><i class="fa-solid fa-rotate mr-1"></i>Обновить</button>
                     </div>
                     <div id="friendsMessage" class="hidden rounded-xl px-3 py-2 text-sm"></div>
-
-                    <div class="rounded-2xl border border-[#edf2f4] p-4">
-                        <h3 class="font-semibold text-[#334153]">Добавить в друзья</h3>
-                        <div class="mt-3 flex gap-2">
-                            <input id="candidateSearch" type="text" placeholder="Поиск по имени или email" class="w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20">
-                            <button id="candidateSearchBtn" class="rounded-xl bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white hover:bg-[#246f52]">Найти</button>
-                        </div>
-                        <div id="candidatesList" class="mt-3 space-y-2"></div>
-                        <p id="candidatesEmpty" class="hidden mt-2 text-sm text-[#8a97a5]">Нет пользователей для добавления.</p>
-                    </div>
 
                     <div class="grid gap-4 md:grid-cols-2">
                         <div class="rounded-2xl border border-[#edf2f4] p-4">
@@ -79,10 +72,10 @@
             </main>
 
             <aside class="space-y-4">
-                <section id="statsSection" class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <div class="text-sm text-[#7f8d9b]">Просмотры профиля за 7 дней</div>
-                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]">247</div>
-                    <div class="mt-1 text-sm font-semibold text-[#3e8c6f]">+18% к прошлой неделе</div>
+                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
+                    <h2 class="text-[18px] font-semibold text-[#2f3d4f]">Пользователи</h2>
+                    <input id="usersSearch" type="text" placeholder="Поиск пользователей" class="mt-3 w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20">
+                    <div id="usersList" class="mt-3 space-y-2"></div>
                 </section>
             </aside>
         </div>
@@ -90,61 +83,23 @@
 </div>
 
 <script>
-function safeUserFromStorage() {
-    try {
-        return JSON.parse(localStorage.getItem('user') || '{}');
-    } catch {
-        return {};
-    }
-}
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
 
-function renderProfile(user) {
-    const fullName = user.full_name || 'Пользователь';
-    const avatar = document.getElementById('mainAvatar');
-    if (user.avatar_url) {
-        avatar.innerHTML = `<img src="${user.avatar_url}" alt="Аватар пользователя" class="h-full w-full rounded-full object-cover">`;
-    } else {
-        avatar.textContent = (fullName[0] || 'U').toUpperCase();
-    }
-    document.getElementById('profileName').textContent = fullName;
-    document.getElementById('profileRole').textContent = `${user.position || 'Участник сообщества'} · ${user.company_name || 'LASTOP'}`;
-    document.getElementById('aboutText').textContent = `Публичный профиль ${fullName}.`;
-}
-
-function toggleGuestView(isAuthenticated) {
-    document.getElementById('registerButton').classList.toggle('hidden', isAuthenticated);
-    document.getElementById('verifiedBadge').classList.toggle('hidden', !isAuthenticated);
-    document.getElementById('aboutSection').classList.toggle('hidden', !isAuthenticated);
-    document.getElementById('friends').classList.toggle('hidden', !isAuthenticated);
-    document.getElementById('statsSection').classList.toggle('hidden', !isAuthenticated);
-}
-
-function userRow(item, actionsHtml) {
-    const avatar = item.friend_avatar || item.avatar_url;
-    const letter = (item.friend_name || item.full_name || 'U')[0].toUpperCase();
-    const name = item.friend_name || item.full_name || 'Пользователь';
-    const email = item.friend_email || item.email || '—';
-    return `
-    <div class="flex items-center justify-between gap-2 rounded-xl border border-[#edf2f4] px-3 py-2">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white overflow-hidden">${avatar ? `<img src="${avatar}" alt="avatar" class="h-full w-full object-cover">` : letter}</div>
-        <div class="min-w-0">
-            <div class="truncate text-sm font-semibold text-[#334153]">${name}</div>
-            <div class="truncate text-xs text-[#8a97a5]">${email}</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">${actionsHtml}</div>
-    </div>`;
-}
-
-const friendsState = { token: localStorage.getItem('token'), busy: new Set() };
+const state = {
+  token,
+  me: null,
+  viewedUser: null,
+  isSelf: true,
+  busy: new Set(),
+};
 
 function setMessage(text, ok = true) {
     const el = document.getElementById('friendsMessage');
     el.textContent = text;
     el.className = `rounded-xl px-3 py-2 text-sm ${ok ? 'bg-[#e9f7ef] text-[#2a7d5b]' : 'bg-[#fdeeee] text-[#b94242]'}`;
     el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 3500);
+    setTimeout(() => el.classList.add('hidden'), 3000);
 }
 
 async function api(path, options = {}) {
@@ -152,28 +107,58 @@ async function api(path, options = {}) {
         ...options,
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${friendsState.token}`,
+            Authorization: `Bearer ${state.token}`,
             ...(options.headers || {})
         }
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload.success === false) {
-        throw new Error(payload.message || payload.error || 'Ошибка запроса');
+    if (!response.ok) {
+        const message = payload.error || payload.message || 'Ошибка запроса';
+        const err = new Error(message);
+        err.status = response.status;
+        throw err;
     }
     return payload.data || payload;
 }
 
-async function friendAction(actionKey, request) {
-    if (friendsState.busy.has(actionKey)) return;
-    friendsState.busy.add(actionKey);
-    try {
-        await request();
-        await loadFriendsData();
-    } catch (e) {
-        setMessage(e.message, false);
-    } finally {
-        friendsState.busy.delete(actionKey);
+function userRow(item, actionsHtml = '') {
+    const avatar = item.friend_avatar || item.avatar_url;
+    const letter = (item.friend_name || item.full_name || 'U')[0].toUpperCase();
+    const name = item.friend_name || item.full_name || 'Пользователь';
+    const email = item.friend_email || item.email || '—';
+    const userId = item.friend_id || item.id || item.user_id || '';
+    return `
+    <div class="flex items-center justify-between gap-2 rounded-xl border border-[#edf2f4] px-3 py-2">
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="/profile.html?userId=${userId}" class="grid h-10 w-10 place-items-center rounded-full bg-[#6fa488] text-sm font-semibold text-white overflow-hidden">${avatar ? `<img src="${avatar}" alt="avatar" class="h-full w-full object-cover">` : letter}</a>
+        <div class="min-w-0">
+            <a href="/profile.html?userId=${userId}" class="truncate text-sm font-semibold text-[#334153] hover:underline block">${name}</a>
+            <div class="truncate text-xs text-[#8a97a5]">${email}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">${actionsHtml}</div>
+    </div>`;
+}
+
+function renderProfile(user, isSelf) {
+    const fullName = user.full_name || 'Пользователь';
+    const avatar = document.getElementById('mainAvatar');
+    if (user.avatar_url) {
+        avatar.innerHTML = `<img src="${user.avatar_url}" alt="Аватар" class="h-full w-full rounded-full object-cover">`;
+    } else {
+        avatar.textContent = (fullName[0] || 'U').toUpperCase();
     }
+    document.getElementById('profileName').textContent = fullName;
+    document.getElementById('profileRole').textContent = `${user.position || 'Участник сообщества'} · ${user.company_name || 'LASTOP'}`;
+    document.getElementById('aboutText').textContent = `Пользователь зарегистрирован: ${new Date(user.created_at).toLocaleDateString('ru-RU')}`;
+    document.getElementById('settingsBtn').classList.toggle('hidden', !isSelf);
+    document.getElementById('writeBtn').classList.toggle('hidden', isSelf);
+}
+
+function renderPrivateView() {
+    document.getElementById('aboutSection').classList.add('hidden');
+    document.getElementById('privateSection').classList.remove('hidden');
+    document.getElementById('writeBtn').classList.remove('hidden');
 }
 
 function renderFriendsList(items) {
@@ -218,124 +203,133 @@ function renderOutgoing(items) {
     list.innerHTML = items.map(item => userRow(item, `<button data-cancel="${item.friend_id}" class="rounded-lg border border-[#dbe4e8] px-2 py-1 text-xs text-[#4f5e6d] hover:bg-[#f8fbfb]">Отменить</button>`)).join('');
 }
 
-function renderCandidates(items) {
-    const list = document.getElementById('candidatesList');
-    const empty = document.getElementById('candidatesEmpty');
-    if (!items.length) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-    empty.classList.add('hidden');
-    list.innerHTML = items.map(item => userRow(item, `<button data-request="${item.id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Добавить</button>`)).join('');
+async function loadUsersList() {
+    const q = encodeURIComponent(document.getElementById('usersSearch').value.trim());
+    const data = await api(`/api/users?q=${q}`);
+    document.getElementById('usersList').innerHTML = (data.users || []).map(u => userRow(u, `<button data-open-chat="${u.id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>`)).join('');
 }
 
 async function loadFriendsData() {
-    document.getElementById('friendsRefresh').disabled = true;
+    const [friends, incoming, outgoing] = await Promise.all([
+      api('/api/friends'),
+      api('/api/friends/requests/incoming'),
+      api('/api/friends/requests/outgoing')
+    ]);
+    renderFriendsList(friends.friends || []);
+    renderIncoming(incoming.requests || []);
+    renderOutgoing(outgoing.requests || []);
+}
+
+async function openOrCreateChat(userId) {
+    const result = await api(`/api/chat/conversations/start/${userId}`, { method: 'POST' });
+    const conversationId = result.conversation?.id;
+    if (!conversationId) throw new Error('Не удалось открыть чат');
+    window.location.href = `/chat.html?conversation=${conversationId}`;
+}
+
+async function friendAction(actionKey, request) {
+    if (state.busy.has(actionKey)) return;
+    state.busy.add(actionKey);
     try {
-        const q = encodeURIComponent(document.getElementById('candidateSearch').value.trim());
-        const [friends, incoming, outgoing, candidates] = await Promise.all([
-            api('/api/friends'),
-            api('/api/friends/requests/incoming'),
-            api('/api/friends/requests/outgoing'),
-            api(`/api/friends/candidates?q=${q}`)
-        ]);
-        renderFriendsList(friends.friends || []);
-        renderIncoming(incoming.requests || []);
-        renderOutgoing(outgoing.requests || []);
-        renderCandidates(candidates.users || []);
+      await request();
+      await loadFriendsData();
     } catch (e) {
-        setMessage(e.message, false);
+      setMessage(e.message, false);
     } finally {
-        document.getElementById('friendsRefresh').disabled = false;
+      state.busy.delete(actionKey);
     }
 }
 
-function bindFriendsEvents() {
-    document.getElementById('friendsRefresh').addEventListener('click', loadFriendsData);
-    document.getElementById('candidateSearchBtn').addEventListener('click', loadFriendsData);
+function bindEvents() {
+  document.getElementById('friendsRefresh').addEventListener('click', () => loadFriendsData().catch(e => setMessage(e.message, false)));
+  document.getElementById('usersSearch').addEventListener('input', () => loadUsersList().catch(e => setMessage(e.message, false)));
 
-    document.getElementById('friends').addEventListener('click', (event) => {
-        const el = event.target.closest('button');
-        if (!el) return;
+  document.getElementById('writeBtn').addEventListener('click', async () => {
+    if (!state.viewedUser?.id) return;
+    try {
+      await openOrCreateChat(state.viewedUser.id);
+    } catch (e) {
+      setMessage(e.message, false);
+    }
+  });
 
-        if (el.dataset.request) {
-            const id = el.dataset.request;
-            return friendAction(`request-${id}`, async () => {
-                await api(`/api/friends/request/${id}`, { method: 'POST' });
-                setMessage('Заявка отправлена');
-            });
-        }
-        if (el.dataset.accept) {
-            const id = el.dataset.accept;
-            return friendAction(`accept-${id}`, async () => {
-                await api(`/api/friends/accept/${id}`, { method: 'POST' });
-                setMessage('Заявка принята');
-            });
-        }
-        if (el.dataset.reject) {
-            const id = el.dataset.reject;
-            return friendAction(`reject-${id}`, async () => {
-                await api(`/api/friends/reject/${id}`, { method: 'POST' });
-                setMessage('Заявка отклонена');
-            });
-        }
-        if (el.dataset.cancel) {
-            const id = el.dataset.cancel;
-            return friendAction(`cancel-${id}`, async () => {
-                await api(`/api/friends/cancel/${id}`, { method: 'POST' });
-                setMessage('Заявка отменена');
-            });
-        }
-        if (el.dataset.remove) {
-            const id = el.dataset.remove;
-            return friendAction(`remove-${id}`, async () => {
-                await api(`/api/friends/${id}`, { method: 'DELETE' });
-                setMessage('Друг удалён');
-            });
-        }
-        if (el.dataset.chat) {
-            const id = el.dataset.chat;
-            return friendAction(`chat-${id}`, async () => {
-                const result = await api(`/api/chat/conversations/start/${id}`, { method: 'POST' });
-                const conversationId = result.conversation?.id;
-                if (!conversationId) {
-                    throw new Error('Не удалось открыть чат');
-                }
-                window.location.href = `/chat.html?conversation=${conversationId}`;
-            });
-        }
-    });
+  document.body.addEventListener('click', (event) => {
+    const el = event.target.closest('button');
+    if (!el) return;
+
+    if (el.dataset.openChat) {
+      return openOrCreateChat(el.dataset.openChat).catch(e => setMessage(e.message, false));
+    }
+    if (el.dataset.chat) {
+      return openOrCreateChat(el.dataset.chat).catch(e => setMessage(e.message, false));
+    }
+    if (el.dataset.accept) {
+      const id = el.dataset.accept;
+      return friendAction(`accept-${id}`, () => api(`/api/friends/accept/${id}`, { method: 'POST' }));
+    }
+    if (el.dataset.reject) {
+      const id = el.dataset.reject;
+      return friendAction(`reject-${id}`, () => api(`/api/friends/reject/${id}`, { method: 'POST' }));
+    }
+    if (el.dataset.cancel) {
+      const id = el.dataset.cancel;
+      return friendAction(`cancel-${id}`, () => api(`/api/friends/cancel/${id}`, { method: 'POST' }));
+    }
+    if (el.dataset.remove) {
+      const id = el.dataset.remove;
+      return friendAction(`remove-${id}`, () => api(`/api/friends/${id}`, { method: 'DELETE' }));
+    }
+  });
 }
 
 async function loadCurrentUser() {
-    if (!friendsState.token) return null;
-    try {
-        const response = await fetch('/api/me', { headers: { Authorization: `Bearer ${friendsState.token}` } });
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data.user || null;
-    } catch {
-        return null;
-    }
+  const me = await api('/api/me');
+  state.me = me.user;
+  localStorage.setItem('user', JSON.stringify(me.user));
 }
 
-async function initProfile() {
-    const apiUser = await loadCurrentUser();
-    const localUser = safeUserFromStorage();
-    const user = apiUser || localUser;
-    const isAuthenticated = Boolean(apiUser || friendsState.token);
+async function loadViewedProfile() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
 
-    toggleGuestView(isAuthenticated);
-    renderProfile(user || {});
+  if (!userId || userId === state.me.id) {
+    state.viewedUser = state.me;
+    state.isSelf = true;
+    renderProfile(state.me, true);
+    return;
+  }
 
-    if (isAuthenticated) {
-        bindFriendsEvents();
-        loadFriendsData();
+  try {
+    const response = await api(`/api/users/${userId}`);
+    state.viewedUser = response.user;
+    state.isSelf = Boolean(response.is_self);
+    renderProfile(response.user, state.isSelf);
+  } catch (e) {
+    if (e.status === 403) {
+      state.isSelf = false;
+      state.viewedUser = { id: userId, full_name: 'Пользователь' };
+      renderProfile(state.viewedUser, false);
+      renderPrivateView();
+      return;
     }
+    throw e;
+  }
 }
 
-initProfile();
+(async function init() {
+  try {
+    bindEvents();
+    await loadCurrentUser();
+    await loadViewedProfile();
+    await loadUsersList();
+    document.getElementById('friends').classList.toggle('hidden', !state.isSelf);
+    if (state.isSelf) {
+      await loadFriendsData();
+    }
+  } catch (e) {
+    setMessage(e.message, false);
+  }
+})();
 </script>
 </body>
 </html>
