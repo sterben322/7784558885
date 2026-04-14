@@ -26,18 +26,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	dbReady := false
-	if err := database.InitDB(cfg.DatabaseURL); err != nil {
-		log.Printf("database init failed, starting in degraded mode: %v", err)
-	} else if err := database.Ping(context.Background()); err != nil {
-		log.Printf("database ping failed, starting in degraded mode: %v", err)
-	} else if err := database.CreateTables(); err != nil {
-		log.Printf("database schema init failed, starting in degraded mode: %v", err)
-	} else {
-		dbReady = true
-		defer database.CloseDB()
+	if strings.TrimSpace(cfg.JWTSecret) == "" {
+		log.Fatal("JWT_SECRET is required")
 	}
+
+	database.Startup(cfg.DatabaseURL)
+	defer database.CloseDB()
 
 	r := gin.Default()
 	allowedOrigins := buildAllowedOrigins()
@@ -52,16 +46,25 @@ func main() {
 	routes.RegisterAuthRoutes(r)
 
 	r.GET("/api/health", func(c *gin.Context) {
-		if database.DB == nil {
-			c.JSON(http.StatusOK, gin.H{
+		if !database.IsConfigured() {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"status":   "degraded",
 				"database": "down",
-				"error":    "database connection is not initialized",
+				"error":    "DATABASE_URL is not configured",
 			})
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second)
+		if database.DB == nil || !database.IsReady() {
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "degraded",
+				"database": "down",
+				"error":    database.LastError(),
+			})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
 		defer cancel()
 		if err := database.Ping(ctx); err != nil {
 			c.JSON(http.StatusOK, gin.H{
@@ -75,9 +78,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "database": "up"})
 	})
 
-	if dbReady {
-		routes.RegisterProtectedRoutes(r)
-	}
+	routes.RegisterProtectedRoutes(r)
 
 	r.Static("/assets", "./web/assets")
 

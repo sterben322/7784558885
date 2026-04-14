@@ -7,17 +7,24 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
+var stateMu sync.RWMutex
+var dbReady bool
+var lastConnectErr string
+var schemaInitialized bool
 
 func InitDB(databaseURL string) error {
 	if os.Getenv("TEST_MODE") == "1" {
 		log.Println("TEST_MODE=1: database initialization skipped")
+		setReadyState(true, "")
 		return nil
 	}
 
@@ -26,7 +33,9 @@ func InitDB(databaseURL string) error {
 	}
 
 	if databaseURL == "" {
-		return fmt.Errorf("DATABASE_URL is not set")
+		err := fmt.Errorf("DATABASE_URL is not set")
+		setReadyState(false, err.Error())
+		return err
 	}
 
 	connStrings := []string{withDefaultSSLMode(databaseURL)}
@@ -53,11 +62,67 @@ func InitDB(databaseURL string) error {
 		}
 
 		DB = db
+		setSchemaInitialized(false)
+		setReadyState(false, "connected, schema is not initialized")
 		log.Println("database connected")
 		return nil
 	}
 
-	return fmt.Errorf("database is unavailable: %w", lastErr)
+	err := fmt.Errorf("database is unavailable: %w", lastErr)
+	setReadyState(false, err.Error())
+	return err
+}
+
+func Startup(databaseURL string) {
+	if os.Getenv("TEST_MODE") == "1" {
+		return
+	}
+	go retryConnectLoop(databaseURL)
+}
+
+func retryConnectLoop(databaseURL string) {
+	initialDelay := envDuration("DB_RETRY_INITIAL_DELAY", time.Second)
+	interval := envDuration("DB_RETRY_INTERVAL", 3*time.Second)
+	pingTimeout := envDuration("DB_PING_TIMEOUT", 5*time.Second)
+
+	if initialDelay > 0 {
+		time.Sleep(initialDelay)
+	}
+
+	for {
+		if IsReady() {
+			time.Sleep(interval)
+			continue
+		}
+
+		if err := InitDB(databaseURL); err != nil {
+			log.Printf("database connection attempt failed: %v", err)
+			time.Sleep(interval)
+			continue
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), pingTimeout)
+		err := Ping(ctx)
+		cancel()
+		if err != nil {
+			setReadyState(false, fmt.Sprintf("database ping failed after connect: %v", err))
+			log.Printf("database ping failed after connect: %v", err)
+			CloseDB()
+			time.Sleep(interval)
+			continue
+		}
+
+		if err := CreateTables(); err != nil {
+			setReadyState(false, fmt.Sprintf("database schema init failed: %v", err))
+			log.Printf("database schema init failed: %v", err)
+			CloseDB()
+			time.Sleep(interval)
+			continue
+		}
+
+		setReadyState(true, "")
+		log.Println("database is ready")
+	}
 }
 
 func withDefaultSSLMode(rawURL string) string {
@@ -96,12 +161,16 @@ func Ping(ctx context.Context) error {
 func CloseDB() {
 	if DB != nil {
 		_ = DB.Close()
+		DB = nil
+		setSchemaInitialized(false)
+		setReadyState(false, "database connection is closed")
 	}
 }
 
 func CreateTables() error {
 	if DB == nil {
 		log.Println("database not initialized: skipping table creation")
+		setReadyState(false, "database is not initialized")
 		return fmt.Errorf("database is not initialized")
 	}
 
@@ -444,6 +513,7 @@ func CreateTables() error {
 
 	for _, query := range queries {
 		if _, err := DB.Exec(query); err != nil {
+			setReadyState(false, fmt.Sprintf("error creating tables: %v", err))
 			return fmt.Errorf("error creating tables: %w", err)
 		}
 	}
@@ -540,7 +610,51 @@ func CreateTables() error {
 		`, companyID, ownerID)
 	}
 
+	setSchemaInitialized(true)
+	setReadyState(true, "")
 	return nil
+}
+
+func setReadyState(ready bool, errMsg string) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	dbReady = ready
+	lastConnectErr = strings.TrimSpace(errMsg)
+}
+
+func IsReady() bool {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	return DB != nil && dbReady && schemaInitialized
+}
+
+func LastError() string {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	return lastConnectErr
+}
+
+func setSchemaInitialized(value bool) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	schemaInitialized = value
+}
+
+func envDuration(key string, fallback time.Duration) time.Duration {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return fallback
+	}
+
+	if parsed, err := time.ParseDuration(raw); err == nil && parsed > 0 {
+		return parsed
+	}
+
+	if seconds, err := strconv.Atoi(raw); err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+
+	return fallback
 }
 
 func EnsureDefaultCommunityRoles(communityID string) error {
