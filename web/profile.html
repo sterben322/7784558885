@@ -185,7 +185,10 @@ function renderFriendsList(items) {
         return;
     }
     empty.classList.add('hidden');
-    list.innerHTML = items.map(item => userRow(item, `<button data-remove="${item.friend_id}" class="rounded-lg border border-[#e5c3c3] px-2 py-1 text-xs text-[#b54545] hover:bg-[#fff5f5]">Удалить из друзей</button>`)).join('');
+    list.innerHTML = items.map(item => userRow(item, `
+      <button data-chat="${item.friend_id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>
+      <button data-remove="${item.friend_id}" class="rounded-lg border border-[#e5c3c3] px-2 py-1 text-xs text-[#b54545] hover:bg-[#fff5f5]">Удалить</button>
+    `)).join('');
 }
 
 function renderIncoming(items) {
@@ -289,6 +292,17 @@ function bindFriendsEvents() {
             return friendAction(`remove-${id}`, async () => {
                 await api(`/api/friends/${id}`, { method: 'DELETE' });
                 setMessage('Друг удалён');
+            });
+        }
+        if (el.dataset.chat) {
+            const id = el.dataset.chat;
+            return friendAction(`chat-${id}`, async () => {
+                const result = await api(`/api/chat/conversations/start/${id}`, { method: 'POST' });
+                const conversationId = result.conversation?.id;
+                if (!conversationId) {
+                    throw new Error('Не удалось открыть чат');
+                }
+                window.location.href = `/chat.html?conversation=${conversationId}`;
             });
         }
     });

@@ -105,6 +105,11 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/chats", handlers.GetChats)
 		api.GET("/chats/:id/messages", handlers.GetMessages)
 		api.POST("/chats/:id/messages", handlers.SendMessage)
+		api.GET("/chat/conversations", handlers.GetChatConversations)
+		api.POST("/chat/conversations/start/:friendId", handlers.StartChatConversation)
+		api.GET("/chat/conversations/:id", handlers.GetChatConversation)
+		api.GET("/chat/conversations/:id/messages", handlers.GetConversationMessages)
+		api.POST("/chat/conversations/:id/messages", handlers.SendConversationMessage)
 
 		api.GET("/dashboard/stats", handlers.GetDashboardStats)
 		api.GET("/resumes", handlers.GetResumes)

@@ -486,22 +486,50 @@ func CreateTables() error {
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(100),
             type VARCHAR(20) NOT NULL DEFAULT 'dialog',
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            direct_user_low UUID REFERENCES users(id) ON DELETE SET NULL,
+            direct_user_high UUID REFERENCES users(id) ON DELETE SET NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_message_at TIMESTAMP
         )`,
+		`ALTER TABLE chats ADD COLUMN IF NOT EXISTS direct_user_low UUID REFERENCES users(id) ON DELETE SET NULL`,
+		`ALTER TABLE chats ADD COLUMN IF NOT EXISTS direct_user_high UUID REFERENCES users(id) ON DELETE SET NULL`,
+		`ALTER TABLE chats ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`,
+		`ALTER TABLE chats ADD COLUMN IF NOT EXISTS last_message_at TIMESTAMP`,
+		`ALTER TABLE chats DROP CONSTRAINT IF EXISTS chats_direct_pair_check`,
+		`ALTER TABLE chats ADD CONSTRAINT chats_direct_pair_check CHECK (
+            type <> 'direct'
+            OR (
+                direct_user_low IS NOT NULL
+                AND direct_user_high IS NOT NULL
+                AND direct_user_low <> direct_user_high
+            )
+        )`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_direct_pair_unique
+            ON chats(direct_user_low, direct_user_high)
+            WHERE type = 'direct'`,
 		`CREATE TABLE IF NOT EXISTS chat_participants (
             chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             unread_count INT NOT NULL DEFAULT 0,
+            joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_read_at TIMESTAMP,
             PRIMARY KEY (chat_id, user_id)
         )`,
+		`ALTER TABLE chat_participants ADD COLUMN IF NOT EXISTS joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`,
+		`ALTER TABLE chat_participants ADD COLUMN IF NOT EXISTS last_read_at TIMESTAMP`,
+		`CREATE INDEX IF NOT EXISTS idx_chat_participants_user ON chat_participants(user_id)`,
 		`CREATE TABLE IF NOT EXISTS messages (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
             sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             content TEXT NOT NULL,
             read BOOLEAN NOT NULL DEFAULT false,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`,
+		`CREATE INDEX IF NOT EXISTS idx_messages_chat_created_at ON messages(chat_id, created_at DESC)`,
 		`CREATE TABLE IF NOT EXISTS sessions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
