@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS user_friends (
     CHECK (status IN ('pending', 'accepted', 'rejected', 'cancelled'))
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friends_pair_unique ON user_friends (user_low, user_high);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friends_pair_expr_unique
+ON user_friends ((LEAST(user_id, friend_id)), (GREATEST(user_id, friend_id)));
 CREATE INDEX IF NOT EXISTS idx_user_friends_status ON user_friends(status);
 CREATE INDEX IF NOT EXISTS idx_user_friends_requester_status ON user_friends(requester_id, status);
 
