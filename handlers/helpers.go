@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -56,7 +55,7 @@ func ensureDatabase(c *gin.Context) bool {
 	return false
 }
 
-func requireChatParticipant(chatID string, userID uuid.UUID) error {
+func requireConversationParticipant(chatID uuid.UUID, userID uuid.UUID) error {
 	var exists bool
 	err := database.DB.QueryRow(`
         SELECT EXISTS(SELECT 1 FROM chat_participants WHERE chat_id = $1 AND user_id = $2)
@@ -65,7 +64,7 @@ func requireChatParticipant(chatID string, userID uuid.UUID) error {
 		return err
 	}
 	if !exists {
-		return fmt.Errorf("forbidden")
+		return errForbidden
 	}
 	return nil
 }
@@ -183,7 +182,8 @@ func isAcceptedFriend(userID uuid.UUID, friendID uuid.UUID) bool {
 		SELECT EXISTS(
 			SELECT 1
 			FROM user_friends
-			WHERE ((user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1))
+			WHERE LEAST(user_id, friend_id) = LEAST($1, $2)
+			  AND GREATEST(user_id, friend_id) = GREATEST($1, $2)
 			  AND status = 'accepted'
 		)
 	`, userID, friendID).Scan(&exists)
