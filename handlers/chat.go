@@ -88,7 +88,6 @@ func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) 
 }
 
 func ensureDirectConversationParticipants(userID, friendID uuid.UUID) error {
-	lowUserID, highUserID := orderedUUIDPair(userID, friendID)
 	_, err := database.DB.Exec(`
 		INSERT INTO chat_participants (chat_id, user_id)
 		SELECT c.id, p.user_id
@@ -98,7 +97,7 @@ func ensureDirectConversationParticipants(userID, friendID uuid.UUID) error {
 		  AND c.direct_user_low = $3
 		  AND c.direct_user_high = $4
 		ON CONFLICT (chat_id, user_id) DO NOTHING
-	`, userID, friendID, lowUserID, highUserID)
+	`, userID, friendID)
 	return err
 }
 
