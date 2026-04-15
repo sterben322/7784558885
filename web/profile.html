@@ -206,7 +206,11 @@ function renderOutgoing(items) {
 async function loadUsersList() {
     const q = encodeURIComponent(document.getElementById('usersSearch').value.trim());
     const data = await api(`/api/users?q=${q}`);
-    document.getElementById('usersList').innerHTML = (data.users || []).map(u => userRow(u, `<button data-open-chat="${u.id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>`)).join('');
+    document.getElementById('usersList').innerHTML = (data.users || []).map(u => {
+      const canWrite = state.me?.id && u.id !== state.me.id;
+      const actions = canWrite ? `<button data-open-chat="${u.id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>` : '';
+      return userRow(u, actions);
+    }).join('');
 }
 
 async function loadFriendsData() {
