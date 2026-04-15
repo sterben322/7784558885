@@ -25,7 +25,15 @@ func parseUUIDParam(c *gin.Context, key string) (uuid.UUID, bool) {
 	return id, true
 }
 
+func orderedUUIDPair(first, second uuid.UUID) (uuid.UUID, uuid.UUID) {
+	if strings.Compare(first.String(), second.String()) <= 0 {
+		return first, second
+	}
+	return second, first
+}
+
 func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
+	lowUserID, highUserID := orderedUUIDPair(userID, friendID)
 	row := database.DB.QueryRow(`
 		SELECT c.id,
 			c.name,
@@ -34,9 +42,9 @@ func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 			(SELECT content FROM messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message
 		FROM chats c
 		WHERE c.type = 'direct'
-		  AND c.direct_user_low = LEAST($1, $2)
-		  AND c.direct_user_high = GREATEST($1, $2)
-	`, userID, friendID)
+		  AND c.direct_user_low = $1
+		  AND c.direct_user_high = $2
+	`, lowUserID, highUserID)
 
 	var chat models.Chat
 	var name sql.NullString
@@ -62,11 +70,12 @@ func getDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 
 func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) {
 	chatID := uuid.New()
+	lowUserID, highUserID := orderedUUIDPair(userID, friendID)
 	_, err := database.DB.Exec(`
 		INSERT INTO chats (id, type, direct_user_low, direct_user_high)
-		VALUES ($1, 'direct', LEAST($2, $3), GREATEST($2, $3))
+		VALUES ($1, 'direct', $2, $3)
 		ON CONFLICT (direct_user_low, direct_user_high) WHERE type = 'direct' DO NOTHING
-	`, chatID, userID, friendID)
+	`, chatID, lowUserID, highUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +94,8 @@ func ensureDirectConversationParticipants(userID, friendID uuid.UUID) error {
 		FROM chats c
 		CROSS JOIN (VALUES ($1::uuid), ($2::uuid)) AS p(user_id)
 		WHERE c.type = 'direct'
-		  AND c.direct_user_low = LEAST($1, $2)
-		  AND c.direct_user_high = GREATEST($1, $2)
+		  AND c.direct_user_low = $3
+		  AND c.direct_user_high = $4
 		ON CONFLICT (chat_id, user_id) DO NOTHING
 	`, userID, friendID)
 	return err
