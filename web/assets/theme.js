@@ -5,6 +5,7 @@
   const AUTH_TOKEN_KEY = 'token';
   const API_URL = '/api';
   const AUTH_PAGE_PATHS = ['/login', '/login.html', '/register', '/register.html'];
+  const PROFILE_PAGE_PATHS = ['/profile', '/profile.html'];
   const PUBLIC_PATHS = new Set(['/privacy', '/privacy.html', '/terms', '/terms.html', '/']);
 
   function applyTheme(theme) {
@@ -46,6 +47,10 @@
   function isPublicPage(path) {
     if (PUBLIC_PATHS.has(path)) return true;
     return isAuthPage(path);
+  }
+
+  function isProfilePage(path) {
+    return PROFILE_PAGE_PATHS.includes(path);
   }
 
   async function validateSession() {
@@ -181,8 +186,7 @@
 
   function createGlobalSidebar() {
     const path = window.location.pathname;
-    const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
-    if (isAuthPage) return;
+    if (isAuthPage(path)) return;
     if (document.getElementById('globalSidebar')) return;
 
     const wrapper = document.createElement('aside');
@@ -227,7 +231,6 @@
     document.body.appendChild(right);
   }
 
-
   function moveHeaderUserToRightSidebar() {
     const rightUserCard = document.getElementById('globalUserCard');
     if (!rightUserCard) return;
@@ -254,8 +257,7 @@
 
   function ensureFloatingProfileButton() {
     const path = window.location.pathname;
-    const isAuthPage = path === '/login' || path === '/login.html' || path === '/register' || path === '/register.html';
-    if (isAuthPage) return;
+    if (isAuthPage(path)) return;
     if (document.getElementById('floatingProfileButton')) return;
 
     const user = getStoredUser();
@@ -273,14 +275,185 @@
     document.body.appendChild(button);
   }
 
+  function buildResultItem(item) {
+    return `
+      <a href="${item.route}" class="global-search__item">
+        <div class="global-search__item-title">${item.title}</div>
+        ${item.subtitle ? `<div class="global-search__item-subtitle">${item.subtitle}</div>` : ''}
+      </a>
+    `;
+  }
+
+  function buildResultGroup(title, items) {
+    if (!Array.isArray(items) || !items.length) return '';
+    return `
+      <div class="global-search__group">
+        <div class="global-search__group-title">${title}</div>
+        <div class="global-search__group-items">${items.map(buildResultItem).join('')}</div>
+      </div>
+    `;
+  }
+
+  function attachGlobalSearch() {
+    const path = window.location.pathname;
+    if (isAuthPage(path) || isPublicPage(path) || isProfilePage(path)) return;
+    if (document.getElementById('globalSearchBlock')) return;
+
+    const header = document.querySelector('.dashboard-main-header, .app-header') || document.querySelector('body > header .max-w-6xl, body > header .max-w-7xl, body > header');
+    if (!header) return;
+
+    const block = document.createElement('div');
+    block.id = 'globalSearchBlock';
+    block.className = 'global-search';
+    block.innerHTML = `
+      <div class="global-search__field-wrap">
+        <i class="fa-solid fa-magnifying-glass global-search__icon"></i>
+        <input id="globalSearchInput" class="global-search__input" type="search" placeholder="Поиск по пользователям, компаниям, форуму, чатам..." autocomplete="off" />
+        <button id="globalSearchClear" class="global-search__clear" type="button" aria-label="Очистить поиск">✕</button>
+      </div>
+      <div id="globalSearchDropdown" class="global-search__dropdown hidden"></div>
+    `;
+
+    if (header.classList.contains('dashboard-main-header') || header.classList.contains('app-header')) {
+      const rightSide = header.querySelector(':scope > .ml-auto');
+      if (rightSide) {
+        header.insertBefore(block, rightSide);
+      } else {
+        header.prepend(block);
+      }
+    } else {
+      header.appendChild(block);
+    }
+
+    const input = block.querySelector('#globalSearchInput');
+    const clearBtn = block.querySelector('#globalSearchClear');
+    const dropdown = block.querySelector('#globalSearchDropdown');
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    let debounceTimer = null;
+    let requestId = 0;
+    let activeController = null;
+
+    function hideDropdown() {
+      dropdown.classList.add('hidden');
+    }
+
+    function showDropdown(html) {
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+    }
+
+    function setLoading() {
+      showDropdown('<div class="global-search__state">Ищем...</div>');
+    }
+
+    function setEmpty(message) {
+      showDropdown(`<div class="global-search__state">${message}</div>`);
+    }
+
+    function renderResults(data) {
+      const html = [
+        buildResultGroup('Пользователи', data.users),
+        buildResultGroup('Компании', data.companies),
+        buildResultGroup('Разделы форума', data.forums),
+        buildResultGroup('Темы форума', data.topics),
+        buildResultGroup('Быстрый чат', data.chats),
+        buildResultGroup('Публикации', data.news)
+      ].join('');
+
+      if (!html) {
+        setEmpty('Ничего не найдено.');
+        return;
+      }
+
+      const footer = `<a href="/search.html?q=${encodeURIComponent(input.value.trim())}" class="global-search__all-results">Показать все результаты</a>`;
+      showDropdown(`${html}${footer}`);
+    }
+
+    async function runSearch(rawValue) {
+      const query = rawValue.trim();
+      if (!query) {
+        hideDropdown();
+        return;
+      }
+      if (query.length < 2) {
+        setEmpty('Введите минимум 2 символа');
+        return;
+      }
+
+      setLoading();
+      requestId += 1;
+      const currentRequest = requestId;
+
+      if (activeController) {
+        activeController.abort();
+      }
+      activeController = new AbortController();
+
+      try {
+        const response = await fetch(`${API_URL}/search/global?q=${encodeURIComponent(query)}&limit=5`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: activeController.signal
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (currentRequest !== requestId) return;
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.error || 'Ошибка поиска');
+        }
+
+        renderResults(payload.data || {});
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        if (currentRequest !== requestId) return;
+        setEmpty('Не удалось выполнить поиск. Попробуйте снова.');
+      }
+    }
+
+    input.addEventListener('input', (event) => {
+      const value = event.target.value || '';
+      clearBtn.classList.toggle('is-visible', value.trim().length > 0);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => runSearch(value), 280);
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        hideDropdown();
+      }
+      if (event.key === 'Enter') {
+        const query = input.value.trim();
+        if (!query) return;
+        window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      clearBtn.classList.remove('is-visible');
+      hideDropdown();
+      input.focus();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!block.contains(event.target)) {
+        hideDropdown();
+      }
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length >= 2) {
+        runSearch(input.value);
+      }
+    });
+  }
+
   function applyInitialVisualState() {
     applyTheme(currentTheme());
     applyLayout(currentLayout());
     createGlobalSidebar();
   }
 
-  // Apply critical visual classes and shell layout as early as possible
-  // to avoid flash/switch of the page after async auth check finishes.
   if (document.readyState === 'loading') {
     document.addEventListener('readystatechange', function onReadyStateChange() {
       if (document.readyState !== 'interactive' && document.readyState !== 'complete') return;
@@ -313,5 +486,7 @@
       window.location.href = '/login.html';
       return;
     }
+
+    attachGlobalSearch();
   });
 })();

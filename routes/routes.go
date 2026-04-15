@@ -124,5 +124,6 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 
 		api.GET("/search/communities", handlers.SearchCommunities)
 		api.GET("/search/companies", handlers.SearchCompanies)
+		api.GET("/search/global", handlers.GlobalSearch)
 	}
 }
