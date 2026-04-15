@@ -43,6 +43,38 @@
                     <p class="mt-2 text-[15px]">Этот пользователь включил приватность профиля. Данные недоступны.</p>
                 </section>
 
+                <section id="newsSection" class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)] space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Новости пользователя</h2>
+                        <button id="newsRefresh" class="rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm text-[#4f5e6d] hover:bg-[#f8fbfb]"><i class="fa-solid fa-rotate mr-1"></i>Обновить</button>
+                    </div>
+
+                    <form id="newsComposer" class="hidden space-y-3 rounded-2xl border border-[#edf2f4] bg-[#fbfdfd] p-4">
+                        <h3 class="text-[16px] font-semibold text-[#334153]">Опубликовать новость</h3>
+                        <input id="newsTitleInput" type="text" placeholder="Заголовок (необязательно)" class="w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20">
+                        <textarea id="newsContentInput" rows="4" placeholder="Текст новости" class="w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20"></textarea>
+                        <input id="newsTagsInput" type="text" placeholder="Теги через запятую" class="w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20">
+                        <div class="rounded-xl border border-dashed border-[#cfd9de] bg-white px-3 py-3">
+                            <label for="newsImageInput" class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#dbe4e8] px-3 py-2 text-sm text-[#4f5e6d] hover:bg-[#f8fbfb]">
+                                <i class="fa-regular fa-image"></i>
+                                Выбрать изображение
+                            </label>
+                            <input id="newsImageInput" type="file" accept="image/*" class="hidden">
+                            <div id="newsImageName" class="mt-2 text-xs text-[#7f8c99]">Файл не выбран</div>
+                            <div id="newsImagePreviewWrap" class="hidden mt-3">
+                                <img id="newsImagePreview" src="" alt="Превью изображения" class="max-h-56 rounded-xl border border-[#e7ecef] object-cover">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="publishNewsBtn" type="submit" class="rounded-xl bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#246f52]">Опубликовать</button>
+                            <span id="newsPublishStatus" class="text-sm text-[#667585]"></span>
+                        </div>
+                    </form>
+
+                    <div id="newsList" class="space-y-3"></div>
+                    <p id="newsEmpty" class="hidden text-sm text-[#8a97a5]">Новостей пока нет.</p>
+                </section>
+
                 <section id="friends" class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)] space-y-5">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Друзья</h2>
@@ -92,6 +124,7 @@ const state = {
   viewedUser: null,
   isSelf: true,
   busy: new Set(),
+  selectedNewsImage: null,
 };
 
 function setMessage(text, ok = true) {
@@ -157,8 +190,122 @@ function renderProfile(user, isSelf) {
 
 function renderPrivateView() {
     document.getElementById('aboutSection').classList.add('hidden');
+    document.getElementById('newsSection').classList.add('hidden');
     document.getElementById('privateSection').classList.remove('hidden');
     document.getElementById('writeBtn').classList.remove('hidden');
+}
+
+function renderNews(posts) {
+    const list = document.getElementById('newsList');
+    const empty = document.getElementById('newsEmpty');
+    if (!posts.length) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = posts.map((post) => {
+      const title = post.title ? `<h3 class="mt-2 text-[18px] font-semibold text-[#2f3d4f]">${post.title}</h3>` : '';
+      const image = post.image_url ? `<img src="${post.image_url}" alt="Изображение новости" class="mt-3 max-h-80 rounded-xl border border-[#e7ecef] object-cover">` : '';
+      const tags = Array.isArray(post.tags) && post.tags.length
+        ? `<div class="mt-3 flex flex-wrap gap-2">${post.tags.map((tag) => `<span class="rounded-full bg-[#edf6f1] px-2 py-1 text-xs text-[#2b8662]">#${tag}</span>`).join('')}</div>`
+        : '';
+      return `
+      <article class="rounded-2xl border border-[#edf2f4] px-4 py-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm font-semibold text-[#334153]">${post.author_name || 'Пользователь'}</div>
+          <div class="text-xs text-[#8a97a5]">${new Date(post.created_at).toLocaleString('ru-RU')}</div>
+        </div>
+        ${title}
+        <p class="mt-2 whitespace-pre-wrap text-[15px] leading-6 text-[#4f5e6d]">${post.content || ''}</p>
+        ${image}
+        ${tags}
+      </article>`;
+    }).join('');
+}
+
+async function loadUserNews() {
+    if (!state.viewedUser?.id) return;
+    const data = await api(`/api/walls/user/${state.viewedUser.id}`);
+    renderNews(data.posts || []);
+}
+
+function setupNewsComposer() {
+    const composer = document.getElementById('newsComposer');
+    const imageInput = document.getElementById('newsImageInput');
+    const imageName = document.getElementById('newsImageName');
+    const previewWrap = document.getElementById('newsImagePreviewWrap');
+    const preview = document.getElementById('newsImagePreview');
+    const publishStatus = document.getElementById('newsPublishStatus');
+
+    composer.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const titleInput = document.getElementById('newsTitleInput');
+      const contentInput = document.getElementById('newsContentInput');
+      const tagsInput = document.getElementById('newsTagsInput');
+      const publishBtn = document.getElementById('publishNewsBtn');
+
+      const content = contentInput.value.trim();
+      if (!content) {
+        publishStatus.textContent = 'Введите текст новости';
+        return;
+      }
+
+      const title = titleInput.value.trim();
+      const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean);
+
+      try {
+        publishBtn.disabled = true;
+        publishStatus.textContent = 'Публикация...';
+        await api('/api/posts?author_type=user', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: title || null,
+            content,
+            short_description: content.slice(0, 180),
+            image_url: state.selectedNewsImage,
+            tags,
+            privacy_level: 'public'
+          })
+        });
+
+        publishStatus.textContent = 'Новость опубликована';
+        titleInput.value = '';
+        contentInput.value = '';
+        tagsInput.value = '';
+        imageInput.value = '';
+        imageName.textContent = 'Файл не выбран';
+        previewWrap.classList.add('hidden');
+        state.selectedNewsImage = null;
+        await loadUserNews();
+      } catch (error) {
+        publishStatus.textContent = error.message || 'Не удалось опубликовать новость';
+      } finally {
+        publishBtn.disabled = false;
+      }
+    });
+
+    imageInput.addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        state.selectedNewsImage = null;
+        imageName.textContent = 'Файл не выбран';
+        previewWrap.classList.add('hidden');
+        return;
+      }
+      imageName.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.selectedNewsImage = typeof reader.result === 'string' ? reader.result : null;
+        if (!state.selectedNewsImage) {
+          previewWrap.classList.add('hidden');
+          return;
+        }
+        preview.src = state.selectedNewsImage;
+        previewWrap.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
 }
 
 function renderFriendsList(items) {
@@ -246,6 +393,7 @@ async function friendAction(actionKey, request) {
 
 function bindEvents() {
   document.getElementById('friendsRefresh').addEventListener('click', () => loadFriendsData().catch(e => setMessage(e.message, false)));
+  document.getElementById('newsRefresh').addEventListener('click', () => loadUserNews().catch(e => setMessage(e.message, false)));
   document.getElementById('usersSearch').addEventListener('input', () => loadUsersList().catch(e => setMessage(e.message, false)));
 
   document.getElementById('writeBtn').addEventListener('click', async () => {
@@ -323,10 +471,13 @@ async function loadViewedProfile() {
 (async function init() {
   try {
     bindEvents();
+    setupNewsComposer();
     await loadCurrentUser();
     await loadViewedProfile();
     await loadUsersList();
+    await loadUserNews();
     document.getElementById('friends').classList.toggle('hidden', !state.isSelf);
+    document.getElementById('newsComposer').classList.toggle('hidden', !state.isSelf);
     if (state.isSelf) {
       await loadFriendsData();
     }
