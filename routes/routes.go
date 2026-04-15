@@ -33,6 +33,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.PUT("/profile/settings", handlers.UpdateProfileSettings)
 		api.GET("/users", handlers.GetUsers)
 		api.GET("/users/:id", handlers.GetUserProfile)
+		api.GET("/users/:id/friends", handlers.GetUserFriends)
 		api.GET("/corporate-profile", handlers.GetMyCorporateProfile)
 		api.POST("/corporate-profile", handlers.CreateCorporateProfile)
 

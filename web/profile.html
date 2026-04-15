@@ -105,9 +105,9 @@
 
             <aside class="space-y-4">
                 <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <h2 class="text-[18px] font-semibold text-[#2f3d4f]">Пользователи</h2>
-                    <input id="usersSearch" type="text" placeholder="Поиск пользователей" class="mt-3 w-full rounded-xl border border-[#dbe4e8] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8662]/20">
-                    <div id="usersList" class="mt-3 space-y-2"></div>
+                    <h2 class="text-[18px] font-semibold text-[#2f3d4f]">Друзья пользователя</h2>
+                    <div id="viewedFriendsList" class="mt-3 space-y-2"></div>
+                    <p id="viewedFriendsEmpty" class="hidden mt-2 text-sm text-[#8a97a5]">Список друзей пуст.</p>
                 </section>
             </aside>
         </div>
@@ -350,14 +350,35 @@ function renderOutgoing(items) {
     list.innerHTML = items.map(item => userRow(item, `<button data-cancel="${item.friend_id}" class="rounded-lg border border-[#dbe4e8] px-2 py-1 text-xs text-[#4f5e6d] hover:bg-[#f8fbfb]">Отменить</button>`)).join('');
 }
 
-async function loadUsersList() {
-    const q = encodeURIComponent(document.getElementById('usersSearch').value.trim());
-    const data = await api(`/api/users?q=${q}`);
-    document.getElementById('usersList').innerHTML = (data.users || []).map(u => {
-      const canWrite = state.me?.id && u.id !== state.me.id;
-      const actions = canWrite ? `<button data-open-chat="${u.id}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>` : '';
-      return userRow(u, actions);
+function renderViewedFriendsList(items) {
+    const list = document.getElementById('viewedFriendsList');
+    const empty = document.getElementById('viewedFriendsEmpty');
+    if (!items.length) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = items.map((item) => {
+      const friendId = item.friend_id || '';
+      const canWrite = state.me?.id && friendId && friendId !== state.me.id;
+      const actions = canWrite ? `<button data-open-chat="${friendId}" class="rounded-lg bg-[#2b8662] px-2 py-1 text-xs font-semibold text-white hover:bg-[#246f52]">Написать</button>` : '';
+      return userRow(item, actions);
     }).join('');
+}
+
+async function loadViewedFriendsList() {
+    if (!state.viewedUser?.id) return;
+    try {
+      const data = await api(`/api/users/${state.viewedUser.id}/friends`);
+      renderViewedFriendsList(data.friends || []);
+    } catch (error) {
+      if (error.status === 403) {
+        renderViewedFriendsList([]);
+        return;
+      }
+      throw error;
+    }
 }
 
 async function loadFriendsData() {
@@ -394,7 +415,6 @@ async function friendAction(actionKey, request) {
 function bindEvents() {
   document.getElementById('friendsRefresh').addEventListener('click', () => loadFriendsData().catch(e => setMessage(e.message, false)));
   document.getElementById('newsRefresh').addEventListener('click', () => loadUserNews().catch(e => setMessage(e.message, false)));
-  document.getElementById('usersSearch').addEventListener('input', () => loadUsersList().catch(e => setMessage(e.message, false)));
 
   document.getElementById('writeBtn').addEventListener('click', async () => {
     if (!state.viewedUser?.id) return;
@@ -474,7 +494,7 @@ async function loadViewedProfile() {
     setupNewsComposer();
     await loadCurrentUser();
     await loadViewedProfile();
-    await loadUsersList();
+    await loadViewedFriendsList();
     await loadUserNews();
     document.getElementById('friends').classList.toggle('hidden', !state.isSelf);
     document.getElementById('newsComposer').classList.toggle('hidden', !state.isSelf);
