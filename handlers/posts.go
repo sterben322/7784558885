@@ -26,11 +26,12 @@ func CreatePost(c *gin.Context) {
 	}
 
 	var authorName string
+	var authorAvatar *string
 	var targetID *uuid.UUID
 
 	switch authorType {
 	case "user":
-		if err := database.DB.QueryRow(`SELECT full_name FROM users WHERE id = $1`, userID).Scan(&authorName); err != nil {
+		if err := database.DB.QueryRow(`SELECT full_name, avatar_url FROM users WHERE id = $1`, userID).Scan(&authorName, &authorAvatar); err != nil {
 			jsonError(c, http.StatusBadRequest, "User not found")
 			return
 		}
@@ -79,9 +80,9 @@ func CreatePost(c *gin.Context) {
 
 	postID := uuid.New()
 	_, err := database.DB.Exec(`
-        INSERT INTO posts (id, author_id, author_type, author_name, title, content, short_description, image_url, tags, privacy_level, target_id, is_hidden, is_unpublished)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    `, postID, userID, authorType, authorName, req.Title, req.Content, req.ShortDescription, req.ImageURL, pq.Array(req.Tags), req.PrivacyLevel, targetID, req.IsHidden, req.IsUnpublished)
+        INSERT INTO posts (id, author_id, author_type, author_name, author_avatar, title, content, short_description, image_url, tags, privacy_level, target_id, is_hidden, is_unpublished)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+    `, postID, userID, authorType, authorName, authorAvatar, req.Title, req.Content, req.ShortDescription, req.ImageURL, pq.Array(req.Tags), req.PrivacyLevel, targetID, req.IsHidden, req.IsUnpublished)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to create post")
 		return
@@ -201,7 +202,7 @@ func GetFeed(c *gin.Context) {
                    p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                    EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
             FROM posts p
-            WHERE p.author_type IN ('community', 'company')
+            WHERE p.author_type IN ('user', 'community', 'company')
               AND p.privacy_level = 'public'
               AND p.is_hidden = false
               AND p.is_unpublished = false
@@ -364,7 +365,7 @@ func GetNews(c *gin.Context) {
                p.is_hidden, p.is_unpublished, p.likes_count, p.comments_count, p.shares_count, p.created_at, p.updated_at,
                EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) AS is_liked
         FROM posts p
-        WHERE p.author_type IN ('community', 'company')
+        WHERE p.author_type IN ('user', 'community', 'company')
           AND p.privacy_level = 'public'
           AND p.is_hidden = false
           AND p.is_unpublished = false

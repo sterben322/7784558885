@@ -83,6 +83,31 @@
                     <p class="mt-2 text-[16px] text-[#7e8a97]">Бесконечная лента: прокручивайте вниз для подгрузки новых публикаций.</p>
                 </div>
 
+                <section class="mb-5 rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
+                    <h2 class="text-[20px] font-semibold text-[#2f3c4e]">Создать новостной пост</h2>
+                    <p class="mt-1 text-sm text-[#7e8a97]">Публикуйте новости от своего имени. Можно добавить изображение из памяти устройства.</p>
+                    <div class="mt-4 space-y-3">
+                        <input id="postTitleInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Заголовок новости">
+                        <textarea id="postContentInput" rows="4" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Текст публикации"></textarea>
+                        <input id="postTagsInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Теги через запятую, например: логистика, импорт">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#dbe3e8] px-4 py-2 text-sm text-[#4f5e6d] hover:bg-[#f5f8f9]">
+                                <i class="fa-regular fa-image"></i>
+                                Изображение с устройства
+                                <input id="postImageInput" type="file" accept="image/*" class="hidden">
+                            </label>
+                            <span id="postImageName" class="text-sm text-[#8492a0]">Файл не выбран</span>
+                        </div>
+                        <div id="postImagePreviewWrap" class="hidden">
+                            <img id="postImagePreview" class="max-h-44 rounded-xl border border-[#e7ecef] object-cover" alt="Превью изображения">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-3">
+                        <button id="createPostBtn" class="rounded-xl bg-[#2f7f5e] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Опубликовать</button>
+                        <span id="postCreateStatus" class="text-sm text-[#7e8a97]"></span>
+                    </div>
+                </section>
+
                 <section id="newsFeed" class="space-y-4"></section>
                 <div id="feedStatus" class="py-5 text-center text-sm text-[#8492a0]">Загрузка новостей...</div>
             </div>
@@ -121,6 +146,16 @@
 <script>
 const API_URL = '/api';
 const token = localStorage.getItem('token');
+let selectedPostImage = null;
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 function setUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -135,7 +170,12 @@ function setUserInfo() {
 
     ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
         const el = document.getElementById(id);
-        if (el) el.textContent = letter;
+        if (!el) return;
+        if (user.avatar_url) {
+            el.innerHTML = `<img src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(name)}" class="h-full w-full rounded-full object-cover">`;
+            return;
+        }
+        el.textContent = letter;
     });
 }
 
@@ -153,18 +193,26 @@ function createNewsCard(item, idx) {
     const excerpt = item.short_description || item.content || 'Описание отсутствует';
     const category = item.tags?.[0] || 'Новости';
     const tags = Array.isArray(item.tags) ? item.tags : [];
+    const authorLetter = (item.author_name?.[0] || 'U').toUpperCase();
+    const authorAvatar = item.author_avatar
+        ? `<img src="${escapeHtml(item.author_avatar)}" alt="${escapeHtml(item.author_name || 'Автор')}" class="h-12 w-12 rounded-full object-cover">`
+        : `<div class="grid h-12 w-12 place-items-center rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">${authorLetter}</div>`;
 
     article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
     article.innerHTML = `
         <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
+            <div class="flex min-w-0 flex-1 items-start gap-3">
+                ${authorAvatar}
+                <div class="min-w-0 flex-1">
                 <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${category}</div>
-                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${item.title || 'Без заголовка'}</h3>
-                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${excerpt}</p>
+                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${escapeHtml(item.title || 'Без заголовка')}</h3>
+                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${escapeHtml(excerpt)}</p>
+                ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="Изображение поста" class="mt-4 max-h-64 rounded-xl border border-[#e7ecef] object-cover">` : ''}
+                </div>
             </div>
             <div class="text-right text-[13px] text-[#95a1ad]">
                 <div>${formatRelativeTime(item.created_at)}</div>
-                <div class="mt-1 font-medium text-[#61707f]">${item.author_name || 'Редакция LASTOP'}</div>
+                <div class="mt-1 font-medium text-[#61707f]">${escapeHtml(item.author_name || 'Редакция LASTOP')}</div>
             </div>
         </div>
         <div class="mt-4 flex flex-wrap gap-2.5">
@@ -214,7 +262,95 @@ async function loadNews() {
     }
 }
 
+function setupPostImagePicker() {
+    const imageInput = document.getElementById('postImageInput');
+    const imageName = document.getElementById('postImageName');
+    const previewWrap = document.getElementById('postImagePreviewWrap');
+    const preview = document.getElementById('postImagePreview');
+
+    imageInput.addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            selectedPostImage = null;
+            imageName.textContent = 'Файл не выбран';
+            previewWrap.classList.add('hidden');
+            return;
+        }
+        imageName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+            selectedPostImage = typeof reader.result === 'string' ? reader.result : null;
+            if (!selectedPostImage) {
+                previewWrap.classList.add('hidden');
+                return;
+            }
+            preview.src = selectedPostImage;
+            previewWrap.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function setupPostCreator() {
+    const createBtn = document.getElementById('createPostBtn');
+    const titleInput = document.getElementById('postTitleInput');
+    const contentInput = document.getElementById('postContentInput');
+    const tagsInput = document.getElementById('postTagsInput');
+    const status = document.getElementById('postCreateStatus');
+
+    createBtn.addEventListener('click', async () => {
+        const content = contentInput.value.trim();
+        if (!content) {
+            status.textContent = 'Введите текст новости';
+            return;
+        }
+
+        const title = titleInput.value.trim();
+        const tags = tagsInput.value.split(',').map((tag) => tag.trim()).filter(Boolean);
+
+        try {
+            createBtn.disabled = true;
+            status.textContent = 'Публикуем...';
+            const response = await fetch(`${API_URL}/posts?author_type=user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: title || null,
+                    content,
+                    short_description: content.slice(0, 180),
+                    image_url: selectedPostImage,
+                    tags,
+                    privacy_level: 'public'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка публикации');
+            }
+
+            status.textContent = 'Пост опубликован';
+            titleInput.value = '';
+            contentInput.value = '';
+            tagsInput.value = '';
+            document.getElementById('postImageInput').value = '';
+            document.getElementById('postImageName').textContent = 'Файл не выбран';
+            document.getElementById('postImagePreviewWrap').classList.add('hidden');
+            selectedPostImage = null;
+            await loadNews();
+        } catch (err) {
+            status.textContent = 'Не удалось опубликовать пост';
+        } finally {
+            createBtn.disabled = false;
+        }
+    });
+}
+
 setUserInfo();
+setupPostImagePicker();
+setupPostCreator();
 loadNews();
 </script>
 </body>

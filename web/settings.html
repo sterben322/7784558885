@@ -32,6 +32,18 @@
             <section class="rounded-2xl border border-[#e7ecef] bg-white p-5">
                 <h2 class="text-xl font-semibold">Публичные данные</h2>
                 <div class="mt-4 grid gap-4 md:grid-cols-2">
+                    <div class="space-y-2 md:col-span-2">
+                        <span class="text-sm text-[#6f7f8f]">Аватар</span>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div id="avatarPreview" class="grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">U</div>
+                            <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#dbe3e8] px-4 py-2 text-sm text-[#4f5e6d] hover:bg-[#f5f8f9]">
+                                <i class="fa-regular fa-image"></i>
+                                Выбрать с устройства
+                                <input id="avatarFileInput" type="file" accept="image/*" class="hidden">
+                            </label>
+                            <span id="avatarFileName" class="text-sm text-[#8492a0]">Файл не выбран</span>
+                        </div>
+                    </div>
                     <label class="space-y-1 text-sm"><span class="text-[#6f7f8f]">Имя и фамилия</span><input id="fullNameInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" /></label>
                     <label class="space-y-1 text-sm"><span class="text-[#6f7f8f]">Компания</span><input id="companyInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" /></label>
                     <label class="space-y-1 text-sm md:col-span-2"><span class="text-[#6f7f8f]">О себе</span><textarea rows="4" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Кратко расскажите о вашем опыте"></textarea></label>
@@ -89,12 +101,48 @@ const companyInput = document.getElementById('companyInput');
 const layoutWideToggle = document.getElementById('layoutWideToggle');
 const themeToggle = document.getElementById('themeDarkToggle');
 const privateProfileToggle = document.getElementById('privateProfileToggle');
+const avatarPreview = document.getElementById('avatarPreview');
+const avatarFileInput = document.getElementById('avatarFileInput');
+const avatarFileName = document.getElementById('avatarFileName');
+let selectedAvatarDataUrl = user.avatar_url || null;
+
+function renderAvatarPreview(url) {
+  const name = (user.full_name || 'User').trim();
+  const letter = (name[0] || 'U').toUpperCase();
+  if (!url) {
+    avatarPreview.textContent = letter;
+    return;
+  }
+  avatarPreview.innerHTML = `<img src="${url}" alt="${name}" class="h-full w-full object-cover">`;
+}
 
 fullNameInput.value = user.full_name || '';
 companyInput.value = user.company_name || '';
 privateProfileToggle.checked = Boolean(user.is_private_profile);
 layoutWideToggle.checked = (localStorage.getItem(LAYOUT_KEY) || 'standard') === 'wide';
 themeToggle.checked = (localStorage.getItem(THEME_KEY) || 'light') === 'dark';
+if (user.avatar_url) {
+  avatarFileName.textContent = 'Текущий аватар';
+}
+renderAvatarPreview(selectedAvatarDataUrl);
+
+avatarFileInput.addEventListener('change', (event) => {
+  const file = event.target.files?.[0];
+  if (!file) {
+    avatarFileName.textContent = 'Файл не выбран';
+    selectedAvatarDataUrl = user.avatar_url || null;
+    renderAvatarPreview(selectedAvatarDataUrl);
+    return;
+  }
+
+  avatarFileName.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = () => {
+    selectedAvatarDataUrl = typeof reader.result === 'string' ? reader.result : null;
+    renderAvatarPreview(selectedAvatarDataUrl);
+  };
+  reader.readAsDataURL(file);
+});
 
 layoutWideToggle.addEventListener('change', () => {
   const nextMode = layoutWideToggle.checked ? 'wide' : 'standard';
@@ -138,7 +186,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
           company_name: company || null,
           phone: user.phone || null,
           position: user.position || null,
-          avatar_url: user.avatar_url || null
+          avatar_url: selectedAvatarDataUrl || null
         })
       });
       await fetch('/api/profile/settings', {
@@ -155,7 +203,8 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
       ...user,
       full_name: fullName,
       company_name: company,
-      is_private_profile: privateProfileToggle.checked
+      is_private_profile: privateProfileToggle.checked,
+      avatar_url: selectedAvatarDataUrl || null
     };
     localStorage.setItem('user', JSON.stringify(updatedUser));
     alert('Настройки сохранены');
