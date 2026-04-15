@@ -110,6 +110,8 @@ func main() {
 		"/chat.html":             "chat.html",
 		"/settings":              "settings.html",
 		"/settings.html":         "settings.html",
+		"/search":                "search.html",
+		"/search.html":           "search.html",
 		"/profile":               "profile.html",
 		"/profile.html":          "profile.html",
 		"/jobs":                  "jobs.html",
