@@ -71,7 +71,15 @@ func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) 
 		return nil, err
 	}
 
-	_, _ = database.DB.Exec(`
+	if err := ensureDirectConversationParticipants(userID, friendID); err != nil {
+		return nil, err
+	}
+
+	return getDirectConversation(userID, friendID)
+}
+
+func ensureDirectConversationParticipants(userID, friendID uuid.UUID) error {
+	_, err := database.DB.Exec(`
 		INSERT INTO chat_participants (chat_id, user_id)
 		SELECT c.id, p.user_id
 		FROM chats c
@@ -81,8 +89,7 @@ func createDirectConversation(userID, friendID uuid.UUID) (*models.Chat, error) 
 		  AND c.direct_user_high = GREATEST($1, $2)
 		ON CONFLICT (chat_id, user_id) DO NOTHING
 	`, userID, friendID)
-
-	return getDirectConversation(userID, friendID)
+	return err
 }
 
 func GetChatConversations(c *gin.Context) {
@@ -180,6 +187,11 @@ func StartChatConversation(c *gin.Context) {
 		chat, err = createDirectConversation(userID, friendID)
 		if err != nil {
 			jsonError(c, http.StatusInternalServerError, "Failed to create conversation")
+			return
+		}
+	} else {
+		if err := ensureDirectConversationParticipants(userID, friendID); err != nil {
+			jsonError(c, http.StatusInternalServerError, "Failed to restore conversation participants")
 			return
 		}
 	}
