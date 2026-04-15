@@ -275,23 +275,81 @@
     document.body.appendChild(button);
   }
 
-  function buildResultItem(item) {
+  const SEARCH_GROUP_ORDER = [
+    { key: 'users', title: 'Пользователи' },
+    { key: 'companies', title: 'Компании' },
+    { key: 'forums', title: 'Форум' },
+    { key: 'topics', title: 'Темы' },
+    { key: 'chats', title: 'Быстрый чат' },
+    { key: 'news', title: 'Публикации' }
+  ];
+
+  const SEARCH_TYPE_ICON = {
+    user: 'fa-regular fa-user',
+    company: 'fa-regular fa-building',
+    forum_section: 'fa-regular fa-comments',
+    forum_topic: 'fa-regular fa-message',
+    chat_user: 'fa-regular fa-envelope',
+    news: 'fa-regular fa-newspaper'
+  };
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getResultIconClass(item) {
+    return SEARCH_TYPE_ICON[item.type] || 'fa-solid fa-hashtag';
+  }
+
+  function flattenGroupedResults(data) {
+    const flat = [];
+    SEARCH_GROUP_ORDER.forEach((group) => {
+      const groupItems = Array.isArray(data[group.key]) ? data[group.key] : [];
+      groupItems.forEach((item) => flat.push(item));
+    });
+    return flat;
+  }
+
+  function buildResultItem(item, globalIndex) {
+    const title = escapeHtml(item.title);
+    const subtitle = escapeHtml(item.subtitle || '');
+    const category = escapeHtml(item.category || '');
+    const iconClass = getResultIconClass(item);
     return `
-      <a href="${item.route}" class="global-search__item">
-        <div class="global-search__item-title">${item.title}</div>
-        ${item.subtitle ? `<div class="global-search__item-subtitle">${item.subtitle}</div>` : ''}
+      <a href="${escapeHtml(item.route)}" class="global-search__item" data-result-index="${globalIndex}">
+        <span class="global-search__item-icon"><i class="${iconClass}"></i></span>
+        <span class="global-search__item-content">
+          <span class="global-search__item-title">${title}</span>
+          ${subtitle ? `<span class="global-search__item-subtitle">${subtitle}</span>` : ''}
+        </span>
+        ${category ? `<span class="global-search__item-badge">${category}</span>` : ''}
       </a>
     `;
   }
 
-  function buildResultGroup(title, items) {
-    if (!Array.isArray(items) || !items.length) return '';
-    return `
-      <div class="global-search__group">
-        <div class="global-search__group-title">${title}</div>
-        <div class="global-search__group-items">${items.map(buildResultItem).join('')}</div>
-      </div>
-    `;
+  function buildResultGroup(title, items, startIndex) {
+    if (!Array.isArray(items) || !items.length) return { html: '', nextIndex: startIndex };
+    let cursor = startIndex;
+    const cards = items.map((item) => {
+      const html = buildResultItem(item, cursor);
+      cursor += 1;
+      return html;
+    }).join('');
+
+    return {
+      html: `
+        <section class="global-search__group">
+          <div class="global-search__group-title">${escapeHtml(title)}</div>
+          <div class="global-search__group-items">${cards}</div>
+        </section>
+      `,
+      nextIndex: cursor
+    };
   }
 
   function attachGlobalSearch() {
@@ -333,9 +391,20 @@
     let debounceTimer = null;
     let requestId = 0;
     let activeController = null;
+    let activeIndex = -1;
+    let flatResults = [];
 
     function hideDropdown() {
       dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+      activeIndex = -1;
+    }
+
+    function highlightActiveResult() {
+      dropdown.querySelectorAll('[data-result-index]').forEach((el) => {
+        const idx = Number(el.getAttribute('data-result-index'));
+        el.classList.toggle('is-active', idx === activeIndex);
+      });
     }
 
     function showDropdown(html) {
@@ -352,16 +421,17 @@
     }
 
     function renderResults(data) {
-      const html = [
-        buildResultGroup('Пользователи', data.users),
-        buildResultGroup('Компании', data.companies),
-        buildResultGroup('Разделы форума', data.forums),
-        buildResultGroup('Темы форума', data.topics),
-        buildResultGroup('Быстрый чат', data.chats),
-        buildResultGroup('Публикации', data.news)
-      ].join('');
+      flatResults = flattenGroupedResults(data);
+      activeIndex = -1;
+      let indexOffset = 0;
+      let html = '';
+      SEARCH_GROUP_ORDER.forEach((group) => {
+        const groupContent = buildResultGroup(group.title, data[group.key], indexOffset);
+        html += groupContent.html;
+        indexOffset = groupContent.nextIndex;
+      });
 
-      if (!html) {
+      if (!flatResults.length || !html) {
         setEmpty('Ничего не найдено.');
         return;
       }
@@ -406,6 +476,7 @@
       } catch (error) {
         if (error.name === 'AbortError') return;
         if (currentRequest !== requestId) return;
+        flatResults = [];
         setEmpty('Не удалось выполнить поиск. Попробуйте снова.');
       }
     }
@@ -419,9 +490,31 @@
 
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
         hideDropdown();
+        input.blur();
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (dropdown.classList.contains('hidden') || !flatResults.length) return;
+        event.preventDefault();
+        const maxIndex = flatResults.length - 1;
+        if (event.key === 'ArrowDown') {
+          activeIndex = activeIndex >= maxIndex ? 0 : activeIndex + 1;
+        } else {
+          activeIndex = activeIndex <= 0 ? maxIndex : activeIndex - 1;
+        }
+        highlightActiveResult();
+        const activeElement = dropdown.querySelector(`[data-result-index="${activeIndex}"]`);
+        if (activeElement) {
+          activeElement.scrollIntoView({ block: 'nearest' });
+        }
       }
       if (event.key === 'Enter') {
+        event.preventDefault();
+        if (activeIndex >= 0 && flatResults[activeIndex]) {
+          window.location.href = flatResults[activeIndex].route;
+          return;
+        }
         const query = input.value.trim();
         if (!query) return;
         window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
@@ -444,6 +537,13 @@
     input.addEventListener('focus', () => {
       if (input.value.trim().length >= 2) {
         runSearch(input.value);
+      }
+    });
+
+    dropdown.addEventListener('mousemove', () => {
+      if (activeIndex !== -1) {
+        activeIndex = -1;
+        highlightActiveResult();
       }
     });
   }

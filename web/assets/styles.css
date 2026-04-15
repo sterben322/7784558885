@@ -1291,16 +1291,39 @@ body.app-modern {
 }
 
 .global-search__item {
-    display: block;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
     border: 1px solid #edf2f4;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 8px 10px;
     background: #fff;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
-.global-search__item:hover {
+.global-search__item:hover,
+.global-search__item.is-active {
     background: #f4f8f7;
     border-color: #dbe8e2;
+    transform: translateY(-1px);
+}
+
+.global-search__item-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #edf6f1;
+    color: #4a8d74;
+    font-size: 13px;
+}
+
+.global-search__item-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .global-search__item-title {
@@ -1314,6 +1337,20 @@ body.app-modern {
     margin-top: 2px;
     color: #738292;
     font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.global-search__item-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #607588;
+    border: 1px solid #d9e4eb;
+    border-radius: 999px;
+    padding: 4px 7px;
+    background: #f7fafc;
 }
 
 .global-search__state {
@@ -1334,6 +1371,60 @@ body.app-modern {
 
 .global-search__all-results:hover {
     text-decoration: underline;
+}
+
+body.dark-theme .global-search__field-wrap {
+    background: #111b2d;
+    border-color: #314357;
+}
+
+body.dark-theme .global-search__field-wrap:focus-within {
+    border-color: #4d8f72;
+    box-shadow: 0 0 0 3px rgba(67, 145, 107, 0.3);
+    background: #0f172a;
+}
+
+body.dark-theme .global-search__input,
+body.dark-theme .global-search__item-title {
+    color: #dbe6ee;
+}
+
+body.dark-theme .global-search__input::placeholder,
+body.dark-theme .global-search__item-subtitle,
+body.dark-theme .global-search__group-title,
+body.dark-theme .global-search__state {
+    color: #90a2b4;
+}
+
+body.dark-theme .global-search__dropdown {
+    background: #0f172a;
+    border-color: #2f3f53;
+}
+
+body.dark-theme .global-search__item {
+    background: #111b2d;
+    border-color: #233349;
+}
+
+body.dark-theme .global-search__item:hover,
+body.dark-theme .global-search__item.is-active {
+    background: #18263b;
+    border-color: #335277;
+}
+
+body.dark-theme .global-search__item-icon {
+    background: #203248;
+    color: #7ac2a1;
+}
+
+body.dark-theme .global-search__item-badge {
+    color: #9cb4c8;
+    border-color: #385270;
+    background: #162236;
+}
+
+body.dark-theme .global-search__all-results {
+    border-top-color: #233349;
 }
 
 @media (max-width: 900px) {
