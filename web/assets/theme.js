@@ -273,9 +273,35 @@
     document.body.appendChild(button);
   }
 
+  function applyInitialVisualState() {
+    applyTheme(currentTheme());
+    applyLayout(currentLayout());
+    createGlobalSidebar();
+  }
+
+  // Apply critical visual classes and shell layout as early as possible
+  // to avoid flash/switch of the page after async auth check finishes.
+  if (document.readyState === 'loading') {
+    document.addEventListener('readystatechange', function onReadyStateChange() {
+      if (document.readyState !== 'interactive' && document.readyState !== 'complete') return;
+      document.removeEventListener('readystatechange', onReadyStateChange);
+      applyInitialVisualState();
+    });
+  } else {
+    applyInitialVisualState();
+  }
+
   document.addEventListener('DOMContentLoaded', async function () {
     const path = window.location.pathname;
     const requiresAuth = !isPublicPage(path);
+
+    applyInitialVisualState();
+    applyBranding();
+    simplifyLeftSidebar();
+    ensureDashboardSidebarAccess();
+    moveHeaderUserToRightSidebar();
+    ensureFloatingProfileButton();
+    bindLogoutButtons();
 
     const validSession = await validateSession();
     if (isAuthPage(path) && validSession) {
@@ -287,15 +313,5 @@
       window.location.href = '/login.html';
       return;
     }
-
-    applyTheme(currentTheme());
-    applyLayout(currentLayout());
-    createGlobalSidebar();
-    applyBranding();
-    simplifyLeftSidebar();
-    ensureDashboardSidebarAccess();
-    moveHeaderUserToRightSidebar();
-    ensureFloatingProfileButton();
-    bindLogoutButtons();
   });
 })();
