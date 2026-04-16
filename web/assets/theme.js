@@ -87,6 +87,21 @@
     window.location.href = '/login.html';
   }
 
+  function isLogoutTrigger(target) {
+    return Boolean(target && target.closest('[data-auth-logout], #logoutBtn, #globalLogoutBtn'));
+  }
+
+  function setupLogoutDelegation() {
+    if (document.documentElement.dataset.logoutDelegationBound === '1') return;
+    document.documentElement.dataset.logoutDelegationBound = '1';
+
+    document.addEventListener('click', (event) => {
+      if (!isLogoutTrigger(event.target)) return;
+      event.preventDefault();
+      logout();
+    });
+  }
+
   function bindLogoutButtons() {
     document.querySelectorAll('[data-auth-logout], #logoutBtn, #globalLogoutBtn').forEach((button) => {
       if (button.dataset.logoutBound === '1') return;
@@ -552,6 +567,7 @@
     applyTheme(currentTheme());
     applyLayout(currentLayout());
     createGlobalSidebar();
+    setupLogoutDelegation();
   }
 
   if (document.readyState === 'loading') {

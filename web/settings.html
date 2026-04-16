@@ -157,12 +157,6 @@ themeToggle.addEventListener('change', () => {
   document.documentElement.classList.toggle('dark', nextTheme === 'dark');
 });
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.href = '/login.html';
-});
-
 document.getElementById('saveBtn').addEventListener('click', async () => {
   const token = localStorage.getItem('token');
   const fullName = fullNameInput.value.trim();
