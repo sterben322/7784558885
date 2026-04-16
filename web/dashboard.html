@@ -65,29 +65,39 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .compose-photo-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--rm);border:1.5px solid var(--gb);background:var(--gl);color:var(--g);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0;white-space:nowrap}
 .compose-photo-pill:hover{background:var(--gb);border-color:var(--gm)}
 .compose-photo-pill svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-/* POST */
-.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .35s ease both}
-.post:nth-child(1){animation-delay:.05s}.post:nth-child(2){animation-delay:.12s}.post:nth-child(3){animation-delay:.19s}.post:nth-child(4){animation-delay:.26s}
+/* POST — горизонтальная карточка новости */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px 16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .35s ease both;cursor:pointer}
+.post:nth-child(1){animation-delay:.05s}.post:nth-child(2){animation-delay:.12s}.post:nth-child(3){animation-delay:.19s}.post:nth-child(4){animation-delay:.26s}
 .post:hover{box-shadow:var(--shm);transform:translateY(-1px)}
-.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.av{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
-.post-meta{flex:1;min-width:0}
-.post-author{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.post-time{font-size:11px;color:var(--gmt);margin-top:1px}
+/* шапка: аватар-источник + имя + время + меню */
+.post-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.av{width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.post-source{font-size:13px;font-weight:700;color:var(--t)}
+.post-verified{display:inline-flex;align-items:center;margin-left:3px;color:var(--g)}
+.post-verified svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.post-time{font-size:12px;color:var(--gmt);margin-left:4px}
+.post-meta{flex:1;min-width:0;display:flex;align-items:center;gap:0}
 .post-badge{padding:3px 8px;border-radius:var(--r);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
 .bc{background:#EEF5FF;color:#3A6CB0}.bu{background:var(--gl);color:var(--g)}
-.post-img{width:100%;max-height:280px;object-fit:cover;border-radius:var(--rm);margin-bottom:10px;border:1px solid var(--bdr)}
-.post-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:5px;line-height:1.4}
-.post-body{font-size:12px;color:var(--tm);line-height:1.6}
-.post-body.trunc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.read-more{font-size:12px;font-weight:600;color:var(--g);cursor:pointer;background:none;border:none;font-family:inherit;margin-top:5px;padding:0;display:inline-flex;align-items:center;gap:4px}
-.read-more:hover{opacity:.75}
-.post-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.tag{padding:3px 10px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer}
-.post-actions{display:flex;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr);align-items:center}
-.post-act{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit}
-.post-act:hover{color:var(--g)}
+.post-menu{width:24px;height:24px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s;flex-shrink:0}
+.post-menu:hover{background:var(--gp);color:var(--t)}
+.post-menu svg{width:16px;height:16px;fill:currentColor}
+/* тело: текст слева, картинка справа */
+.post-body-row{display:flex;align-items:flex-start;gap:16px}
+.post-text{flex:1;min-width:0}
+.post-title{font-size:15px;font-weight:700;color:var(--t);margin-bottom:5px;line-height:1.4}
+.post-body{font-size:13px;color:var(--tm);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-body.expanded{display:block}
+.post-thumb{width:120px;height:80px;border-radius:var(--rm);object-fit:cover;flex-shrink:0;border:1px solid var(--bdr)}
+/* нижняя строка */
+.post-footer{display:flex;align-items:center;gap:0;margin-top:10px;padding-top:8px;border-top:1px solid var(--bdr)}
+.post-tags{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+.tag{padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;flex-shrink:0}
+.tag:hover{background:var(--gb)}
+.post-actions{display:flex;gap:12px;align-items:center;flex-shrink:0}
+.post-act{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit;padding:3px 6px;border-radius:6px}
+.post-act:hover{color:var(--g);background:var(--gp)}
 .post-act.liked{color:var(--red)}
 .post-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 /* SKELETON */
@@ -393,32 +403,45 @@ document.querySelectorAll('.ftab').forEach(btn=>btn.addEventListener('click',()=
 const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A'];
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':Math.floor(m/1440)+' д назад';}
-function badge(type){if(type==='company')return'<span class="post-badge bc">Компания</span>';if(type==='community')return'<span class="post-badge bu">Сообщество</span>';return'';}
 function buildPost(p,i){
   const c=AVC[(p.author_name||'').charCodeAt(0)%AVC.length]||AVC[i%AVC.length];
   const tags=Array.isArray(p.tags)?p.tags.filter(Boolean):[];
   const imgUrl=Array.isArray(p.images)&&p.images[0]?p.images[0]:p.image_url||'';
-  const isLong=(p.content||'').length>280;
+  const badgeCls=p.author_type==='company'?'bc':p.author_type==='community'?'bu':'';
+  const badgeTxt=p.author_type==='company'?'Компания':p.author_type==='community'?'Сообщество':'';
   return`<article class="post" data-id="${p.id}">
-  <div class="post-head"><div class="av" style="background:${c}">${(p.author_name||'?')[0].toUpperCase()}</div>
-  <div class="post-meta"><div class="post-author">${esc(p.author_name||'Автор')}</div><div class="post-time">${ago(p.created_at)}</div></div>
-  ${badge(p.author_type)}</div>
-  ${imgUrl?`<img class="post-img" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
-  ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
-  <div class="post-body${isLong?' trunc':''}" id="pb-${p.id}">${esc(p.content||'')}</div>
-  ${isLong?`<button class="read-more" onclick="expand('${p.id}',this)">Читать полностью <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>`:''}
-  ${tags.length?`<div class="post-tags">${tags.map(t=>`<span class="tag" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:''}
-  <div class="post-actions">
-    <button class="post-act${p.is_liked?' liked':''}" onclick="likePost('${p.id}',this)">
-      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <span>${p.likes_count||0}</span></button>
-    <button class="post-act" onclick="location.href='/dashboard.html?post=${p.id}'">
-      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>${p.comments_count||0}</span></button>
-    <button class="post-act" onclick="sharePost('${p.id}')">
-      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      Поделиться</button>
-  </div></article>`;
+  <div class="post-head">
+    <div class="av" style="background:${c}">${(p.author_name||'?')[0].toUpperCase()}</div>
+    <div class="post-meta">
+      <span class="post-source">${esc(p.author_name||'Автор')}</span>
+      <span class="post-verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg></span>
+      <span class="post-time">· ${ago(p.created_at)}</span>
+    </div>
+    ${badgeTxt?`<span class="post-badge ${badgeCls}">${badgeTxt}</span>`:''}
+    <button class="post-menu" title="Действия"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+  </div>
+  <div class="post-body-row">
+    <div class="post-text">
+      ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
+      <div class="post-body" id="pb-${p.id}">${esc(p.content||'')}</div>
+    </div>
+    ${imgUrl?`<img class="post-thumb" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
+  </div>
+  <div class="post-footer">
+    <div class="post-tags">${tags.map(t=>`<span class="tag" onclick="event.stopPropagation();filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>
+    <div class="post-actions">
+      <button class="post-act${p.is_liked?' liked':''}" onclick="event.stopPropagation();likePost('${p.id}',this)">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>${p.likes_count||0}</span></button>
+      <button class="post-act" onclick="event.stopPropagation();location.href='/dashboard.html?post=${p.id}'">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>${p.comments_count||0}</span></button>
+      <button class="post-act" onclick="event.stopPropagation();sharePost('${p.id}')">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться</button>
+    </div>
+  </div>
+</article>`;
 }
 
 function showSkeletons(){
