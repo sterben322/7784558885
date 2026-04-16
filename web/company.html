@@ -1,247 +1,466 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Компании</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Компании</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+
+/* ═══ SHELL ═══ */
+.shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar""nav main";height:100vh;gap:10px;padding:10px}
+
+/* ═══ LOGO ═══ */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+
+/* ═══ TOPBAR ═══ */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+
+/* ═══ LEFT NAV ═══ */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ MAIN ═══ */
+.main{grid-area:main;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+
+/* ─── TOOLBAR ─── */
+.toolbar{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;flex-wrap:wrap}
+.toolbar-title{font-size:16px;font-weight:800;color:var(--t);margin-right:4px}
+.toolbar-count{font-size:13px;color:var(--gmt);font-weight:500}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s;white-space:nowrap}
+.ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
+.ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.sort-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);color:var(--tm);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.sort-btn:hover{background:var(--gl);border-color:var(--gb);color:var(--g)}
+.sort-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+
+/* ─── GRID ─── */
+.companies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;overflow-y:auto;padding-right:2px;padding-bottom:10px}
+.companies-grid::-webkit-scrollbar{width:4px}
+.companies-grid::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* ─── SKELETON ─── */
+.co-skel{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;height:280px}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ─── COMPANY CARD ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.co-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,transform .18s;animation:fadeUp .3s ease both}
+.co-card:hover{box-shadow:var(--shm);transform:translateY(-2px)}
+
+/* banner */
+.co-banner{height:64px;position:relative;overflow:hidden;flex-shrink:0}
+.co-banner::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.09)}
+.co-banner::after{content:'';position:absolute;bottom:-20px;left:20%;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)}
+
+/* avatar */
+.co-av-wrap{padding:0 16px;margin-top:-24px;flex-shrink:0}
+.co-av{width:48px;height:48px;border-radius:var(--rm);border:3px solid var(--w);display:grid;place-items:center;font-size:18px;font-weight:800;color:#fff;position:relative}
+
+/* card body */
+.co-body{padding:6px 16px 12px;flex:1;display:flex;flex-direction:column;gap:0}
+.co-name{font-size:14px;font-weight:800;color:var(--t);line-height:1.3;margin-top:2px}
+.co-industry{font-size:11px;color:var(--gmt);margin-top:3px;display:flex;align-items:center;gap:4px}
+.co-industry svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+
+/* status pill */
+.co-status{display:inline-flex;align-items:center;gap:5px;background:var(--gl);border:1px solid var(--gb);border-radius:99px;padding:3px 10px 3px 7px;margin-top:7px;width:fit-content;max-width:100%}
+.co-status svg{width:11px;height:11px;fill:none;stroke:var(--g);stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.co-status span{font-size:11px;color:var(--tm);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* tags */
+.co-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.co-tag{padding:2px 9px;border-radius:99px;background:var(--gp);color:var(--gmt);font-size:11px;font-weight:600;border:1px solid var(--bdr);cursor:pointer;transition:background .12s}
+.co-tag:hover{background:var(--gl);color:var(--g);border-color:var(--gb)}
+
+/* meta */
+.co-meta{display:flex;gap:14px;margin-top:10px}
+.co-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt)}
+.co-meta-item svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+.co-meta-item b{color:var(--t);font-weight:700}
+
+/* links */
+.co-links{display:flex;align-items:center;gap:0;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.co-link{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--g);text-decoration:none;flex:1;min-width:0;font-weight:600;transition:opacity .15s}
+.co-link:hover{opacity:.75}
+.co-link svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+.co-link span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co-sep{width:1px;background:var(--bdr);height:16px;flex-shrink:0;margin:0 8px}
+.co-addr{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt);flex:1;min-width:0}
+.co-addr svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+.co-addr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* action buttons */
+.co-actions{display:flex;gap:6px;padding:10px 16px 14px;flex-shrink:0}
+.btn-profile{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 10px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);font-family:inherit;font-size:12px;font-weight:600;color:var(--tm);cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-profile:hover{background:var(--gl);border-color:var(--gb);color:var(--g)}
+.btn-profile svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.btn-follow{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 10px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:background .15s}
+.btn-follow:hover{background:var(--gm)}
+.btn-follow svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.btn-follow.following{background:var(--gl);color:var(--g);border:1.5px solid var(--gb)}
+.btn-follow.following:hover{background:var(--gb)}
+.btn-follow.following svg{stroke:var(--g)}
+
+/* empty state */
+.empty-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:20px;background:var(--gl);display:grid;place-items:center;color:var(--g)}
+.empty-icon svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--t)}
+.empty-state p{font-size:13px;color:var(--gmt);max-width:280px;line-height:1.55}
+
+/* responsive */
+@media(max-width:1100px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}}
+@media(max-width:800px){.companies-grid{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="bg-white text-[#273244]">
-<div class="min-h-screen p-6 font-sans">
-    <div class="mx-auto max-w-6xl rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
-        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#e8ecef] px-6 py-5 bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
-            <div>
-                <a href="/dashboard.html" class="text-sm text-[#7f8b98] hover:text-[#2c394b]"><i class="fa-solid fa-arrow-left mr-2"></i>Назад в ленту</a>
-                <h1 class="mt-2 text-[30px] font-semibold tracking-[-0.02em] text-[#2c394b]">Компании LASTOP</h1>
-                <p class="text-[#7e8a97]">Каталог компаний с удобной фильтрацией и сортировкой.</p>
-            </div>
-            <div class="flex gap-3">
-                <a href="/create-company.html" class="rounded-2xl border border-[#dbe4e9] bg-white px-4 py-2.5 text-sm font-medium text-[#3f5163] hover:bg-[#f4f8fa]">
-                    <i class="fa-solid fa-plus mr-2"></i>Создать компанию
-                </a>
-                <a id="openMyCompany" href="/company-profile.html" class="rounded-2xl bg-[#4c8d78] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3f7866]">
-                    <i class="fa-regular fa-building mr-2"></i>Моя компания
-                </a>
-            </div>
-        </header>
+<body>
+<div class="shell">
 
-        <section class="border-b border-[#e8ecef] px-6 py-5 bg-[#fbfcfc]">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <select id="companySectorFilter" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
-                    <option value="all">Все отрасли</option>
-                    <option value="Логистика">Логистика</option>
-                    <option value="IT">IT</option>
-                    <option value="Производство">Производство</option>
-                </select>
-                <select id="companySort" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
-                    <option value="followers">Сначала популярные</option>
-                    <option value="employees">По числу сотрудников</option>
-                    <option value="name">По алфавиту</option>
-                </select>
-            </div>
-        </section>
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img id="logo-img" alt="LASTOP GROUP">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
 
-        <main class="px-6 py-6 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]">
-            <div id="companyList" class="grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
-            <div id="companyListEmpty" class="hidden rounded-2xl border border-dashed border-[#d4dde3] bg-white p-8 text-center text-[#7f8b98]">
-                По вашему фильтру компании не найдены.
-            </div>
-        </main>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск компаний, отраслей, тегов…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br" id="bellCount">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg" id="chatCount">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item active" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="toolbar-title">Компании</span>
+    <span class="toolbar-count" id="totalCount"></span>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="ftab active" data-industry="">Все</button>
+      <button class="ftab" data-industry="Логистика">Логистика</button>
+      <button class="ftab" data-industry="Производство">Производство</button>
+      <button class="ftab" data-industry="IT">IT</button>
+      <button class="ftab" data-industry="Торговля">Торговля</button>
+      <button class="ftab" data-industry="Сельское хозяйство">АПК</button>
+      <button class="ftab" data-industry="Фармацевтика">Фарма</button>
     </div>
+    <button class="sort-btn" id="sortBtn">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span id="sortLabel">По подписчикам</span>
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div class="companies-grid" id="companiesGrid"></div>
+</div>
 </div>
 
 <script>
-const DEMO_COMPANIES = [
-    {
-        id: 'demo-1',
-        name: 'NorthBridge Logistics',
-        owner_name: 'Ирина Власова',
-        economic_sector: 'Логистика',
-        description: 'Международная B2B логистика и таможенное сопровождение поставок в СНГ и ЕС.',
-        followers_count: 1240,
-        employee_count: 58,
-        is_public: true,
-        tags: ['логистика', 'экспорт', 'склад'],
-        website: 'northbridge.example.com',
-        address: 'Москва, Ленинградский пр-т 35'
-    },
-    {
-        id: 'demo-2',
-        name: 'CloudForge Systems',
-        owner_name: 'Алексей Ким',
-        economic_sector: 'IT',
-        description: 'Разработка корпоративных платформ для автоматизации закупок и продаж.',
-        followers_count: 980,
-        employee_count: 41,
-        is_public: true,
-        tags: ['it', 'saas', 'автоматизация'],
-        website: 'cloudforge.example.com',
-        address: 'Санкт-Петербург, Невский пр-т 108'
-    },
-    {
-        id: 'demo-3',
-        name: 'Volga Industrial Group',
-        owner_name: 'Роман Дёмин',
-        economic_sector: 'Производство',
-        description: 'Производство и поставка комплектующих для строительной и сельхоз техники.',
-        followers_count: 760,
-        employee_count: 133,
-        is_public: true,
-        tags: ['производство', 'комплектующие', 'b2b'],
-        website: 'volgaindustrial.example.com',
-        address: 'Казань, ул. Аграрная 9'
-    }
-];
+const API='/api', tk=()=>localStorage.getItem('token');
 
-let companies = [...DEMO_COMPANIES];
+/* ── LOGO ── */
+(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
-function getCompanyTags(company) {
-    const tags = company.search_tags || company.tags || [];
-    return Array.isArray(tags) ? tags : [];
-}
-
-function companyCard(company) {
-    const tags = getCompanyTags(company);
-    return `
-        <article class="rounded-[22px] border border-[#e8ecee] bg-white px-5 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${company.name}</h3>
-                    <p class="mt-1 text-sm text-[#7f8b98]">Владелец: ${company.owner_name || 'Не указан'}</p>
-                    <p class="mt-3 text-[15px] leading-6 text-[#697685]">${company.description || 'Описание отсутствует'}</p>
-                </div>
-                <span class="rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${company.economic_sector || 'Без отрасли'}</span>
-            </div>
-
-            <div class="mt-4 flex flex-wrap gap-2.5">
-                ${tags.length ? tags.map((tag) => `<span class="rounded-full bg-[#eef2f6] px-3 py-1.5 text-[12px] font-medium text-[#5f7081]">#${tag}</span>`).join('') : '<span class="text-xs text-[#97a3af]">Теги не указаны</span>'}
-            </div>
-
-            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Подписчики</dt><dd class="text-lg font-semibold text-[#344153]">${company.followers_count || 0}</dd></div>
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Сотрудники</dt><dd class="text-lg font-semibold text-[#344153]">${company.employee_count || 0}</dd></div>
-            </dl>
-
-            <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-[#7a8794]">
-                <span><i class="fa-solid fa-globe mr-1.5"></i>${company.website || 'Сайт не указан'}</span>
-                <span><i class="fa-solid fa-location-dot mr-1.5"></i>${company.address || 'Адрес не указан'}</span>
-            </div>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-                <button data-open-company="${company.owner_id || ''}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть профиль</button>
-                <button data-follow-company="${company.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Подписаться</button>
-            </div>
-        </article>
-    `;
-}
-
-function filteredCompanies() {
-    const sector = document.getElementById('companySectorFilter').value;
-    const sort = document.getElementById('companySort').value;
-
-    const filtered = companies.filter((company) => {
-        const bySector = sector === 'all' || (company.economic_sector || '').toLowerCase() === sector.toLowerCase();
-        return bySector;
-    });
-
-    filtered.sort((a, b) => {
-        if (sort === 'employees') return (b.employee_count || 0) - (a.employee_count || 0);
-        if (sort === 'name') return (a.name || '').localeCompare(b.name || '', 'ru');
-        return (b.followers_count || 0) - (a.followers_count || 0);
-    });
-
-    return filtered;
-}
-
-function renderCompanies() {
-    const list = document.getElementById('companyList');
-    const empty = document.getElementById('companyListEmpty');
-    const data = filteredCompanies();
-
-    if (!data.length) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-
-    empty.classList.add('hidden');
-    list.innerHTML = data.map(companyCard).join('');
-}
-
-async function tryLoadFromAPI() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    try {
-        const response = await fetch('/api/search/companies?q=', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) return;
-
-        const data = await response.json();
-        if (Array.isArray(data.companies) && data.companies.length) {
-            companies = [...DEMO_COMPANIES, ...data.companies];
-        }
-    } catch (error) {
-        console.warn('Не удалось получить список компаний из API:', error);
-    }
-}
-
-function wireActions() {
-    ['companySectorFilter', 'companySort'].forEach((id) => {
-        document.getElementById(id).addEventListener('input', renderCompanies);
-        document.getElementById(id).addEventListener('change', renderCompanies);
-    });
-
-    document.getElementById('companyList').addEventListener('click', async (event) => {
-        const openBtn = event.target.closest('[data-open-company]');
-        if (openBtn) {
-            const ownerId = openBtn.dataset.openCompany;
-            if (ownerId) {
-                window.location.href = `/company-profile.html?owner_id=${encodeURIComponent(ownerId)}`;
-            } else {
-                window.location.href = '/company-profile.html';
-            }
-            return;
-        }
-
-        const followBtn = event.target.closest('[data-follow-company]');
-        if (followBtn) {
-            const companyId = followBtn.dataset.followCompany;
-            if (companyId.startsWith('demo-')) {
-                followBtn.textContent = 'Демо: подписка включена';
-                followBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
-                followBtn.classList.add('bg-[#4c8d78]', 'text-white');
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('Требуется авторизация для подписки.');
-                return;
-            }
-
-            const response = await fetch(`/api/company/${companyId}/follow`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.ok) {
-                followBtn.textContent = 'Вы подписаны';
-                followBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
-                followBtn.classList.add('bg-[#4c8d78]', 'text-white');
-            }
-        }
-    });
-}
-
-(async function init() {
-    wireActions();
-    await tryLoadFromAPI();
-    renderCompanies();
+/* ── AUTH GUARD ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok){localStorage.clear();location.href='/login.html';}
+  }catch{}
+  loadCompanies();
 })();
+
+/* ── SEARCH ── */
+let sT;
+document.getElementById('searchInput').addEventListener('input',e=>{
+  clearTimeout(sT);
+  const q=e.target.value.trim();
+  if(q.length>1) sT=setTimeout(()=>filterAndRender(q),300);
+  else filterAndRender('');
+});
+document.getElementById('searchInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){clearTimeout(sT);filterAndRender(e.target.value.trim());}
+});
+
+/* ── DATA ── */
+const AV_COLORS=['#3A90C0','#C07030','#9060C0','#1A8A6A','#E04040','#208090','#B05090','#5A8A3A','#C04070','#6060C0'];
+const BANNERS=[
+  'linear-gradient(135deg,#185FA5,#378ADD)',
+  'linear-gradient(135deg,#854F0B,#EF9F27)',
+  'linear-gradient(135deg,#534AB7,#7F77DD)',
+  'linear-gradient(135deg,#0F6E56,#1D9E75)',
+  'linear-gradient(135deg,#993C1D,#D85A30)',
+  'linear-gradient(135deg,#185FA5,#1D9E75)',
+  'linear-gradient(135deg,#72243E,#D4537E)',
+  'linear-gradient(135deg,#27500A,#639922)',
+  'linear-gradient(135deg,#3C3489,#7F77DD)',
+  'linear-gradient(135deg,#633806,#EF9F27)',
+];
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtNum(n){if(!n&&n!==0)return'—';return n>=1000?(Math.round(n/100)/10).toFixed(1).replace('.0','')+'к':String(n);}
+function avc(name){return AV_COLORS[(name||'').charCodeAt(0)%AV_COLORS.length]||AV_COLORS[0];}
+function banner(name){return BANNERS[(name||'').charCodeAt(0)%BANNERS.length]||BANNERS[0];}
+
+let allCompanies=[], currentFilter='', currentSort='subscribers', searchQuery='';
+const followedSet=new Set(JSON.parse(localStorage.getItem('followed_companies')||'[]'));
+
+function getDemoCompanies(){
+  return[
+    {id:'1',name:'NorthBridge Logistics',industry:'Логистика',status:'Открыты к партнёрству',tags:['мультимодал','снг','экспорт'],employees:248,subscribers:1200,website:'northbridge.ru',address:'Москва',description:'Мультимодальные перевозки по СНГ и Европе'},
+    {id:'2',name:'Volga Industrial Group',industry:'Производство',status:'Ищем дистрибьюторов',tags:['металл','сталь','b2b'],employees:1400,subscribers:890,website:'volga-industrial.ru',address:'Самара',description:'Производство металлоконструкций'},
+    {id:'3',name:'TechRoute Solutions',industry:'IT',status:'Внедряем WMS и TMS',tags:['wms','tms','saas'],employees:87,subscribers:2100,website:'techroute.io',address:'Санкт-Петербург',description:'Автоматизация складской и транспортной логистики'},
+    {id:'4',name:'AgroTrade Export',industry:'Сельское хозяйство',status:'Выходим на рынки Азии',tags:['зерно','масло','экспорт'],employees:320,subscribers:670,website:'agrotrade.ru',address:'Краснодар',description:'Экспорт сельскохозяйственной продукции'},
+    {id:'5',name:'PharmLogix',industry:'Фармацевтика',status:'Ищем перевозчиков GDP',tags:['фарма','gdp','холодоцепь'],employees:95,subscribers:430,website:'pharmlogix.ru',address:'Москва',description:'Логистика фармацевтических грузов'},
+    {id:'6',name:'GlobalTrade Partners',industry:'Торговля',status:'Открыты к новым сделкам',tags:['импорт','таможня','вэд'],employees:56,subscribers:1560,website:'globaltp.ru',address:'Новосибирск',description:'ВЭД и таможенное оформление'},
+    {id:'7',name:'СтройМаркет Групп',industry:'Производство',status:'Расширяем дилерскую сеть',tags:['стройматериалы','оптовик','рф'],employees:180,subscribers:740,website:'stroymarket.ru',address:'Екатеринбург',description:'Оптовые поставки строительных материалов'},
+    {id:'8',name:'FastCargo Express',industry:'Логистика',status:'Новый хаб в Казахстане',tags:['доставка','авиа','курьер'],employees:620,subscribers:1890,website:'fastcargo.kz',address:'Алматы',description:'Экспресс-доставка по СНГ'},
+    {id:'9',name:'DataLogic AI',industry:'IT',status:'Ищем пилотных клиентов',tags:['ai','ml','оптимизация'],employees:34,subscribers:980,website:'datalogic.ai',address:'Москва',description:'ИИ-оптимизация логистических маршрутов'},
+    {id:'10',name:'EuroAsia Grain',industry:'Сельское хозяйство',status:'Сезонные закупки открыты',tags:['пшеница','ячмень','кукуруза'],employees:210,subscribers:520,website:'euroasiagrain.com',address:'Ростов-на-Дону',description:'Торговля зерновыми культурами'},
+    {id:'11',name:'Meridian Pharma',industry:'Фармацевтика',status:'Партнёры по дистрибуции',tags:['дистрибуция','опт','rx'],employees:440,subscribers:360,website:'meridianpharma.ru',address:'Казань',description:'Дистрибуция лекарственных препаратов'},
+    {id:'12',name:'ТрансРечФлот',industry:'Логистика',status:'Навигация открыта',tags:['речфлот','баржи','волга'],employees:890,subscribers:610,website:'transrechflot.ru',address:'Нижний Новгород',description:'Речные грузоперевозки по Волжскому бассейну'},
+  ];
+}
+
+async function loadCompanies(){
+  showSkeletons();
+  try{
+    const r=await fetch(API+'/companies?limit=50',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{companies=[]}=await r.json();
+    allCompanies=companies.length?companies:getDemoCompanies();
+  }catch{
+    allCompanies=getDemoCompanies();
+  }
+  filterAndRender(searchQuery);
+}
+
+function showSkeletons(){
+  const grid=document.getElementById('companiesGrid');
+  grid.innerHTML=Array(6).fill(0).map(()=>`
+    <div class="co-skel">
+      <div class="sl" style="height:64px;border-radius:0"></div>
+      <div style="padding:0 16px">
+        <div class="sl" style="width:48px;height:48px;border-radius:var(--rm);margin-top:-24px;margin-bottom:10px;border:3px solid var(--w)"></div>
+        <div class="sl" style="height:14px;width:70%;margin-bottom:6px;border-radius:6px"></div>
+        <div class="sl" style="height:11px;width:50%;margin-bottom:10px;border-radius:6px"></div>
+        <div class="sl" style="height:22px;width:60%;margin-bottom:8px;border-radius:99px"></div>
+        <div style="display:flex;gap:4px;margin-bottom:10px">
+          <div class="sl" style="height:20px;width:60px;border-radius:99px"></div>
+          <div class="sl" style="height:20px;width:50px;border-radius:99px"></div>
+          <div class="sl" style="height:20px;width:55px;border-radius:99px"></div>
+        </div>
+        <div class="sl" style="height:11px;width:80%;border-radius:6px"></div>
+      </div>
+    </div>`).join('');
+}
+
+function filterAndRender(query=''){
+  searchQuery=query;
+  let list=[...allCompanies];
+
+  /* filter by industry */
+  if(currentFilter) list=list.filter(c=>(c.industry||'').toLowerCase().includes(currentFilter.toLowerCase()));
+
+  /* filter by search */
+  if(query){
+    const q=query.toLowerCase();
+    list=list.filter(c=>
+      (c.name||'').toLowerCase().includes(q)||
+      (c.industry||'').toLowerCase().includes(q)||
+      (c.status||'').toLowerCase().includes(q)||
+      (c.address||'').toLowerCase().includes(q)||
+      (c.tags||[]).some(t=>t.toLowerCase().includes(q))
+    );
+  }
+
+  /* sort */
+  if(currentSort==='subscribers') list.sort((a,b)=>(b.subscribers||0)-(a.subscribers||0));
+  else if(currentSort==='employees') list.sort((a,b)=>(b.employees||0)-(a.employees||0));
+  else if(currentSort==='name') list.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ru'));
+
+  document.getElementById('totalCount').textContent=list.length?'· '+list.length+' компаний':'';
+  renderGrid(list);
+}
+
+function renderGrid(list){
+  const grid=document.getElementById('companiesGrid');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state">
+      <div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+      <h3>Компании не найдены</h3>
+      <p>Попробуйте изменить фильтр или поисковый запрос</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML=list.map((c,idx)=>buildCard(c,idx)).join('');
+  /* animation delays */
+  grid.querySelectorAll('.co-card').forEach((el,i)=>{el.style.animationDelay=(i*0.04)+'s';});
+}
+
+function buildCard(c,idx){
+  const color=avc(c.name);
+  const bg=banner(c.name);
+  const letter=(c.name||'?')[0].toUpperCase();
+  const tags=(c.tags||[]).slice(0,4);
+  const isFollowed=followedSet.has(c.id);
+  const site=c.website?(c.website.replace(/^https?:\/\//,'').split('/')[0]):'';
+
+  return`<div class="co-card" data-id="${esc(c.id)}">
+  <div class="co-banner" style="background:${bg}"></div>
+  <div class="co-av-wrap">
+    <div class="co-av" style="background:${color}">${letter}</div>
+  </div>
+  <div class="co-body">
+    <div class="co-name">${esc(c.name)}</div>
+    <div class="co-industry">
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      ${esc(c.industry||'Не указана')}
+    </div>
+    ${c.status?`<div class="co-status">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+      <span>${esc(c.status)}</span>
+    </div>`:''}
+    ${tags.length?`<div class="co-tags">${tags.map(t=>`<span class="co-tag">#${esc(t)}</span>`).join('')}</div>`:''}
+    <div class="co-meta">
+      <div class="co-meta-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <b>${fmtNum(c.employees)}</b> сотр.
+      </div>
+      <div class="co-meta-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <b>${fmtNum(c.subscribers)}</b> подп.
+      </div>
+    </div>
+    <div class="co-links">
+      ${site?`<a class="co-link" href="https://${esc(site)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span>${esc(site)}</span>
+      </a><div class="co-sep"></div>`:''}
+      ${c.address?`<div class="co-addr">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>${esc(c.address)}</span>
+      </div>`:''}
+    </div>
+  </div>
+  <div class="co-actions">
+    <a class="btn-profile" href="/company-profile.html?id=${esc(c.id)}" onclick="event.stopPropagation()">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Профиль
+    </a>
+    <button class="btn-follow${isFollowed?' following':''}" onclick="event.stopPropagation();toggleFollow(this,'${esc(c.id)}')">
+      ${isFollowed
+        ?`<svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>Слежу`
+        :`<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Подписаться`
+      }
+    </button>
+  </div>
+</div>`;
+}
+
+/* ── FOLLOW ── */
+async function toggleFollow(btn,companyId){
+  const isFollowed=followedSet.has(companyId);
+  const method=isFollowed?'DELETE':'POST';
+  if(isFollowed) followedSet.delete(companyId); else followedSet.add(companyId);
+  localStorage.setItem('followed_companies',JSON.stringify([...followedSet]));
+
+  btn.classList.toggle('following',!isFollowed);
+  btn.innerHTML=!isFollowed
+    ?`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round"><polyline points="20,6 9,17 4,12"/></svg>Слежу`
+    :`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Подписаться`;
+
+  /* обновить счётчик в данных */
+  const comp=allCompanies.find(c=>c.id===companyId);
+  if(comp) comp.subscribers=(comp.subscribers||0)+(isFollowed?-1:1);
+
+  try{
+    await fetch(API+'/companies/'+companyId+'/follow',{method,headers:{Authorization:'Bearer '+tk()}});
+  }catch{}
+}
+
+/* ── FILTERS ── */
+document.getElementById('filterTabs').addEventListener('click',e=>{
+  const tab=e.target.closest('.ftab');
+  if(!tab)return;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  currentFilter=tab.dataset.industry||'';
+  filterAndRender(searchQuery);
+});
+
+/* ── SORT ── */
+const sortOptions=['subscribers','employees','name'];
+const sortLabels={'subscribers':'По подписчикам','employees':'По сотрудникам','name':'По алфавиту'};
+let sortIdx=0;
+document.getElementById('sortBtn').addEventListener('click',()=>{
+  sortIdx=(sortIdx+1)%sortOptions.length;
+  currentSort=sortOptions[sortIdx];
+  document.getElementById('sortLabel').textContent=sortLabels[currentSort];
+  filterAndRender(searchQuery);
+});
 </script>
 </body>
 </html>
