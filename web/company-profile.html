@@ -1,240 +1,728 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Профиль компании</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Профиль компании</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+
+/* ═══ SHELL ═══ */
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
+
+/* ═══ LOGO ═══ */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+
+/* ═══ TOPBAR ═══ */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+
+/* ═══ LEFT NAV ═══ */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ MAIN ═══ */
+.main{grid-area:main;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* ═══ RIGHT ═══ */
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+
+/* ─── CARD ─── */
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+
+/* ─── HERO ─── */
+.hero-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh);flex-shrink:0}
+.hero-banner{height:88px;position:relative;overflow:hidden;cursor:pointer}
+.hero-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero-banner::after{content:'';position:absolute;bottom:-20px;left:30%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)}
+.hero-banner-hint{position:absolute;bottom:8px;right:10px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:var(--r);padding:3px 8px;font-size:10px;font-weight:600;color:#fff;opacity:0;transition:opacity .15s}
+.hero-banner:hover .hero-banner-hint{opacity:1}
+.hero-banner-hint svg{width:11px;height:11px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.hero-body{padding:0 18px 16px}
+.hero-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.hero-av-wrap{position:relative;margin-top:-34px;flex-shrink:0}
+.hero-av{width:68px;height:68px;border-radius:var(--rl);border:3px solid var(--w);display:grid;place-items:center;font-size:26px;font-weight:800;color:#fff;position:relative}
+.hero-actions-row{display:flex;align-items:center;gap:8px;padding-top:6px}
+
+/* кнопки */
+.btn-msg{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:13px;font-weight:600;transition:background .15s}
+.btn-msg:hover{background:var(--gm)}
+.btn-msg svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
+.btn-follow{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:all .15s}
+.btn-follow:hover{background:var(--gl);border-color:var(--gb);color:var(--g)}
+.btn-follow svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.btn-follow.following{background:var(--gl);color:var(--g);border-color:var(--gb)}
+.btn-follow.following:hover{background:var(--gb)}
+.btn-edit{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rm);background:var(--gp);border:1.5px solid var(--bdr);cursor:pointer;color:var(--tm);font-family:inherit;font-size:13px;font-weight:600;transition:background .15s}
+.btn-edit:hover{background:var(--gl);border-color:var(--gb);color:var(--g)}
+.btn-edit svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+
+.hero-name{font-size:18px;font-weight:800;color:var(--t);margin-top:10px;line-height:1.2}
+.hero-industry{font-size:12px;color:var(--gmt);margin-top:3px;display:flex;align-items:center;gap:5px}
+.hero-industry svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+
+/* статус */
+.status-pill{display:inline-flex;align-items:center;gap:6px;background:var(--gl);border:1.5px solid var(--gb);border-radius:99px;padding:4px 12px 4px 8px;margin-top:8px;cursor:pointer;transition:background .15s;max-width:100%}
+.status-pill:hover{background:var(--gb)}
+.status-pill svg{width:13px;height:13px;fill:none;stroke:var(--g);stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.status-pill-text{font-size:12px;color:var(--tm);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-pill-placeholder{font-size:12px;color:var(--gmt);font-style:italic}
+
+.hero-since{font-size:11px;color:var(--gmt);margin-top:6px}
+
+/* stats */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat-cell{background:var(--gp);border-radius:var(--rm);padding:10px 12px;text-align:center;border:1px solid var(--bdr)}
+.stat-num{font-size:18px;font-weight:800;color:var(--g)}
+.stat-lbl{font-size:10px;color:var(--gmt);font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+
+/* feed label */
+.feed-label{display:flex;align-items:center;gap:8px;padding:0 2px;flex-shrink:0}
+.feed-label span{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.feed-label::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* posts */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px 16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both;cursor:pointer}
+.post:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.post-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.av{width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.post-source{font-size:13px;font-weight:700;color:var(--t)}
+.post-verified{display:inline-flex;align-items:center;margin-left:3px;color:var(--g)}
+.post-verified svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.post-time{font-size:12px;color:var(--gmt);margin-left:4px}
+.post-meta{flex:1;min-width:0;display:flex;align-items:center}
+.post-menu{width:24px;height:24px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s;flex-shrink:0}
+.post-menu:hover{background:var(--gp)}
+.post-menu svg{width:16px;height:16px;fill:currentColor}
+.post-body-row{display:grid;grid-template-columns:1fr 120px;grid-template-rows:auto auto;column-gap:14px;row-gap:5px}
+.post-body-row.no-img{grid-template-columns:1fr}
+.post-title{grid-column:1;grid-row:1;font-size:15px;font-weight:700;color:var(--t);line-height:1.4}
+.post-body{grid-column:1;grid-row:2;font-size:13px;color:var(--tm);line-height:1.55}
+.post-thumb{grid-column:2;grid-row:1/3;width:120px;min-height:80px;height:100%;border-radius:var(--rm);object-fit:cover;border:1px solid var(--bdr);align-self:stretch}
+.post-footer{display:flex;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--bdr)}
+.post-tags{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+.tag{padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s}
+.tag:hover{background:var(--gb)}
+.post-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.post-act{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit;padding:3px 6px;border-radius:6px}
+.post-act:hover{color:var(--g);background:var(--gp)}
+.post-act.liked{color:var(--red)}
+.post-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.skel{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ─── INFO ROWS ─── */
+.info-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.info-row:last-child{border-bottom:none;padding-bottom:0}
+.info-icon{width:30px;height:30px;border-radius:var(--r);background:var(--gp);display:grid;place-items:center;flex-shrink:0;color:var(--gmt)}
+.info-icon svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.info-body{flex:1;min-width:0}
+.info-val{font-size:13px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info-val.link{color:var(--g);cursor:pointer}
+.info-val.link:hover{text-decoration:underline}
+.info-lbl{font-size:10px;color:var(--gmt);margin-top:1px}
+
+/* ─── EMPLOYEES (как friends-grid) ─── */
+.emp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.emp-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.emp-item:hover{background:var(--gp)}
+.emp-av{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;position:relative}
+.emp-online{position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:#22CC66;border:2px solid var(--w)}
+.emp-name{font-size:10px;color:var(--gmt);text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emp-more{background:var(--gp);border-radius:var(--rm);display:grid;place-items:center;height:36px;cursor:pointer;transition:background .15s}
+.emp-more:hover{background:var(--gl)}
+.emp-more span{font-size:11px;font-weight:700;color:var(--gmt)}
+
+/* ─── PROJECTS ─── */
+.project-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.project-item:hover{background:var(--gp)}
+.project-icon{width:32px;height:32px;border-radius:var(--r);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
+.project-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.project-info{flex:1;min-width:0}
+.project-name{font-size:12px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.project-meta{font-size:10px;color:var(--gmt);margin-top:2px;display:flex;align-items:center;gap:4px}
+.project-status{padding:1px 6px;border-radius:99px;font-size:9px;font-weight:700}
+.ps-active{background:#E8F5EE;color:var(--g)}
+.ps-done{background:var(--gp);color:var(--gmt)}
+.ps-plan{background:#EEF5FF;color:#3A6CB0}
+
+/* ─── PARTNERS (как comm-item) ─── */
+.partner-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.partner-item:hover{background:var(--gp)}
+.partner-av{width:32px;height:32px;border-radius:var(--r);font-size:12px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.partner-name{font-size:13px;font-weight:600;color:var(--t)}
+.partner-ind{font-size:11px;color:var(--gmt);margin-top:1px}
+
+/* ─── AD ─── */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-block::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(120,80,200,.07)}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ad-btn:hover{opacity:.88}
+
+/* ─── STATUS MODAL ─── */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.4);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:420px;transform:translateY(12px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head h3{font-size:16px;font-weight:700;color:var(--t)}
+.modal-x{width:28px;height:28px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.status-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px 12px;font-family:inherit;font-size:14px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp)}
+.status-input:focus{border-color:var(--gm)}
+.status-input::placeholder{color:var(--gmt)}
+.status-hints{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.status-hint{padding:4px 12px;border-radius:99px;background:var(--gl);color:var(--g);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--gb);transition:background .15s}
+.status-hint:hover{background:var(--gb)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 20px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+
+@media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:960px){
+  .shell{grid-template-columns:48px 1fr;grid-template-areas:"logo topbar""nav main"}
+  .right{display:none}
+  .nav-item span,.logo-text{display:none}
+  .nav-item{justify-content:center;padding:10px}
+}
+</style>
 </head>
-<body class="bg-white text-[#273244]">
-<div class="min-h-screen p-4 md:p-6">
-    <div class="mx-auto w-full max-w-[1460px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)] overflow-hidden">
-        <header class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecef] bg-white px-5 py-4 md:px-7">
-            <a href="/" class="brand-link"><img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" class="brand-logo"></a>
-            <nav class="flex items-center gap-3 text-sm text-[#5b6777]">
-                <a href="/dashboard.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Главная</a>
-                <a href="/company-profile.html" class="rounded-xl bg-[#eef5f1] px-3 py-2 font-semibold text-[#4c8d78]">Компания</a>
-                <a href="/company.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Каталог</a>
-                <a href="/profile.html" class="rounded-xl px-3 py-2 hover:bg-[#f4f7f7]">Профиль</a>
-            </nav>
-        </header>
+<body>
+<div class="shell">
 
-        <div class="grid gap-5 p-4 md:grid-cols-[minmax(0,1fr)_320px] md:p-6">
-            <main class="space-y-4">
-                <section class="rounded-[24px] border border-[#e7ecef] bg-white shadow-[0_10px_22px_rgba(178,190,198,0.10)]">
-                    <div class="h-[220px] rounded-t-[24px] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_40%),linear-gradient(110deg,#1f6a4d_0%,#2b8662_48%,#41936f_100%)]"></div>
-                    <div class="relative px-5 pb-5 pt-0 md:px-7 md:pb-6">
-                        <div class="-mt-12 flex flex-wrap items-end justify-between gap-4">
-                            <div class="flex items-end gap-4">
-                                <div id="companyLogo" class="avatar-circle grid h-24 w-24 place-items-center border-4 border-white bg-[#3f8566] text-4xl font-bold text-white shadow"><i class="fas fa-building"></i></div>
-                                <div class="pb-2">
-                                    <h1 id="companyName" class="text-3xl font-semibold text-[#273244]">Компания</h1>
-                                    <p id="companyMeta" class="text-[16px] text-[#607080]"></p>
-                                    <p id="companyOwner" class="text-sm text-[#8793a0]"><i class="fa-solid fa-user mr-1"></i>Владелец: —</p>
-                                </div>
-                            </div>
-                            <span id="companyPrivacy" class="rounded-full bg-[#e8f5ee] px-3 py-1 text-sm font-semibold text-[#4e8d75]"><i class="fa-solid fa-check mr-1"></i>Публичная</span>
-                        </div>
-                    </div>
-                </section>
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img id="logo-img" alt="LASTOP GROUP">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
 
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">О компании</h2>
-                    <p id="companyDescription" class="mt-3 text-[16px] leading-7 text-[#667585]"></p>
-                </section>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br" id="bellCount">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg" id="chatCount">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
 
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Контакты компании</h2>
-                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <div id="companyPhone" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-phone mr-2"></i>Не указан</div>
-                        <div id="companyEmail" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-envelope mr-2"></i>Не указан</div>
-                        <div id="companyWebsite" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-globe mr-2"></i>Не указан</div>
-                        <div id="companyAddress" class="rounded-2xl border border-[#e6ecef] bg-[#fafcfc] px-4 py-3 text-[#5a6979]"><i class="fas fa-map-marker-alt mr-2"></i>Не указан</div>
-                    </div>
-                </section>
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item active" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
 
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Сотрудники</h2>
-                    <div id="employeesContainer" class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"></div>
-                </section>
+<!-- MAIN -->
+<main class="main">
 
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white px-5 py-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-[22px] font-semibold text-[#2f3d4f]">Новости компании</h2>
-                        <button id="openEmployeesPage" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Панель компании</button>
-                    </div>
-                    <div id="companyNewsContainer" class="mt-4 space-y-3"></div>
-                </section>
-            </main>
-
-            <aside class="space-y-4">
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <div class="text-sm text-[#7f8d9b]">Сотрудников</div>
-                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]" id="employeeCount">0</div>
-                </section>
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <div class="text-sm text-[#7f8d9b]">Подписчиков</div>
-                    <div class="mt-2 text-5xl font-semibold text-[#2f3d4f]" id="followersCount">0</div>
-                </section>
-                <section class="rounded-[20px] border border-[#e7ecef] bg-white p-5 shadow-[0_8px_16px_rgba(178,190,198,0.08)]">
-                    <div class="text-sm text-[#7f8d9b]">Реквизиты</div>
-                    <div class="mt-2 text-sm text-[#607080]">ИНН: <span class="font-semibold text-[#2f3d4f]" id="companyInn">—</span></div>
-                </section>
-            </aside>
-        </div>
+  <!-- HERO -->
+  <div class="hero-card">
+    <div class="hero-banner" id="heroBanner">
+      <div class="hero-banner-hint">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Изменить обложку
+      </div>
     </div>
+    <div class="hero-body">
+      <div class="hero-top-row">
+        <div class="hero-av-wrap">
+          <div class="hero-av" id="heroAv"><span id="heroAvLetter">N</span></div>
+        </div>
+        <div class="hero-actions-row">
+          <button class="btn-msg" id="msgBtn" onclick="location.href='/chat.html'">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Написать
+          </button>
+          <button class="btn-follow" id="followBtn" onclick="toggleFollow()">
+            <svg id="followIcon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span id="followLabel">Подписаться</span>
+          </button>
+          <button class="btn-edit" id="editBtn" style="display:none" onclick="location.href='/settings.html?tab=company'">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Редактировать
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-name" id="heroName">Загрузка…</div>
+      <div class="hero-industry" id="heroIndustry">
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        <span id="heroIndustryText">—</span>
+      </div>
+
+      <div class="status-pill" id="statusPill" onclick="openStatusModal()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+        <span class="status-pill-placeholder" id="statusText">Добавить статус компании…</span>
+      </div>
+
+      <div class="hero-since" id="heroSince">На платформе с —</div>
+
+      <div class="stats-row">
+        <div class="stat-cell"><div class="stat-num" id="statPosts">—</div><div class="stat-lbl">Публикации</div></div>
+        <div class="stat-cell"><div class="stat-num" id="statEmployees">—</div><div class="stat-lbl">Сотрудники</div></div>
+        <div class="stat-cell"><div class="stat-num" id="statSubs">—</div><div class="stat-lbl">Подписчики</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLICATIONS -->
+  <div class="feed-label"><span>Публикации компании</span></div>
+  <div id="postsList"></div>
+  <div style="height:10px;flex-shrink:0"></div>
+</main>
+
+<!-- RIGHT SIDEBAR -->
+<aside class="right">
+
+  <!-- Реквизиты -->
+  <div class="card">
+    <div class="block-title">Реквизиты</div>
+    <div class="info-row">
+      <div class="info-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+      <div class="info-body"><div class="info-val" id="infoInn">—</div><div class="info-lbl">ИНН</div></div>
+    </div>
+    <div class="info-row">
+      <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div class="info-body"><div class="info-val" id="infoAddress">—</div><div class="info-lbl">Адрес</div></div>
+    </div>
+    <div class="info-row">
+      <div class="info-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <div class="info-body"><div class="info-val link" id="infoWebsite" onclick="if(this.textContent!=='—')window.open('https://'+this.textContent,'_blank')">—</div><div class="info-lbl">Сайт</div></div>
+    </div>
+    <div class="info-row">
+      <div class="info-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></div>
+      <div class="info-body"><div class="info-val link" id="infoEmail" onclick="if(this.textContent!=='—')location='mailto:'+this.textContent">—</div><div class="info-lbl">Почта</div></div>
+    </div>
+  </div>
+
+  <!-- Сотрудники -->
+  <div class="card" id="employeesCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="block-title" style="margin-bottom:0">Сотрудники <span id="empCount" style="color:var(--g)"></span></div>
+      <a href="#" style="font-size:11px;color:var(--g);font-weight:600;text-decoration:none">Все →</a>
+    </div>
+    <div class="emp-grid" id="empGrid"></div>
+  </div>
+
+  <!-- Проекты -->
+  <div class="card" id="projectsCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="block-title" style="margin-bottom:0">Проекты</div>
+      <a href="/projects.html" style="font-size:11px;color:var(--g);font-weight:600;text-decoration:none">Все →</a>
+    </div>
+    <div id="projectsList"></div>
+  </div>
+
+  <!-- Партнёры -->
+  <div class="card" id="partnersCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="block-title" style="margin-bottom:0">Партнёры <span id="partnersCount" style="color:var(--g)"></span></div>
+      <a href="/company-profile.html#partners" style="font-size:11px;color:var(--g);font-weight:600;text-decoration:none">Все →</a>
+    </div>
+    <div id="partnersList"></div>
+  </div>
+
+  <!-- Ad -->
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">LogisticsPro 2026</div>
+      <div class="ad-sub">Выставка · Москва · май</div>
+      <button class="ad-btn">Узнать подробнее</button>
+    </div>
+  </div>
+
+</aside>
 </div>
 
-<div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg hidden transition-all z-50 bg-gray-800 text-white"></div>
+<!-- STATUS MODAL -->
+<div class="modal-bg" id="statusModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Статус компании</h3>
+      <button class="modal-x" onclick="closeStatusModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <input type="text" class="status-input" id="statusInput" placeholder="Чем занимается компания сейчас…" maxlength="100">
+    <div class="status-hints">
+      <span class="status-hint" onclick="setHint(this)">Открыты к партнёрству</span>
+      <span class="status-hint" onclick="setHint(this)">Ищем дистрибьюторов</span>
+      <span class="status-hint" onclick="setHint(this)">Набираем сотрудников</span>
+      <span class="status-hint" onclick="setHint(this)">Выходим на новые рынки</span>
+      <span class="status-hint" onclick="setHint(this)">Принимаем заявки</span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="clearStatus()">Очистить</button>
+      <button class="btn-sec" onclick="closeStatusModal()">Отмена</button>
+      <button class="btn-pri" onclick="saveStatus()">Сохранить</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const API_URL = '/api';
-let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-let currentCompany = null;
+const API='/api', tk=()=>localStorage.getItem('token');
+const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
+const BANNERS=['linear-gradient(135deg,#185FA5,#378ADD)','linear-gradient(135deg,#854F0B,#EF9F27)','linear-gradient(135deg,#534AB7,#7F77DD)','linear-gradient(135deg,#0F6E56,#1D9E75)','linear-gradient(135deg,#993C1D,#D85A30)','linear-gradient(135deg,#185FA5,#1D9E75)','linear-gradient(135deg,#72243E,#D4537E)','linear-gradient(135deg,#27500A,#639922)'];
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function avc(n){return AVC[(n||'').charCodeAt(0)%AVC.length]||AVC[0];}
+function banner(n){return BANNERS[(n||'').charCodeAt(0)%BANNERS.length]||BANNERS[0];}
+function fmtNum(n){if(!n&&n!==0)return'—';return n>=1000?(Math.round(n/100)/10).toFixed(1).replace('.0','')+'к':String(n);}
+function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':Math.floor(m/1440)+' д назад';}
 
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.remove('hidden');
-    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
-    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all z-50 ${colors[type]}`;
-    setTimeout(() => toast.classList.add('hidden'), 3000);
+const params=new URLSearchParams(location.search);
+const companyId=params.get('id');
+let companyData=null, isOwnCompany=false, isFollowed=false;
+
+/* ── LOGO ── */
+(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
+
+/* ── AUTH + LOAD ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const [meR,coR]=await Promise.all([
+      fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}}),
+      fetch(API+(companyId?'/companies/'+companyId:'/me/company'),{headers:{Authorization:'Bearer '+tk()}})
+    ]);
+    const{user={}}=meR.ok?await meR.json():{};
+    const co=coR.ok?await coR.json():null;
+    companyData=co?.company||co||getDemoCompany();
+    isOwnCompany=!!(user.company_id&&user.company_id===companyData.id)||(!!user.is_company_admin);
+    isFollowed=!!(companyData.is_followed);
+    fillPage();
+  }catch{
+    companyData=getDemoCompany();
+    fillPage();
+  }
+})();
+
+function getDemoCompany(){
+  return{
+    id:'demo',name:'NorthBridge Logistics',industry:'Логистика и транспорт',
+    status:'Открыты к партнёрству · ищем перевозчиков',
+    inn:'7707083893',address:'Москва, Пресненская наб., 10, стр. 2',
+    website:'northbridge.ru',email:'info@northbridge.ru',
+    employees_count:248,subscribers_count:1200,posts_count:84,
+    created_at:'2023-01-15T00:00:00Z',is_followed:false,
+    employees:[
+      {id:'1',full_name:'Алексей Иванов',position:'Директор',is_online:true},
+      {id:'2',full_name:'Марина Соколова',position:'Менеджер',is_online:false},
+      {id:'3',full_name:'Дмитрий Козлов',position:'Логист',is_online:true},
+      {id:'4',full_name:'Ольга Павлова',position:'Бухгалтер',is_online:false},
+      {id:'5',full_name:'Сергей Новиков',position:'Водитель',is_online:true},
+      {id:'6',full_name:'Елена Морозова',position:'HR',is_online:false},
+      {id:'7',full_name:'Игорь Лебедев',position:'ИТ',is_online:false},
+    ],
+    projects:[
+      {id:'p1',name:'Маршрут Москва — Алматы',status:'active',members:5,deadline:'июнь 2026'},
+      {id:'p2',name:'Автоматизация склада',status:'plan',members:3,deadline:'Q3 2026'},
+      {id:'p3',name:'Сертификация ISO 9001',status:'done',members:2,deadline:'завершён'},
+    ],
+    partners:[
+      {id:'c1',name:'TechRoute Solutions',industry:'IT'},
+      {id:'c2',name:'AgroTrade Export',industry:'АПК'},
+      {id:'c3',name:'GlobalTrade Partners',industry:'Торговля'},
+    ]
+  };
 }
 
-function setText(id, icon, value, fallback = 'Не указан') {
-    document.getElementById(id).innerHTML = `<i class="${icon} mr-2"></i>${value || fallback}`;
+function fillPage(){
+  const c=companyData;
+  const color=avc(c.name);
+
+  /* banner + avatar */
+  document.getElementById('heroBanner').style.background=banner(c.name);
+  document.getElementById('heroAv').style.background=color;
+  document.getElementById('heroAvLetter').textContent=(c.name||'?')[0].toUpperCase();
+
+  /* name + industry */
+  document.getElementById('heroName').textContent=c.name||'Компания';
+  document.getElementById('heroIndustryText').textContent=c.industry||'Не указана';
+
+  /* since */
+  const since=c.created_at?new Date(c.created_at).toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):'—';
+  document.getElementById('heroSince').textContent='На платформе с '+since;
+
+  /* stats */
+  document.getElementById('statPosts').textContent=fmtNum(c.posts_count);
+  document.getElementById('statEmployees').textContent=fmtNum(c.employees_count);
+  document.getElementById('statSubs').textContent=fmtNum(c.subscribers_count);
+
+  /* requisites */
+  document.getElementById('infoInn').textContent=c.inn||'Не указан';
+  document.getElementById('infoAddress').textContent=c.address||'Не указан';
+  document.getElementById('infoWebsite').textContent=c.website?(c.website.replace(/^https?:\/\//,'')):'—';
+  document.getElementById('infoEmail').textContent=c.email||'—';
+
+  /* status */
+  const savedStatus=localStorage.getItem('co_status_'+(c.id||'demo'))||c.status||'';
+  applyStatus(savedStatus);
+
+  /* own company — show edit, hide follow */
+  if(isOwnCompany){
+    document.getElementById('followBtn').style.display='none';
+    document.getElementById('editBtn').style.display='flex';
+  } else {
+    updateFollowBtn();
+  }
+
+  /* employees */
+  renderEmployees(c.employees||[]);
+  /* projects */
+  renderProjects(c.projects||[]);
+  /* partners */
+  renderPartners(c.partners||[]);
+  /* posts */
+  loadPosts(c.id||'demo', c.name, color);
 }
 
-function renderCompany(company) {
-    const fallbackName = currentUser.company_name || 'Моя компания';
-    const name = company?.name || fallbackName;
-    const description = company?.description || 'Информация о компании пока не заполнена.';
-    const sector = company?.economic_sector || 'Отрасль не указана';
-
-    document.getElementById('companyName').textContent = name;
-    document.getElementById('companyMeta').textContent = `${sector} · профиль компании`;
-    document.getElementById('companyOwner').innerHTML = `<i class="fa-solid fa-user mr-1"></i>Владелец: ${company?.owner_name || currentUser.full_name || 'Не указан'}`;
-    document.getElementById('companyDescription').textContent = description;
-    document.getElementById('employeeCount').textContent = company?.employee_count || 0;
-    document.getElementById('followersCount').textContent = company?.followers_count || 0;
-    document.getElementById('companyInn').textContent = company?.inn || '—';
-
-    setText('companyPhone', 'fas fa-phone', company?.phone);
-    setText('companyEmail', 'fas fa-envelope', currentUser.email);
-    setText('companyWebsite', 'fas fa-globe', company?.website);
-    setText('companyAddress', 'fas fa-map-marker-alt', company?.address);
-
-    const privacyBadge = document.getElementById('companyPrivacy');
-    if (company?.is_public === false) {
-        privacyBadge.className = 'rounded-full bg-[#fff1f2] px-3 py-1 text-sm font-semibold text-[#be123c]';
-        privacyBadge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i>Приватная';
-    }
-
-    const logo = document.getElementById('companyLogo');
-    if (company?.logo_url) {
-        logo.innerHTML = `<img src="${company.logo_url}" alt="Логотип ${name}" class="h-full w-full object-cover">`;
-    } else {
-        logo.innerHTML = `<span>${(name[0] || 'C').toUpperCase()}</span>`;
-    }
+/* ── FOLLOW ── */
+function updateFollowBtn(){
+  const btn=document.getElementById('followBtn');
+  const icon=document.getElementById('followIcon');
+  const label=document.getElementById('followLabel');
+  btn.classList.toggle('following',isFollowed);
+  label.textContent=isFollowed?'Вы подписаны':'Подписаться';
+  icon.innerHTML=isFollowed
+    ?'<polyline points="20,6 9,17 4,12"/>'
+    :'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
+}
+async function toggleFollow(){
+  isFollowed=!isFollowed;
+  if(companyData)companyData.subscribers_count=(companyData.subscribers_count||0)+(isFollowed?1:-1);
+  document.getElementById('statSubs').textContent=fmtNum(companyData?.subscribers_count);
+  updateFollowBtn();
+  try{await fetch(API+'/companies/'+(companyData?.id||'demo')+'/follow',{method:isFollowed?'POST':'DELETE',headers:{Authorization:'Bearer '+tk()}});}catch{}
 }
 
-async function loadCompany() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const ownerID = params.get('owner_id');
-        const token = localStorage.getItem('token');
-        const endpoint = ownerID ? `${API_URL}/company?owner_id=${encodeURIComponent(ownerID)}` : `${API_URL}/company`;
-        let response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` } });
-        let data = await response.json();
-        if ((!data.company || response.status === 401) && ownerID) {
-            const publicByOwnerResponse = await fetch(`${API_URL}/search/companies?q=`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const all = await publicByOwnerResponse.json();
-            const found = (all.companies || []).find((it) => it.owner_id === ownerID);
-            if (found?.id) {
-                response = await fetch(`${API_URL}/public/companies/${found.id}`);
-                data = await response.json();
-            }
-        }
-        const company = data.company;
-        currentCompany = company;
-        renderCompany(company);
-        await loadEmployees();
-        await loadCompanyNews();
-    } catch (error) {
-        console.error('Failed to load company:', error);
-        renderCompany(null);
-        showToast('Не удалось загрузить данные компании', 'error');
-    }
+/* ── EMPLOYEES ── */
+function renderEmployees(list){
+  if(!list.length){document.getElementById('employeesCard').style.display='none';return;}
+  const count=companyData?.employees_count||list.length;
+  document.getElementById('empCount').textContent='· '+fmtNum(count);
+  const MAX=7, shown=list.slice(0,MAX), rest=count-MAX;
+  document.getElementById('empGrid').innerHTML=shown.map(e=>{
+    const col=avc(e.full_name||e.name||'');
+    const letter=((e.full_name||e.name||'?')[0]).toUpperCase();
+    const first=(e.full_name||e.name||'').split(' ')[0];
+    return`<div class="emp-item" onclick="location.href='/profile.html?id=${esc(e.id)}'">
+      <div class="emp-av" style="background:${col}">${letter}${e.is_online?'<div class="emp-online"></div>':''}</div>
+      <div class="emp-name">${esc(first)}</div>
+    </div>`;
+  }).join('')+(rest>0?`<div class="emp-more"><span>+${rest}</span></div>`:'');
 }
 
-async function loadCompanyNews() {
-    const container = document.getElementById('companyNewsContainer');
-    if (!currentCompany?.id) {
-        container.innerHTML = '<div class="text-sm text-gray-500">Новости появятся после регистрации компании.</div>';
-        return;
-    }
-    const token = localStorage.getItem('token');
-    let response = await fetch(`${API_URL}/feed?type=company&company_id=${currentCompany.id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!response.ok) {
-        response = await fetch(`${API_URL}/public/companies/${currentCompany.id}/news`);
-    }
-    const data = await response.json();
-    const posts = data.posts || [];
-    if (!posts.length) {
-        container.innerHTML = '<div class="text-sm text-gray-500">У компании пока нет опубликованных новостей.</div>';
-        return;
-    }
-    container.innerHTML = posts.map(post => `
-        <article class="rounded-xl border border-[#e6ecef] p-4">
-            <h3 class="font-semibold text-[#2f3d4f]">${post.title || 'Новость'}</h3>
-            <p class="mt-2 text-sm text-[#5f6b79]">${post.short_description || post.content || ''}</p>
-            <div class="mt-2 text-xs text-[#8a97a5]">${new Date(post.created_at).toLocaleString('ru-RU')}</div>
-        </article>
-    `).join('');
+/* ── PROJECTS ── */
+const PS_LABELS={active:'Активный',plan:'Планируется',done:'Завершён'};
+const PS_CSS={active:'ps-active',plan:'ps-plan',done:'ps-done'};
+function renderProjects(list){
+  if(!list.length){document.getElementById('projectsCard').style.display='none';return;}
+  document.getElementById('projectsList').innerHTML=list.map(p=>`
+    <div class="project-item" onclick="location.href='/projects.html?id=${esc(p.id)}'">
+      <div class="project-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="project-info">
+        <div class="project-name">${esc(p.name)}</div>
+        <div class="project-meta">
+          <span class="project-status ${PS_CSS[p.status]||'ps-plan'}">${PS_LABELS[p.status]||p.status}</span>
+          ${p.deadline?`<span>· ${esc(p.deadline)}</span>`:''}
+          ${p.members?`<span>· ${p.members} уч.</span>`:''}
+        </div>
+      </div>
+    </div>`).join('');
 }
 
-document.getElementById('openEmployeesPage').addEventListener('click', () => {
-    if (!currentCompany?.id) return;
-    window.location.href = `/employees.html?id=${encodeURIComponent(currentCompany.id)}`;
-});
-
-async function loadEmployees() {
-    try {
-        if (!currentCompany) {
-            document.getElementById('employeesContainer').innerHTML = '<div class="text-center py-8 text-gray-500">Сотрудники появятся после регистрации компании.</div>';
-            return;
-        }
-
-        const response = await fetch(`${API_URL}/companies/${currentCompany.id}/employees`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
-        const container = document.getElementById('employeesContainer');
-
-        if (!data.employees || data.employees.length === 0) {
-            container.innerHTML = '<div class="md:col-span-2 text-center py-8 text-gray-500">Пока нет сотрудников</div>';
-            return;
-        }
-
-        container.innerHTML = data.employees.map(emp => `
-            <div class="flex items-center space-x-3 rounded-2xl border border-[#e6ecef] p-3">
-                <div class="avatar-circle grid h-10 w-10 place-items-center bg-[#5fa786] text-sm font-bold text-white">${emp.user_name?.charAt(0) || 'U'}</div>
-                <div>
-                    <p class="font-semibold">${emp.user_name}</p>
-                    <p class="text-sm text-gray-600">${emp.position_name || 'Сотрудник'}</p>
-                    ${emp.department ? `<p class="text-xs text-gray-400">${emp.department}</p>` : ''}
-                </div>
-            </div>
-        `).join('');
-    } catch (error) {
-        console.error(error);
-    }
+/* ── PARTNERS ── */
+function renderPartners(list){
+  if(!list.length){document.getElementById('partnersCard').style.display='none';return;}
+  document.getElementById('partnersCount').textContent='· '+list.length;
+  document.getElementById('partnersList').innerHTML=list.map(p=>{
+    const col=avc(p.name);
+    const letter=(p.name||'?')[0].toUpperCase();
+    return`<div class="partner-item" onclick="location.href='/company-profile.html?id=${esc(p.id)}'">
+      <div class="partner-av" style="background:${col}">${letter}</div>
+      <div>
+        <div class="partner-name">${esc(p.name)}</div>
+        <div class="partner-ind">${esc(p.industry||'Компания')}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-loadCompany();
+/* ── POSTS ── */
+function showSkeletons(){
+  document.getElementById('postsList').innerHTML=Array(3).fill(0).map(()=>`
+    <div class="skel" style="margin-bottom:10px">
+      <div style="display:flex;gap:10px;margin-bottom:12px"><div class="sl" style="width:28px;height:28px;border-radius:8px"></div><div style="flex:1"><div class="sl" style="height:11px;width:50%;margin-bottom:5px;border-radius:6px"></div><div class="sl" style="height:9px;width:30%;border-radius:6px"></div></div></div>
+      <div class="sl" style="height:14px;width:75%;margin-bottom:7px;border-radius:6px"></div>
+      <div class="sl" style="height:11px;width:100%;margin-bottom:4px;border-radius:6px"></div>
+      <div class="sl" style="height:11px;width:65%;border-radius:6px"></div>
+    </div>`).join('');
+}
+async function loadPosts(coId,coName,color){
+  showSkeletons();
+  try{
+    const r=await fetch(API+'/companies/'+coId+'/posts',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{posts=[]}=await r.json();
+    if(!posts.length)throw 0;
+    document.getElementById('statPosts').textContent=fmtNum(posts.length);
+    renderPosts(posts,coName,color);
+  }catch{renderPosts(getDemoPosts(coName),coName,color);}
+}
+function getDemoPosts(coName){
+  return[
+    {id:'p1',title:'Открываем новый маршрут Москва — Алматы',content:'С июня запускаем регулярные рейсы по маршруту с промежуточными хабами. Тариф на первый месяц снижен на 15%.',tags:['логистика','снг'],likes_count:24,comments_count:7,created_at:new Date(Date.now()-7200000).toISOString(),is_liked:false},
+    {id:'p2',title:'Итоги первого квартала 2026',content:'Грузопоток вырос на 22% относительно 2025 года. Запустили новые направления в Казахстан и Узбекистан.',tags:['аналитика'],likes_count:38,comments_count:14,created_at:new Date(Date.now()-86400000).toISOString(),is_liked:false},
+    {id:'p3',title:'Приглашаем на стенд — LogisticsPro 2026',content:'Встретимся на выставке в Москве. Покажем новые маршруты, тарифы и систему отслеживания грузов в реальном времени.',tags:['выставки','партнёрство'],likes_count:19,comments_count:5,created_at:new Date(Date.now()-259200000).toISOString(),is_liked:true},
+  ];
+}
+function renderPosts(posts,coName,color){
+  const letter=(coName[0]||'К').toUpperCase();
+  document.getElementById('postsList').innerHTML=posts.map(p=>{
+    const tags=Array.isArray(p.tags)?p.tags.filter(Boolean):[];
+    const imgUrl=Array.isArray(p.images)&&p.images[0]?p.images[0]:p.image_url||'';
+    return`<article class="post" style="margin-bottom:10px" data-id="${esc(p.id)}">
+  <div class="post-head">
+    <div class="av" style="background:${color}">${letter}</div>
+    <div class="post-meta">
+      <span class="post-source">${esc(coName)}</span>
+      <span class="post-verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg></span>
+      <span class="post-time">· ${ago(p.created_at)}</span>
+    </div>
+    <button class="post-menu" title="Действия"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+  </div>
+  <div class="post-body-row${imgUrl?'':' no-img'}">
+    ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
+    <div class="post-body">${esc(p.content||'')}</div>
+    ${imgUrl?`<img class="post-thumb" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
+  </div>
+  <div class="post-footer">
+    <div class="post-tags">${tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>
+    <div class="post-actions">
+      <button class="post-act${p.is_liked?' liked':''}" onclick="event.stopPropagation();likePost('${p.id}',this)">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>${p.likes_count||0}</span>
+      </button>
+      <button class="post-act" onclick="event.stopPropagation();location.href='/dashboard.html?post=${p.id}'">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>${p.comments_count||0}</span>
+      </button>
+      <button class="post-act" onclick="event.stopPropagation();sharePost('${p.id}')">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться
+      </button>
+    </div>
+  </div>
+</article>`;
+  }).join('');
+}
+async function likePost(id,btn){
+  const liked=btn.classList.contains('liked'),m=liked?'DELETE':'POST';
+  try{const r=await fetch(API+'/posts/'+id+'/like',{method:m,headers:{Authorization:'Bearer '+tk()}});if(r.ok){btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(liked?-1:1);}}catch{}
+}
+function sharePost(id){const url=location.origin+'/dashboard.html?post='+id;if(navigator.share)navigator.share({title:'LASTOP',url}).catch(()=>{});else navigator.clipboard.writeText(url).catch(()=>{});}
+
+/* ── SEARCH ── */
+let sT;
+document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(sT);const q=e.target.value.trim();if(q.length>1)sT=setTimeout(()=>location.href='/search.html?q='+encodeURIComponent(q),600);});
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(q)location.href='/search.html?q='+encodeURIComponent(q);}});
+
+/* ── STATUS MODAL ── */
+function applyStatus(text){
+  const el=document.getElementById('statusText');
+  if(text){el.textContent=text;el.className='status-pill-text';}
+  else{el.textContent='Добавить статус компании…';el.className='status-pill-placeholder';}
+}
+function openStatusModal(){
+  if(!isOwnCompany)return;
+  const cur=document.getElementById('statusText').textContent;
+  document.getElementById('statusInput').value=cur.includes('Добавить')?'':cur;
+  document.getElementById('statusModal').classList.add('open');
+  setTimeout(()=>document.getElementById('statusInput').focus(),150);
+}
+function closeStatusModal(){document.getElementById('statusModal').classList.remove('open');}
+function setHint(el){document.getElementById('statusInput').value=el.textContent;}
+function clearStatus(){
+  document.getElementById('statusInput').value='';
+  applyStatus('');
+  const key='co_status_'+(companyData?.id||'demo');
+  localStorage.removeItem(key);
+  closeStatusModal();
+  try{fetch(API+'/companies/'+(companyData?.id||'demo')+'/status',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({status:''})});}catch{}
+}
+function saveStatus(){
+  const text=document.getElementById('statusInput').value.trim();
+  applyStatus(text);
+  const key='co_status_'+(companyData?.id||'demo');
+  localStorage.setItem(key,text);
+  closeStatusModal();
+  try{fetch(API+'/companies/'+(companyData?.id||'demo')+'/status',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({status:text})});}catch{}
+}
+document.getElementById('statusModal').addEventListener('click',e=>{if(e.target===document.getElementById('statusModal'))closeStatusModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStatusModal();});
+document.getElementById('statusInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveStatus();});
 </script>
 </body>
 </html>
