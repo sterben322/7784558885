@@ -1,357 +1,510 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Новости</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Новости</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav feed right";height:100vh;gap:10px;padding:10px}
+/* LOGO */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+/* TOPBAR */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+/* NAV */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* FEED */
+.feed{grid-area:feed;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
+.feed::-webkit-scrollbar{width:4px}
+.feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+/* TOOLBAR */
+.feed-toolbar{display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:10px 14px;box-shadow:var(--sh)}
+.feed-toolbar h1{font-size:16px;font-weight:800;color:var(--t);flex:1}
+.ftabs{display:flex;gap:4px}
+.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s}
+.ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
+.ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
+/* COMPOSE BAR */
+.compose{background:var(--w);border:1.5px dashed var(--gb);border-radius:var(--rxl);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;transition:background .15s,border-color .15s}
+.compose:hover{background:var(--gp);border-color:var(--gm)}
+.compose-left{display:flex;align-items:center;gap:10px;flex:1;cursor:pointer}
+.compose-plus{width:32px;height:32px;border-radius:var(--rm);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
+.compose-plus svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.compose-text{font-size:13px;color:var(--gmt);font-weight:500}
+.compose-photo-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--rm);border:1.5px solid var(--gb);background:var(--gl);color:var(--g);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0;white-space:nowrap}
+.compose-photo-pill:hover{background:var(--gb);border-color:var(--gm)}
+.compose-photo-pill svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* POST */
+.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .35s ease both}
+.post:nth-child(1){animation-delay:.05s}.post:nth-child(2){animation-delay:.12s}.post:nth-child(3){animation-delay:.19s}.post:nth-child(4){animation-delay:.26s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.post:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.av{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.post-meta{flex:1;min-width:0}
+.post-author{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-time{font-size:11px;color:var(--gmt);margin-top:1px}
+.post-badge{padding:3px 8px;border-radius:var(--r);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.bc{background:#EEF5FF;color:#3A6CB0}.bu{background:var(--gl);color:var(--g)}
+.post-img{width:100%;max-height:280px;object-fit:cover;border-radius:var(--rm);margin-bottom:10px;border:1px solid var(--bdr)}
+.post-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:5px;line-height:1.4}
+.post-body{font-size:12px;color:var(--tm);line-height:1.6}
+.post-body.trunc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.read-more{font-size:12px;font-weight:600;color:var(--g);cursor:pointer;background:none;border:none;font-family:inherit;margin-top:5px;padding:0;display:inline-flex;align-items:center;gap:4px}
+.read-more:hover{opacity:.75}
+.post-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tag{padding:3px 10px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer}
+.post-actions{display:flex;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr);align-items:center}
+.post-act{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit}
+.post-act:hover{color:var(--g)}
+.post-act.liked{color:var(--red)}
+.post-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* SKELETON */
+.skel{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* RIGHT */
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+/* PROFILE */
+.profile-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);box-shadow:var(--sh);position:relative}
+.profile-trigger{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-radius:var(--rxl);transition:background .15s}
+.profile-trigger:hover{background:var(--gp)}
+.pav{width:36px;height:36px;border-radius:var(--rm);background:var(--g);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pco{font-size:11px;color:var(--gmt);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{flex-shrink:0;color:var(--gmt);transition:transform .22s;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chev.open{transform:rotate(180deg)}
+.dropdown{overflow:hidden;max-height:0;transition:max-height .25s ease;border-top:1px solid transparent}
+.dropdown.open{max-height:280px;border-top-color:var(--bdr)}
+.dd-inner{padding:6px 8px 8px;display:flex;flex-direction:column;gap:2px}
+.dd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;color:var(--tm);transition:background .15s,color .15s;text-decoration:none}
+.dd-item:hover{background:var(--gp);color:var(--g)}
+.dd-item.danger{color:#C04040}
+.dd-item.danger:hover{background:#FFF0F0;color:#B03030}
+.dd-div{height:1px;background:var(--bdr);margin:3px 4px}
+.dd-item svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* TRENDING */
+.ctx-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.trend-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rm);cursor:pointer;transition:background .15s;margin-bottom:4px}
+.trend-item:last-child{margin-bottom:0}
+.trend-item:hover{background:var(--gp)}
+.trend-num{font-size:18px;font-weight:800;color:var(--gl);min-width:24px;line-height:1}
+.trend-label{font-size:12px;font-weight:700;color:var(--t)}
+.trend-sub{font-size:11px;color:var(--gmt);margin-top:2px}
+/* AD */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-block::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(120,80,200,.07)}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ad-btn:hover{opacity:.88}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:540px;transform:translateY(14px);transition:transform .22s;max-height:90vh;overflow-y:auto}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head h3{font-size:16px;font-weight:700;color:var(--t)}
+.modal-x{width:28px;height:28px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pttabs{display:flex;gap:6px;margin-bottom:12px}
+.pttab{flex:1;padding:7px;border-radius:var(--rm);font-size:12px;font-weight:600;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;cursor:pointer;transition:all .15s;text-align:center}
+.pttab:hover{border-color:var(--gb);color:var(--g)}
+.pttab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.mfield{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp);margin-bottom:10px;display:block}
+.mfield:focus{border-color:var(--gm)}
+textarea.mfield{min-height:100px;resize:vertical}
+.img-zone{border:1.5px dashed var(--gb);border-radius:var(--rm);background:var(--gp);padding:20px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s;margin-bottom:10px;position:relative}
+.img-zone:hover,.img-zone.drag-over{background:var(--gl);border-color:var(--gm)}
+.img-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-zone-icon{width:36px;height:36px;border-radius:var(--rm);background:var(--gl);display:grid;place-items:center;margin:0 auto 8px;color:var(--g)}
+.img-zone-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.img-zone-title{font-size:13px;font-weight:600;color:var(--t)}
+.img-zone-sub{font-size:11px;color:var(--gmt);margin-top:3px}
+.img-zone-sub b{color:var(--g)}
+.img-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.img-thumb{position:relative;width:80px;height:60px;border-radius:var(--rm);overflow:hidden;border:1px solid var(--bdr);flex-shrink:0}
+.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.img-thumb-rm{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(224,64,64,.9);border:none;cursor:pointer;display:grid;place-items:center}
+.img-thumb-rm svg{width:8px;height:8px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+.img-add{width:80px;height:60px;border-radius:var(--rm);border:1.5px dashed var(--gb);background:var(--gp);display:grid;place-items:center;cursor:pointer;transition:background .15s;position:relative;flex-shrink:0}
+.img-add:hover{background:var(--gl);border-color:var(--gm)}
+.img-add svg{width:20px;height:20px;fill:none;stroke:var(--g);stroke-width:2;stroke-linecap:round}
+.img-add input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.mfooter{display:flex;gap:10px;margin-top:6px;justify-content:flex-end}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 20px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+.btn-pri:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:1100px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:960px){
+  .shell{grid-template-columns:48px 1fr;grid-template-areas:"logo topbar""nav feed"}
+  .right{display:none}
+  .nav-item span,.logo-text{display:none}
+  .nav-item{justify-content:center;padding:10px}
+  .ftabs{display:none}
+  .compose-photo-pill span{display:none}
+}
+</style>
 </head>
-<body class="bg-white text-[#273244] dashboard-page">
-<div class="min-h-screen p-6 font-sans">
-    <div class="dashboard-shell mx-auto grid max-w-[1460px] grid-cols-[276px_minmax(0,1fr)_330px] rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
-        <aside class="dashboard-sidebar relative flex flex-col border-r border-[#e6eaec] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)]">
-            <div class="flex h-[82px] items-center gap-4 border-b border-[#e8ecef] px-8">
-                <a href="/dashboard.html" class="flex items-center gap-3">
-                    <div class="grid h-12 w-12 place-items-center rounded-2xl text-[#3e826e]"><div class="text-[30px]">⛓</div></div>
-                    <div class="text-[18px] font-black tracking-[0.08em] text-[#213246]">LASTOP</div>
-                </a>
-            </div>
+<body>
+<div class="shell">
 
-            <div class="px-4 py-5">
-                <div class="space-y-1.5">
-                    <a href="/" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-house"></i></span>
-                        <span class="text-[15px] font-medium">Главная</span>
-                    </a>
-                    <a href="/dashboard.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition bg-[#eff7f3] text-[#4c8d78]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl bg-white shadow-[0_2px_8px_rgba(130,148,160,0.14)]"><i class="fa-regular fa-newspaper"></i></span>
-                        <span class="text-[15px] font-semibold">Новости</span>
-                    </a>
-                    <a href="/projects.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-folder-tree"></i></span>
-                        <span class="text-[15px] font-medium">Проекты</span>
-                    </a>
-                    <a href="/exhibitions.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-briefcase"></i></span>
-                        <span class="text-[15px] font-medium">Выставки</span>
-                    </a>
-                    <a href="/events.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-calendar-days"></i></span>
-                        <span class="text-[15px] font-medium">Мероприятия</span>
-                    </a>
-                    <a href="/forum.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-message"></i></span>
-                        <span class="text-[15px] font-medium">Форум</span>
-                    </a>
-                    <a href="/company-profile.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-regular fa-building"></i></span>
-                        <span class="text-[15px] font-medium">Компании</span>
-                    </a>
-                    <a href="/jobs.html" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition text-[#5d6978] hover:bg-[#f4f7f7]">
-                        <span class="grid h-8 w-8 place-items-center rounded-xl"><i class="fa-solid fa-briefcase"></i></span>
-                        <span class="text-[15px] font-medium">Резюме и вакансии</span>
-                    </a>
-                </div>
-            </div>
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img id="logo-img" alt="LASTOP GROUP">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
 
-            <div class="mt-auto border-t border-[#e8ecef] px-5 py-5">
-                <a href="/settings.html" class="flex items-center gap-3 rounded-2xl px-2 py-2">
-                    <div class="grid h-11 w-11 place-items-center rounded-full bg-[#d9e2e7] text-sm font-semibold text-[#51606f]" id="footerAvatar">U</div>
-                    <div class="min-w-0 flex-1"><div class="truncate text-[15px] font-semibold text-[#3a4758]" id="footerName">Настройки</div></div>
-                    <i class="fa-solid fa-gear h-4 w-4 text-[#a0acb8]"></i>
-                </a>
-            </div>
-        </aside>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск новостей, авторов, тегов…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br" id="bellCount">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg" id="chatCount">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
 
-        <main class="dashboard-main relative bg-white">
-            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)]"></div>
-            <div class="absolute inset-y-0 right-0 w-[42%] bg-white"></div>
-            <div class="absolute bottom-0 left-0 h-[44%] w-[38%] bg-white"></div>
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item active" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
 
-            <header class="dashboard-main-header relative z-10 flex h-[82px] items-center justify-between border-b border-[#e8ecef] px-7">
-                <div class="ml-auto flex items-center gap-4">
-                    <a href="/chat.html" class="text-[#95a1ad] hover:text-[#2b8662]" title="Чат"><i class="fa-regular fa-envelope h-5 w-5"></i></a>
-                </div>
-            </header>
-
-            <div id="feedScrollContainer" class="relative z-10 px-8 py-6">
-                <div class="mb-5 rounded-[24px] border border-[#e7ecef] bg-white p-5 shadow-[0_10px_22px_rgba(178,190,198,0.10)] backdrop-blur">
-                    <h1 class="text-[28px] font-semibold tracking-[-0.02em] text-[#2c394b]">Лента новостей LASTOP</h1>
-                    <p class="mt-2 text-[16px] text-[#7e8a97]">Бесконечная лента: прокручивайте вниз для подгрузки новых публикаций.</p>
-                </div>
-
-                <section class="mb-5 rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
-                    <h2 class="text-[20px] font-semibold text-[#2f3c4e]">Создать новостной пост</h2>
-                    <p class="mt-1 text-sm text-[#7e8a97]">Публикуйте новости от своего имени. Можно добавить изображение из памяти устройства.</p>
-                    <div class="mt-4 space-y-3">
-                        <input id="postTitleInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Заголовок новости">
-                        <textarea id="postContentInput" rows="4" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Текст публикации"></textarea>
-                        <input id="postTagsInput" class="w-full rounded-xl border border-[#dbe3e8] px-3 py-2.5 outline-none focus:border-[#86bda6]" placeholder="Теги через запятую, например: логистика, импорт">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#dbe3e8] px-4 py-2 text-sm text-[#4f5e6d] hover:bg-[#f5f8f9]">
-                                <i class="fa-regular fa-image"></i>
-                                Изображение с устройства
-                                <input id="postImageInput" type="file" accept="image/*" class="hidden">
-                            </label>
-                            <span id="postImageName" class="text-sm text-[#8492a0]">Файл не выбран</span>
-                        </div>
-                        <div id="postImagePreviewWrap" class="hidden">
-                            <img id="postImagePreview" class="max-h-44 rounded-xl border border-[#e7ecef] object-cover" alt="Превью изображения">
-                        </div>
-                    </div>
-                    <div class="mt-4 flex items-center gap-3">
-                        <button id="createPostBtn" class="rounded-xl bg-[#2f7f5e] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#256b4f]">Опубликовать</button>
-                        <span id="postCreateStatus" class="text-sm text-[#7e8a97]"></span>
-                    </div>
-                </section>
-
-                <section id="newsFeed" class="space-y-4"></section>
-                <div id="feedStatus" class="py-5 text-center text-sm text-[#8492a0]">Загрузка новостей...</div>
-            </div>
-        </main>
-
-        <aside class="dashboard-sidebar border-l border-[#e7ebed] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)] px-6 py-6">
-            <div class="rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
-                <h3 class="text-[18px] font-semibold text-[#334153]">Недавняя активность</h3>
-                <div class="mt-5 space-y-5">
-                    <div class="flex gap-3">
-                        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">T</div>
-                        <div class="text-[14px] leading-6 text-[#728090]"><span class="font-semibold text-[#344153]">Tilon</span> опубликовал предложение в обсуждении “Сертификация импорта стройматериалов”<div class="mt-1 text-xs text-[#9eabb7]">2 ч</div></div>
-                    </div>
-                    <div class="flex gap-3">
-                        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">M</div>
-                        <div class="text-[14px] leading-6 text-[#728090]"><span class="font-semibold text-[#344153]">Montler</span> оставил комментарий в теме “Логистика фармпродукции”<div class="mt-1 text-xs text-[#9eabb7]">2 ч</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-5 rounded-[24px] border border-[#e8ecee] bg-white p-5 shadow-[0_10px_20px_rgba(178,190,198,0.10)]">
-                <h3 class="text-[18px] font-semibold text-[#334153]">Рекомендуемое</h3>
-                <div class="mt-4 rounded-[18px] border border-[#edf0f2] bg-[#fafbfb] p-4">
-                    <div class="text-[16px] font-semibold leading-6 text-[#334153]">Готовим мероприятие в Москве</div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-[#7c8996] ring-1 ring-[#e6eaec]">#организация</span>
-                        <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-[#7c8996] ring-1 ring-[#e6eaec]">#события</span>
-                    </div>
-                    <div class="mt-3 flex items-center justify-between text-sm text-[#9aa7b2]"><span>Перейти в тему</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
-                </div>
-            </div>
-        </aside>
+<!-- FEED -->
+<main class="feed">
+  <div class="feed-toolbar">
+    <h1>Лента новостей</h1>
+    <div class="ftabs">
+      <button class="ftab active" data-feed="global">Все</button>
+      <button class="ftab" data-feed="friends">Друзья</button>
+      <button class="ftab" data-feed="company">Компании</button>
+      <button class="ftab" data-feed="community">Сообщества</button>
+      <button class="ftab" data-feed="my">Мои</button>
     </div>
+  </div>
+
+  <div class="compose">
+    <div class="compose-left" id="composeTrigger">
+      <div class="compose-plus"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      <span class="compose-text">Что нового? Поделитесь с сообществом…</span>
+    </div>
+    <button class="compose-photo-pill" id="composePhotoPill">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+      <span>Фото</span>
+    </button>
+  </div>
+
+  <div id="postsList"></div>
+  <div style="height:10px;flex-shrink:0"></div>
+</main>
+
+<!-- RIGHT (только В тренде + реклама) -->
+<aside class="right">
+  <div class="profile-block">
+    <div class="profile-trigger" id="profileTrigger">
+      <div class="pav" id="profileAv">АВ</div>
+      <div class="pinfo"><div class="pname" id="profileName">Загрузка…</div><div class="pco" id="profileCo">—</div></div>
+      <svg class="chev" id="profileChev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="dropdown" id="profileDrop">
+      <div class="dd-inner">
+        <a class="dd-item" href="/profile.html#friends"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Друзья</a>
+        <a class="dd-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Моя компания</a>
+        <a class="dd-item" href="/settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
+        <a class="dd-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Сообщества</a>
+        <div class="dd-div"></div>
+        <a class="dd-item danger" href="#" id="logoutBtn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Выход</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- В тренде -->
+  <div class="ctx-block">
+    <div class="block-title">В тренде сейчас</div>
+    <div class="trend-item" onclick="filterTag('логистика')">
+      <div class="trend-num">1</div>
+      <div><div class="trend-label">#логистика</div><div class="trend-sub">48 публикаций</div></div>
+    </div>
+    <div class="trend-item" onclick="filterTag('экспорт')">
+      <div class="trend-num">2</div>
+      <div><div class="trend-label">#экспорт</div><div class="trend-sub">31 публикация</div></div>
+    </div>
+    <div class="trend-item" onclick="filterTag('партнёрство')">
+      <div class="trend-num">3</div>
+      <div><div class="trend-label">#партнёрство</div><div class="trend-sub">27 публикаций</div></div>
+    </div>
+    <div class="trend-item" onclick="filterTag('автоматизация')">
+      <div class="trend-num">4</div>
+      <div><div class="trend-label">#автоматизация</div><div class="trend-sub">19 публикаций</div></div>
+    </div>
+  </div>
+
+  <!-- Ad -->
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">LogisticsPro 2026</div>
+      <div class="ad-sub">Выставка · Москва · май</div>
+      <button class="ad-btn">Узнать подробнее</button>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Новая публикация</h3>
+      <button class="modal-x" id="modalX"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="pttabs">
+      <button class="pttab active" data-type="user">От себя</button>
+      <button class="pttab" data-type="company">От компании</button>
+      <button class="pttab" data-type="community">От сообщества</button>
+    </div>
+    <input type="text" class="mfield" id="mTitle" placeholder="Заголовок (необязательно)">
+    <textarea class="mfield" id="mContent" placeholder="Что нового? Поделитесь с сообществом…"></textarea>
+    <div id="imgGrid" class="img-grid" style="display:none"></div>
+    <div class="img-zone" id="imgZone">
+      <input type="file" id="imgInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+      <div class="img-zone-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+      <div class="img-zone-title">Нажмите или перетащите фото</div>
+      <div class="img-zone-sub">JPG, PNG, WebP · до <b>10 МБ</b> каждый · максимум 5 файлов</div>
+    </div>
+    <input type="text" class="mfield" id="mTags" placeholder="Теги через запятую: логистика, экспорт…">
+    <div class="mfooter">
+      <button class="btn-sec" id="modalCancel">Отмена</button>
+      <button class="btn-pri" id="modalSubmit">Опубликовать</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const API_URL = '/api';
-const token = localStorage.getItem('token');
-let selectedPostImage = null;
+const API='/api',tk=()=>localStorage.getItem('token');
+const MAX_IMG=5,MAX_MB=10;
+let imgs=[],postType='user',currentFeed='global';
 
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+/* logo */
+(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
+
+/* auth guard */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    const{user={}}=await r.json();localStorage.setItem('user',JSON.stringify(user));applyUser(user);
+  }catch{const u=JSON.parse(localStorage.getItem('user')||'{}');if(u.full_name)applyUser(u);}
+})();
+function applyUser(u){
+  const n=u.full_name||u.name||'Пользователь';
+  document.getElementById('profileAv').textContent=(n[0]||'П').toUpperCase();
+  document.getElementById('profileName').textContent=n;
+  document.getElementById('profileCo').textContent=u.company_name||u.position||'Участник LASTOP';
 }
 
-function setUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const name = user.full_name || 'Гость';
-    const letter = (name[0] || 'U').toUpperCase();
+/* search */
+let sT;
+document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(sT);const q=e.target.value.trim();if(q.length>1)sT=setTimeout(()=>location.href='/search.html?q='+encodeURIComponent(q),600);});
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(q)location.href='/search.html?q='+encodeURIComponent(q);}});
 
-    const sidebarUserName = document.getElementById('userName');
-    if (sidebarUserName) sidebarUserName.textContent = name;
+/* profile dropdown */
+document.getElementById('profileTrigger').addEventListener('click',()=>{
+  const d=document.getElementById('profileDrop'),c=document.getElementById('profileChev');
+  const o=d.classList.toggle('open');c.classList.toggle('open',o);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.profile-block')){document.getElementById('profileDrop').classList.remove('open');document.getElementById('profileChev').classList.remove('open');}});
 
-    const topUserName = document.getElementById('topUserName');
-    if (topUserName) topUserName.textContent = name;
+/* logout */
+document.getElementById('logoutBtn').addEventListener('click',async e=>{
+  e.preventDefault();try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  localStorage.clear();location.href='/login.html';
+});
 
-    ['userAvatar', 'topAvatar', 'footerAvatar'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (user.avatar_url) {
-            el.innerHTML = `<img src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(name)}" class="h-full w-full rounded-full object-cover">`;
-            return;
-        }
-        el.textContent = letter;
-    });
+/* feed tabs */
+document.querySelectorAll('.ftab').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');currentFeed=btn.dataset.feed;loadFeed(true);
+}));
+
+/* posts */
+const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A'];
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':Math.floor(m/1440)+' д назад';}
+function badge(type){if(type==='company')return'<span class="post-badge bc">Компания</span>';if(type==='community')return'<span class="post-badge bu">Сообщество</span>';return'';}
+function buildPost(p,i){
+  const c=AVC[(p.author_name||'').charCodeAt(0)%AVC.length]||AVC[i%AVC.length];
+  const tags=Array.isArray(p.tags)?p.tags.filter(Boolean):[];
+  const imgUrl=Array.isArray(p.images)&&p.images[0]?p.images[0]:p.image_url||'';
+  const isLong=(p.content||'').length>280;
+  return`<article class="post" data-id="${p.id}">
+  <div class="post-head"><div class="av" style="background:${c}">${(p.author_name||'?')[0].toUpperCase()}</div>
+  <div class="post-meta"><div class="post-author">${esc(p.author_name||'Автор')}</div><div class="post-time">${ago(p.created_at)}</div></div>
+  ${badge(p.author_type)}</div>
+  ${imgUrl?`<img class="post-img" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
+  ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
+  <div class="post-body${isLong?' trunc':''}" id="pb-${p.id}">${esc(p.content||'')}</div>
+  ${isLong?`<button class="read-more" onclick="expand('${p.id}',this)">Читать полностью <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>`:''}
+  ${tags.length?`<div class="post-tags">${tags.map(t=>`<span class="tag" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:''}
+  <div class="post-actions">
+    <button class="post-act${p.is_liked?' liked':''}" onclick="likePost('${p.id}',this)">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>${p.likes_count||0}</span></button>
+    <button class="post-act" onclick="location.href='/dashboard.html?post=${p.id}'">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>${p.comments_count||0}</span></button>
+    <button class="post-act" onclick="sharePost('${p.id}')">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Поделиться</button>
+  </div></article>`;
 }
 
-function formatRelativeTime(ts) {
-    if (!ts) return 'только что';
-    const diffMin = Math.max(1, Math.floor((Date.now() - new Date(ts).getTime()) / 60000));
-    if (diffMin < 60) return `${diffMin} мин назад`;
-    const hours = Math.floor(diffMin / 60);
-    if (hours < 24) return `${hours} ч назад`;
-    return `${Math.floor(hours / 24)} д назад`;
+function showSkeletons(){
+  document.getElementById('postsList').innerHTML=Array(4).fill(0).map(()=>`
+    <div class="skel">
+      <div style="display:flex;gap:10px;margin-bottom:12px"><div class="sl" style="width:36px;height:36px;border-radius:var(--rm)"></div><div style="flex:1"><div class="sl" style="height:12px;width:55%;margin-bottom:6px;border-radius:6px"></div><div class="sl" style="height:10px;width:35%;border-radius:6px"></div></div></div>
+      <div class="sl" style="height:14px;width:80%;margin-bottom:8px;border-radius:6px"></div>
+      <div class="sl" style="height:10px;width:100%;margin-bottom:5px;border-radius:6px"></div>
+      <div class="sl" style="height:10px;width:70%;border-radius:6px"></div>
+    </div>`).join('');
 }
 
-function createNewsCard(item, idx) {
-    const article = document.createElement('article');
-    const excerpt = item.short_description || item.content || 'Описание отсутствует';
-    const category = item.tags?.[0] || 'Новости';
-    const tags = Array.isArray(item.tags) ? item.tags : [];
-    const authorLetter = (item.author_name?.[0] || 'U').toUpperCase();
-    const authorAvatar = item.author_avatar
-        ? `<img src="${escapeHtml(item.author_avatar)}" alt="${escapeHtml(item.author_name || 'Автор')}" class="h-12 w-12 rounded-full object-cover">`
-        : `<div class="grid h-12 w-12 place-items-center rounded-full bg-[#dce4e8] text-sm font-semibold text-[#5c6978]">${authorLetter}</div>`;
-
-    article.className = 'rounded-[22px] border border-[#e8ecee] bg-white px-6 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]';
-    article.innerHTML = `
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex min-w-0 flex-1 items-start gap-3">
-                ${authorAvatar}
-                <div class="min-w-0 flex-1">
-                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef7f2] px-3 py-1 text-xs font-semibold text-[#5f8f7b]">${category}</div>
-                <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${escapeHtml(item.title || 'Без заголовка')}</h3>
-                <p class="mt-3 text-[16px] leading-7 text-[#697685]">${escapeHtml(excerpt)}</p>
-                ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="Изображение поста" class="mt-4 max-h-64 rounded-xl border border-[#e7ecef] object-cover">` : ''}
-                </div>
-            </div>
-            <div class="text-right text-[13px] text-[#95a1ad]">
-                <div>${formatRelativeTime(item.created_at)}</div>
-                <div class="mt-1 font-medium text-[#61707f]">${escapeHtml(item.author_name || 'Редакция LASTOP')}</div>
-            </div>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2.5">
-            ${tags.map((tag) => `<span class="rounded-full bg-[#eef7f2] px-3 py-1.5 text-[13px] font-medium text-[#6e9c88]">#${tag}</span>`).join('')}
-        </div>
-        <div class="mt-4 flex items-center justify-between text-sm text-[#8f9ba8]">
-            <span>Публикация #${idx + 1}</span>
-            <a href="/dashboard.html" class="rounded-xl border border-[#e5eaed] px-3 py-1.5 hover:bg-[#f6f8f9]">Читать</a>
-        </div>
-    `;
-    return article;
+async function loadFeed(reset=true){
+  if(reset)showSkeletons();
+  const url=currentFeed==='my'?API+'/news':API+'/feed?type='+currentFeed+'&limit=20';
+  try{
+    const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});if(!r.ok)throw 0;
+    const{posts=[]}=await r.json();
+    const ct=document.getElementById('postsList');
+    if(!posts.length){ct.innerHTML='<div style="padding:32px;text-align:center;color:var(--gmt);font-size:13px">📭 Публикаций пока нет. Будьте первым!</div>';return;}
+    ct.innerHTML=posts.map((p,i)=>buildPost(p,i)).join('');
+  }catch{document.getElementById('postsList').innerHTML='<div style="padding:20px;text-align:center;color:var(--gmt);font-size:13px">Не удалось загрузить ленту.</div>';}
 }
 
-function renderNews(posts) {
-    const feed = document.getElementById('newsFeed');
-    const status = document.getElementById('feedStatus');
-
-    if (!posts.length) {
-        feed.innerHTML = '<div class="rounded-[22px] border border-[#e8ecee] bg-white px-6 py-10 text-center text-[#7f8a97]">Новостей пока нет</div>';
-        status.textContent = 'Нет доступных публикаций';
-        return;
-    }
-
-    feed.innerHTML = '';
-    posts.forEach((post, idx) => feed.appendChild(createNewsCard(post, idx)));
-    status.textContent = `Показано публикаций: ${posts.length}`;
+async function likePost(id,btn){
+  const liked=btn.classList.contains('liked'),m=liked?'DELETE':'POST';
+  try{const r=await fetch(API+'/posts/'+id+'/like',{method:m,headers:{Authorization:'Bearer '+tk()}});if(r.ok){btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(liked?-1:1);}}catch{}
 }
+function expand(id,btn){document.getElementById('pb-'+id).classList.remove('trunc');btn.style.display='none';}
+function sharePost(id){const url=location.origin+'/dashboard.html?post='+id;if(navigator.share)navigator.share({title:'LASTOP',url}).catch(()=>{});else navigator.clipboard.writeText(url).catch(()=>{});}
+function filterTag(tag){document.getElementById('searchInput').value='#'+tag;}
 
-async function loadNews() {
-    const status = document.getElementById('feedStatus');
-
-    if (!token) {
-        status.textContent = 'Войдите в аккаунт, чтобы увидеть новости';
-        renderNews([]);
-        return;
-    }
-
-    try {
-        status.textContent = 'Загрузка новостей...';
-        const response = await fetch(`${API_URL}/news`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await response.json();
-        const posts = data.posts || [];
-        renderNews(posts);
-    } catch (e) {
-        status.textContent = 'Не удалось загрузить новости';
-        renderNews([]);
-    }
+/* image logic */
+function renderImgGrid(){
+  const grid=document.getElementById('imgGrid'),zone=document.getElementById('imgZone');
+  if(!imgs.length){grid.style.display='none';zone.style.display='';return;}
+  grid.style.display='flex';zone.style.display=imgs.length>=MAX_IMG?'none':'';
+  grid.innerHTML=imgs.map((img,i)=>`
+    <div class="img-thumb"><img src="${img.dataUrl}" alt=""><button class="img-thumb-rm" onclick="removeImg(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('')+
+    (imgs.length<MAX_IMG?`<label class="img-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onchange="addImgs(this.files)"></label>`:'');
 }
-
-function setupPostImagePicker() {
-    const imageInput = document.getElementById('postImageInput');
-    const imageName = document.getElementById('postImageName');
-    const previewWrap = document.getElementById('postImagePreviewWrap');
-    const preview = document.getElementById('postImagePreview');
-
-    imageInput.addEventListener('change', (event) => {
-        const file = event.target.files?.[0];
-        if (!file) {
-            selectedPostImage = null;
-            imageName.textContent = 'Файл не выбран';
-            previewWrap.classList.add('hidden');
-            return;
-        }
-        imageName.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = () => {
-            selectedPostImage = typeof reader.result === 'string' ? reader.result : null;
-            if (!selectedPostImage) {
-                previewWrap.classList.add('hidden');
-                return;
-            }
-            preview.src = selectedPostImage;
-            previewWrap.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    });
+function removeImg(i){imgs.splice(i,1);renderImgGrid();}
+function addImgs(files){
+  Array.from(files).slice(0,MAX_IMG-imgs.length).forEach(f=>{
+    if(f.size>MAX_MB*1024*1024)return;
+    const rd=new FileReader();rd.onload=e=>{imgs.push({file:f,dataUrl:e.target.result});renderImgGrid();};rd.readAsDataURL(f);
+  });
 }
+document.getElementById('imgInput').addEventListener('change',function(){addImgs(this.files);this.value='';});
+const iz=document.getElementById('imgZone');
+iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('drag-over');});
+iz.addEventListener('dragleave',()=>iz.classList.remove('drag-over'));
+iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
 
-function setupPostCreator() {
-    const createBtn = document.getElementById('createPostBtn');
-    const titleInput = document.getElementById('postTitleInput');
-    const contentInput = document.getElementById('postContentInput');
-    const tagsInput = document.getElementById('postTagsInput');
-    const status = document.getElementById('postCreateStatus');
-
-    createBtn.addEventListener('click', async () => {
-        const content = contentInput.value.trim();
-        if (!content) {
-            status.textContent = 'Введите текст новости';
-            return;
-        }
-
-        const title = titleInput.value.trim();
-        const tags = tagsInput.value.split(',').map((tag) => tag.trim()).filter(Boolean);
-
-        try {
-            createBtn.disabled = true;
-            status.textContent = 'Публикуем...';
-            const response = await fetch(`${API_URL}/posts?author_type=user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    title: title || null,
-                    content,
-                    short_description: content.slice(0, 180),
-                    image_url: selectedPostImage,
-                    tags,
-                    privacy_level: 'public'
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка публикации');
-            }
-
-            status.textContent = 'Пост опубликован';
-            titleInput.value = '';
-            contentInput.value = '';
-            tagsInput.value = '';
-            document.getElementById('postImageInput').value = '';
-            document.getElementById('postImageName').textContent = 'Файл не выбран';
-            document.getElementById('postImagePreviewWrap').classList.add('hidden');
-            selectedPostImage = null;
-            await loadNews();
-        } catch (err) {
-            status.textContent = 'Не удалось опубликовать пост';
-        } finally {
-            createBtn.disabled = false;
-        }
-    });
+/* modal */
+const mbg=document.getElementById('modalBg');
+function openModal(photo=false){mbg.classList.add('open');if(photo)setTimeout(()=>document.getElementById('imgInput').click(),150);}
+function closeModal(){
+  mbg.classList.remove('open');imgs=[];renderImgGrid();
+  document.getElementById('mTitle').value='';document.getElementById('mContent').value='';document.getElementById('mTags').value='';
+  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));postType='user';
 }
+document.getElementById('composeTrigger').addEventListener('click',()=>openModal());
+document.getElementById('composePhotoPill').addEventListener('click',()=>openModal(true));
+document.getElementById('modalX').addEventListener('click',closeModal);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+mbg.addEventListener('click',e=>{if(e.target===mbg)closeModal();});
+document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));b.classList.add('active');postType=b.dataset.type;}));
 
-setUserInfo();
-setupPostImagePicker();
-setupPostCreator();
-loadNews();
+document.getElementById('modalSubmit').addEventListener('click',async()=>{
+  const content=document.getElementById('mContent').value.trim();if(!content)return;
+  const title=document.getElementById('mTitle').value.trim();
+  const tags=document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const sub=document.getElementById('modalSubmit');sub.disabled=true;sub.textContent='Публикация…';
+  try{
+    let imgUrls=[];
+    for(const img of imgs){try{const fd=new FormData();fd.append('file',img.file);const ur=await fetch(API+'/upload',{method:'POST',headers:{Authorization:'Bearer '+tk()},body:fd});if(ur.ok){const d=await ur.json();imgUrls.push(d.url||d.path||'');}}catch{}}
+    const body={title:title||null,content,short_description:content.slice(0,180),tags,privacy_level:'public'};
+    if(imgUrls.length)body.images=imgUrls;
+    const r=await fetch(API+'/posts?author_type='+postType,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    if(r.ok){closeModal();loadFeed(true);}
+  }catch{}
+  sub.disabled=false;sub.textContent='Опубликовать';
+});
+
+loadFeed(true);
 </script>
 </body>
 </html>

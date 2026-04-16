@@ -228,10 +228,11 @@ type Message struct {
 }
 
 type DashboardStats struct {
-	ProjectsCount     int `json:"projects_count"`
-	CommunitiesJoined int `json:"communities_joined"`
-	TopicsCount       int `json:"topics_count"`
-	UnreadMessages    int `json:"unread_messages"`
+	ProjectsCount       int `json:"projects_count"`
+	CommunitiesJoined   int `json:"communities_joined"`
+	TopicsCount         int `json:"topics_count"`
+	UnreadNotifications int `json:"unread_notifications"`
+	UnreadMessages      int `json:"unread_messages"`
 }
 
 type CommunityRole struct {

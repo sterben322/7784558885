@@ -201,11 +201,11 @@ textarea.mfield{min-height:100px;resize:vertical}
   </div>
   <button class="icon-btn" title="Уведомления">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span class="badge br" id="bellCount">3</span>
+    <span class="badge br" id="notificationsBadge" style="display:none">0</span>
   </button>
   <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
     <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-    <span class="badge bgg" id="chatCount">7</span>
+    <span class="badge bg" id="messagesBadge" style="display:none">0</span>
   </button>
   <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -418,50 +418,40 @@ async function likePost(id,btn){
   const liked=btn.classList.contains('liked'),m=liked?'DELETE':'POST';
   try{const r=await fetch(API+'/posts/'+id+'/like',{method:m,headers:{Authorization:'Bearer '+tk()}});if(r.ok){btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(liked?-1:1);}}catch{}
 }
-function sharePost(id){const url=location.origin+'/dashboard.html?post='+id;if(navigator.share)navigator.share({title:'LASTOP',url}).catch(()=>{});else navigator.clipboard.writeText(url).catch(()=>{});}
+function showComments(id){window.location.href='/dashboard.html?post='+id;}
 
-/* ── IMAGE LOGIC (shared) ── */
-function renderImgGrid(){
-  const grid=document.getElementById('imgGrid'),zone=document.getElementById('imgZone');
-  if(!imgs.length){grid.style.display='none';zone.style.display='';return;}
-  grid.style.display='flex';zone.style.display=imgs.length>=MAX_IMG?'none':'';
-  grid.innerHTML=imgs.map((img,i)=>`
-    <div class="img-thumb"><img src="${img.dataUrl}" alt=""><button class="img-thumb-rm" onclick="removeImg(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('')+
-    (imgs.length<MAX_IMG?`<label class="img-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onchange="addImgs(this.files)"></label>`:'');
+function applyBadgeCount(elementId, count){
+  const el = document.getElementById(elementId);
+  if(!el) return;
+  const safeCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+  if(safeCount <= 0){
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'flex';
+  el.textContent = safeCount > 99 ? '99+' : String(safeCount);
 }
-function removeImg(i){imgs.splice(i,1);renderImgGrid();}
-function addImgs(files){
-  Array.from(files).slice(0,MAX_IMG-imgs.length).forEach(f=>{
-    if(f.size>MAX_MB*1024*1024)return;
-    const rd=new FileReader();rd.onload=e=>{imgs.push({file:f,dataUrl:e.target.result});renderImgGrid();};rd.readAsDataURL(f);
-  });
-}
-document.getElementById('imgInput').addEventListener('change',function(){addImgs(this.files);this.value='';});
-const zone=document.getElementById('imgZone');
-zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over');});
-zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
-zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
 
-/* ── MODAL ── */
-const mbg=document.getElementById('modalBg');
-function openModal(photo=false){mbg.classList.add('open');if(photo)setTimeout(()=>document.getElementById('imgInput').click(),150);}
-function closeModal(){
-  mbg.classList.remove('open');imgs=[];renderImgGrid();
-  document.getElementById('mTitle').value='';document.getElementById('mContent').value='';document.getElementById('mTags').value='';
-  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));postType='user';
+async function loadTopbarCounters(){
+  try{
+    const r = await fetch(API+'/dashboard/stats',{headers:{Authorization:'Bearer '+token()}});
+    if(!r.ok) return;
+    const payload = await r.json();
+    const stats = payload.stats || {};
+    applyBadgeCount('notificationsBadge', stats.unread_notifications);
+    applyBadgeCount('messagesBadge', stats.unread_messages);
+  }catch(_){ }
 }
-document.getElementById('composeTrigger').addEventListener('click',()=>openModal());
-document.getElementById('composePhotoPill').addEventListener('click',()=>openModal(true));
-document.getElementById('modalX').addEventListener('click',closeModal);
-document.getElementById('modalCancel').addEventListener('click',closeModal);
-mbg.addEventListener('click',e=>{if(e.target===mbg)closeModal();});
-document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));b.classList.add('active');postType=b.dataset.type;}));
 
-document.getElementById('modalSubmit').addEventListener('click',async()=>{
-  const content=document.getElementById('mContent').value.trim();if(!content)return;
-  const title=document.getElementById('mTitle').value.trim();
-  const tags=document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const sub=document.getElementById('modalSubmit');sub.disabled=true;sub.textContent='Публикация…';
+const modalBg = document.getElementById('modalBg');
+document.getElementById('composeBtn').addEventListener('click',()=>modalBg.classList.add('open'));
+document.getElementById('modalClose').addEventListener('click',()=>modalBg.classList.remove('open'));
+modalBg.addEventListener('click',e=>{if(e.target===modalBg)modalBg.classList.remove('open');});
+
+document.getElementById('modalSubmit').addEventListener('click', async function(){
+  const title = document.getElementById('postTitleInput').value.trim();
+  const content = document.getElementById('postContentInput').value.trim();
+  if(!content) return;
   try{
     let imgUrls=[];
     for(const img of imgs){try{const fd=new FormData();fd.append('file',img.file);const ur=await fetch(API+'/upload',{method:'POST',headers:{Authorization:'Bearer '+tk()},body:fd});if(ur.ok){const d=await ur.json();imgUrls.push(d.url||d.path||'');}}catch{}}
@@ -474,6 +464,7 @@ document.getElementById('modalSubmit').addEventListener('click',async()=>{
 });
 
 loadPosts();
+loadTopbarCounters();
 </script>
 </body>
 </html>
