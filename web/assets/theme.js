@@ -157,6 +157,14 @@
   function ensureDashboardSidebarAccess() {
     const navBlocks = document.querySelectorAll('.dashboard-shell > aside.dashboard-sidebar .space-y-1\\.5');
     navBlocks.forEach((nav) => {
+      if (!nav.querySelector('a[href="/communities.html"]')) {
+        nav.appendChild(createNavItem({
+          href: '/communities.html',
+          iconClass: 'fa-solid fa-users',
+          label: 'Сообщества'
+        }));
+      }
+
       if (!nav.querySelector('a[href="/jobs.html"]')) {
         nav.appendChild(createNavItem({
           href: '/jobs.html',
@@ -215,6 +223,7 @@
         <a href="/dashboard.html" class="global-sidebar__item">Новости</a>
         <a href="/forum.html" class="global-sidebar__item">Форум</a>
         <a href="/company.html" class="global-sidebar__item">Компании</a>
+        <a href="/communities.html" class="global-sidebar__item">Сообщества</a>
         <a href="/jobs.html" class="global-sidebar__item">Резюме и вакансии</a>
         <a href="/profile.html" class="global-sidebar__item">Профиль</a>
       </nav>
@@ -233,6 +242,7 @@
         <h3 class="text-[18px] font-semibold text-[#334153]">Быстрые переходы</h3>
         <div class="mt-4 space-y-3 text-[15px] text-[#5f6b79]">
           <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/dashboard.html">Новости</a>
+          <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/communities.html">Сообщества</a>
           <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/profile.html">Мой профиль</a>
           <a class="block rounded-xl border border-[#edf0f2] px-3 py-2 hover:bg-[#f8fafb]" href="/profile.html#friends">Друзья</a>
         </div>
