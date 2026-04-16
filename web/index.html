@@ -10,15 +10,12 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
-  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--tmut:#6A8A7A;--bdr:#DDE8E2;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
   --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
-  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 4px 20px rgba(30,138,76,.10)
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
 }
 html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
-
-/* SHELL */
 .shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav feed right";height:100vh;gap:10px;padding:10px}
-
 /* LOGO */
 .logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
 .logo-cell:hover{box-shadow:var(--shm)}
@@ -26,7 +23,6 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .logo-text{display:flex;flex-direction:column;line-height:1.15}
 .logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
 .logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
-
 /* TOPBAR */
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
 .search-wrap{flex:1;position:relative;display:flex;align-items:center}
@@ -36,10 +32,9 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .search-wrap input::placeholder{color:var(--gmt)}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
 .icon-btn:hover{background:var(--gl);border-color:var(--gb)}
-.icon-btn svg{width:16px;height:16px}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
-.br{background:var(--red)}.bg{background:var(--g)}
-
+.br{background:var(--red)}.bgg{background:var(--g)}
 /* NAV */
 .nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
 .nav::-webkit-scrollbar{display:none}
@@ -47,15 +42,12 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
 .nav-item:hover{background:var(--gp);color:var(--g)}
 .nav-item.active{background:var(--g);color:#fff;font-weight:600}
-.nav-item.active svg path,.nav-item.active svg line,.nav-item.active svg circle,.nav-item.active svg polyline,.nav-item.active svg rect{stroke:#fff}
+.nav-item.active svg *{stroke:#fff}
 .nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-
 /* FEED */
 .feed{grid-area:feed;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
 .feed::-webkit-scrollbar{width:4px}
-.feed::-webkit-scrollbar-track{background:transparent}
 .feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
-
 /* HERO */
 .hero{background:linear-gradient(135deg,#1A6A3C 0%,#22A05A 60%,#2ECC71 100%);border-radius:var(--rxl);padding:22px 24px;color:#fff;position:relative;overflow:hidden;flex-shrink:0}
 .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.07)}
@@ -68,21 +60,27 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .hbtn:hover{transform:translateY(-1px);opacity:.92}
 .hbtn-p{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)}
 .hbtn-g{background:transparent;color:rgba(255,255,255,.85);border:1.5px solid rgba(255,255,255,.3)}
-
-/* COMPOSE */
-.compose{background:var(--w);border:1.5px dashed var(--gb);border-radius:var(--rxl);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;flex-shrink:0;transition:background .15s}
-.compose:hover{background:var(--gp)}
+/* COMPOSE BAR */
+.compose{background:var(--w);border:1.5px dashed var(--gb);border-radius:var(--rxl);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;transition:background .15s,border-color .15s}
+.compose:hover{background:var(--gp);border-color:var(--gm)}
+.compose-left{display:flex;align-items:center;gap:10px;flex:1;cursor:pointer}
 .compose-plus{width:32px;height:32px;border-radius:var(--rm);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
-.compose span{font-size:13px;color:var(--gmt);font-weight:500}
-
+.compose-plus svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.compose-text{font-size:13px;color:var(--gmt);font-weight:500}
+.compose-photo-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--rm);border:1.5px solid var(--gb);background:var(--gl);color:var(--g);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0;white-space:nowrap}
+.compose-photo-pill:hover{background:var(--gb);border-color:var(--gm)}
+.compose-photo-pill svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 /* POST */
-.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s}
+.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .35s ease both}
+.post:nth-child(1){animation-delay:.05s}.post:nth-child(2){animation-delay:.12s}.post:nth-child(3){animation-delay:.19s}.post:nth-child(4){animation-delay:.26s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .post:hover{box-shadow:var(--shm);transform:translateY(-1px)}
 .post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .av{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
 .post-meta{flex:1;min-width:0}
 .post-author{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .post-time{font-size:11px;color:var(--gmt);margin-top:1px}
+.post-img{width:100%;max-height:280px;object-fit:cover;border-radius:var(--rm);margin-bottom:10px;border:1px solid var(--bdr)}
 .post-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:5px;line-height:1.4}
 .post-body{font-size:12px;color:var(--tm);line-height:1.6}
 .post-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
@@ -90,13 +88,12 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .post-actions{display:flex;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr)}
 .post-act{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit}
 .post-act:hover{color:var(--g)}
+.post-act.liked{color:var(--red)}
 .post-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-
 /* RIGHT */
 .right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .right::-webkit-scrollbar{display:none}
-
-/* PROFILE BLOCK */
+/* PROFILE */
 .profile-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);box-shadow:var(--sh);position:relative}
 .profile-trigger{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-radius:var(--rxl);transition:background .15s}
 .profile-trigger:hover{background:var(--gp)}
@@ -106,7 +103,6 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .pco{font-size:11px;color:var(--gmt);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chev{flex-shrink:0;color:var(--gmt);transition:transform .22s;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chev.open{transform:rotate(180deg)}
-
 .dropdown{overflow:hidden;max-height:0;transition:max-height .25s ease;border-top:1px solid transparent}
 .dropdown.open{max-height:280px;border-top-color:var(--bdr)}
 .dd-inner{padding:6px 8px 8px;display:flex;flex-direction:column;gap:2px}
@@ -116,8 +112,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .dd-item.danger:hover{background:#FFF0F0;color:#B03030}
 .dd-div{height:1px;background:var(--bdr);margin:3px 4px}
 .dd-item svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-
-/* CONTEXT */
+/* CTX & AD */
 .ctx-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
 .block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
 .ctx-item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--rm);background:var(--gp);margin-bottom:6px;cursor:pointer;transition:background .15s}
@@ -128,45 +123,64 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .ctx-texts{flex:1;min-width:0}
 .ctx-label{font-size:12px;font-weight:700;color:var(--t)}
 .ctx-sub{font-size:11px;color:var(--gmt);margin-top:2px}
-
-/* AD */
-.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative}
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-block::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(120,80,200,.07)}
 .ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
-.ad-content{margin-top:18px;text-align:center}
+.ad-content{margin-top:20px;text-align:center}
 .ad-title{font-size:13px;font-weight:700;color:#5040A0}
 .ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
 .ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
 .ad-btn:hover{opacity:.88}
-
-/* COMPOSE MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-bg.open{opacity:1;pointer-events:all}
-.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:520px;transform:translateY(12px);transition:transform .2s}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:540px;transform:translateY(14px);transition:transform .22s;max-height:90vh;overflow-y:auto}
 .modal-bg.open .modal{transform:translateY(0)}
-.modal h3{font-size:16px;font-weight:700;color:var(--t);margin-bottom:16px}
-.modal textarea{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px 12px;font-family:inherit;font-size:13px;color:var(--t);resize:vertical;min-height:100px;outline:none;transition:border-color .2s;background:var(--gp)}
-.modal textarea:focus{border-color:var(--gm)}
-.modal input[type=text]{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:8px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp);margin-bottom:10px}
-.modal input:focus{border-color:var(--gm)}
-.modal-actions{display:flex;gap:10px;margin-top:14px;justify-content:flex-end}
-.btn-cancel{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
-.btn-cancel:hover{background:var(--gp)}
-.btn-submit{padding:8px 18px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
-.btn-submit:hover{opacity:.88}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.post{animation:fadeUp .35s ease both}
-.post:nth-child(1){animation-delay:.05s}
-.post:nth-child(2){animation-delay:.12s}
-.post:nth-child(3){animation-delay:.19s}
-.post:nth-child(4){animation-delay:.26s}
-
-@media(max-width:1100px){.shell{grid-template-columns:48px 1fr 240px}}
-@media(max-width:900px){
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head h3{font-size:16px;font-weight:700;color:var(--t)}
+.modal-x{width:28px;height:28px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pttabs{display:flex;gap:6px;margin-bottom:12px}
+.pttab{flex:1;padding:7px;border-radius:var(--rm);font-size:12px;font-weight:600;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;cursor:pointer;transition:all .15s;text-align:center}
+.pttab:hover{border-color:var(--gb);color:var(--g)}
+.pttab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.mfield{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp);margin-bottom:10px;display:block}
+.mfield:focus{border-color:var(--gm)}
+textarea.mfield{min-height:100px;resize:vertical}
+/* image upload */
+.img-zone{border:1.5px dashed var(--gb);border-radius:var(--rm);background:var(--gp);padding:20px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s;margin-bottom:10px;position:relative}
+.img-zone:hover,.img-zone.drag-over{background:var(--gl);border-color:var(--gm)}
+.img-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-zone-icon{width:36px;height:36px;border-radius:var(--rm);background:var(--gl);display:grid;place-items:center;margin:0 auto 8px;color:var(--g)}
+.img-zone-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.img-zone-title{font-size:13px;font-weight:600;color:var(--t)}
+.img-zone-sub{font-size:11px;color:var(--gmt);margin-top:3px}
+.img-zone-sub b{color:var(--g)}
+.img-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.img-thumb{position:relative;width:80px;height:60px;border-radius:var(--rm);overflow:hidden;border:1px solid var(--bdr);flex-shrink:0}
+.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.img-thumb-rm{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(224,64,64,.9);border:none;cursor:pointer;display:grid;place-items:center}
+.img-thumb-rm svg{width:8px;height:8px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+.img-add{width:80px;height:60px;border-radius:var(--rm);border:1.5px dashed var(--gb);background:var(--gp);display:grid;place-items:center;cursor:pointer;transition:background .15s;position:relative;flex-shrink:0}
+.img-add:hover{background:var(--gl);border-color:var(--gm)}
+.img-add svg{width:20px;height:20px;fill:none;stroke:var(--g);stroke-width:2;stroke-linecap:round}
+.img-add input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.mfooter{display:flex;gap:10px;margin-top:6px;justify-content:flex-end}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 20px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+.btn-pri:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:1100px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:960px){
   .shell{grid-template-columns:48px 1fr;grid-template-areas:"logo topbar""nav feed"}
   .right{display:none}
   .nav-item span,.logo-text{display:none}
   .nav-item{justify-content:center;padding:10px}
+  .compose-photo-pill span{display:none}
 }
 </style>
 </head>
@@ -176,19 +190,16 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <!-- LOGO -->
 <a class="logo-cell" href="/">
   <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text">
-    <span class="lt1">LASTOP</span>
-    <span class="lt2">GROUP</span>
-  </div>
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
 </a>
 
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="search-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" placeholder="Поиск пользователей, компаний, форума…" id="searchInput">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума…" autocomplete="off">
   </div>
-  <button class="icon-btn" title="Уведомления" onclick="alert('Уведомлений нет')">
+  <button class="icon-btn" title="Уведомления">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     <span class="badge br" id="notificationsBadge" style="display:none">0</span>
   </button>
@@ -201,74 +212,90 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
   </button>
 </header>
 
+<!-- NAV -->
 <nav class="nav">
-  <a class="nav-item active" href="/">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-    <span>Главная</span>
-  </a>
-  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="5" rx="1"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="16" x2="21" y2="16"/><line x1="3" y1="20" x2="15" y2="20"/></svg><span>Новости</span></a>
+  <a class="nav-item active" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
   <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
-  <a class="nav-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
   <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
   <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
-  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
   <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
   <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
   <div class="nav-div"></div>
-  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
   <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
 </nav>
 
-<main class="feed" id="feedContainer">
+<!-- FEED -->
+<main class="feed">
   <section class="hero">
     <div class="hero-label">Платформа для деловых связей</div>
     <h1 class="hero-title">Управляйте новостями, проектами и контактами бизнеса</h1>
     <p class="hero-sub">Объединяем компании, сообщества и специалистов в единой бизнес-среде.</p>
     <div class="hero-actions">
-      <button class="hbtn hbtn-p" onclick="location.href='/dashboard.html'">Открыть ленту</button>
-      <button class="hbtn hbtn-g" onclick="location.href='/forum.html'">Форум</button>
+      <button class="hbtn hbtn-p" onclick="location.href='/dashboard.html'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Открыть ленту
+      </button>
+      <button class="hbtn hbtn-g" onclick="location.href='/forum.html'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Форум
+      </button>
     </div>
   </section>
 
-  <div class="compose" id="composeBtn">
-    <div class="compose-plus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-    <span>Написать новость или публикацию…</span>
+  <!-- COMPOSE BAR -->
+  <div class="compose">
+    <div class="compose-left" id="composeTrigger">
+      <div class="compose-plus"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      <span class="compose-text">Написать новость или публикацию…</span>
+    </div>
+    <div class="compose-photo-pill" id="composePhotoPill">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="M21 15l-5-4-8 9"/></svg>
+      <span>Фото</span>
+    </div>
   </div>
 
   <div id="postsList"></div>
+  <div style="height:10px;flex-shrink:0"></div>
 </main>
 
+<!-- RIGHT -->
 <aside class="right">
   <div class="profile-block">
     <div class="profile-trigger" id="profileTrigger">
       <div class="pav" id="profileAv">АВ</div>
-      <div class="pinfo">
-        <div class="pname" id="profileName">Загрузка…</div>
-        <div class="pco" id="profileCo">—</div>
-      </div>
+      <div class="pinfo"><div class="pname" id="profileName">Загрузка…</div><div class="pco" id="profileCo">—</div></div>
       <svg class="chev" id="profileChev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div class="dropdown" id="profileDrop">
       <div class="dd-inner">
-        <a class="dd-item" href="/profile.html#friends">Друзья</a>
-        <a class="dd-item" href="/company-profile.html">Моя компания</a>
-        <a class="dd-item" href="/settings.html">Настройки</a>
-        <a class="dd-item" href="/communities.html">Сообщества</a>
+        <a class="dd-item" href="/profile.html#friends"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Друзья</a>
+        <a class="dd-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Моя компания</a>
+        <a class="dd-item" href="/settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
+        <a class="dd-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Сообщества</a>
         <div class="dd-div"></div>
-        <a class="dd-item danger" href="#" id="logoutBtn">Выход</a>
+        <a class="dd-item danger" href="#" id="logoutBtn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Выход</a>
       </div>
     </div>
   </div>
-
   <div class="ctx-block">
-    <div class="block-title" id="ctxTitle">Сейчас на главной</div>
-    <div id="ctxItems">
-      <div class="ctx-item" onclick="location.href='/dashboard.html'"><div class="ctx-texts"><div class="ctx-label">Топ новость недели</div><div class="ctx-sub">Экспорт стройматериалов ↗</div></div></div>
-      <div class="ctx-item" onclick="location.href='/forum.html'"><div class="ctx-texts"><div class="ctx-label">Тренд дня</div><div class="ctx-sub">Логистика фармпродукции</div></div></div>
-      <div class="ctx-item" onclick="location.href='/communities.html'"><div class="ctx-texts"><div class="ctx-label">Активных сейчас</div><div class="ctx-sub">124 пользователя онлайн</div></div></div>
+    <div class="block-title">Сейчас на главной</div>
+    <div class="ctx-item" onclick="location.href='/dashboard.html'">
+      <div class="ctx-icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="ctx-texts"><div class="ctx-label">Топ новость недели</div><div class="ctx-sub">Экспорт стройматериалов ↗</div></div>
+    </div>
+    <div class="ctx-item" onclick="location.href='/forum.html'">
+      <div class="ctx-icon"><svg viewBox="0 0 24 24"><polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/><polyline points="17,6 23,6 23,12"/></svg></div>
+      <div class="ctx-texts"><div class="ctx-label">Тренд дня</div><div class="ctx-sub">Логистика фармпродукции</div></div>
+    </div>
+    <div class="ctx-item" onclick="location.href='/communities.html'">
+      <div class="ctx-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <div class="ctx-texts"><div class="ctx-label">Активных сейчас</div><div class="ctx-sub">124 пользователя онлайн</div></div>
     </div>
   </div>
-
   <div class="ad-block">
     <div class="ad-label">реклама</div>
     <div class="ad-content">
@@ -280,145 +307,116 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 </aside>
 </div>
 
+<!-- MODAL -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
-    <h3>Новая публикация</h3>
-    <input type="text" id="postTitleInput" placeholder="Заголовок (необязательно)">
-    <textarea id="postContentInput" placeholder="Что нового? Поделитесь с сообществом…"></textarea>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="modalClose">Отмена</button>
-      <button class="btn-submit" id="modalSubmit">Опубликовать</button>
+    <div class="modal-head">
+      <h3>Новая публикация</h3>
+      <button class="modal-x" id="modalX"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="pttabs">
+      <button class="pttab active" data-type="user">От себя</button>
+      <button class="pttab" data-type="company">От компании</button>
+      <button class="pttab" data-type="community">От сообщества</button>
+    </div>
+    <input type="text" class="mfield" id="mTitle" placeholder="Заголовок (необязательно)">
+    <textarea class="mfield" id="mContent" placeholder="Что нового? Поделитесь с сообществом…"></textarea>
+    <div id="imgGrid" class="img-grid" style="display:none"></div>
+    <div class="img-zone" id="imgZone">
+      <input type="file" id="imgInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+      <div class="img-zone-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+      <div class="img-zone-title">Нажмите или перетащите фото</div>
+      <div class="img-zone-sub">JPG, PNG, WebP · до <b>10 МБ</b> каждый · максимум 5 файлов</div>
+    </div>
+    <input type="text" class="mfield" id="mTags" placeholder="Теги через запятую: логистика, экспорт…">
+    <div class="mfooter">
+      <button class="btn-sec" id="modalCancel">Отмена</button>
+      <button class="btn-pri" id="modalSubmit">Опубликовать</button>
     </div>
   </div>
 </div>
 
 <script>
-const API = '/api';
-const token = () => localStorage.getItem('token');
+const API='/api',tk=()=>localStorage.getItem('token');
+const MAX_IMG=5,MAX_MB=10;
+let imgs=[],postType='user';
 
-(function(){
-  const img = document.getElementById('logo-img');
-  img.src = '/assets/lastop-group-logo.svg';
-  img.onerror = () => { img.style.display='none'; };
-})();
+/* logo */
+(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
-(async function(){
-  if(!token()){window.location.href='/login.html';return;}
+/* auth guard */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
   try{
-    const r = await fetch(API+'/me',{headers:{Authorization:'Bearer '+token()}});
-    if(!r.ok){localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='/login.html';return;}
-    const d = await r.json();
-    const u = d.user || {};
-    localStorage.setItem('user', JSON.stringify(u));
-    const name = u.full_name || u.name || 'Пользователь';
-    const letter = (name[0]||'П').toUpperCase();
-    document.getElementById('profileAv').textContent = letter;
-    document.getElementById('profileName').textContent = name;
-    document.getElementById('profileCo').textContent = u.company_name || u.position || 'Участник LASTOP';
-  }catch(e){
-    const stored = JSON.parse(localStorage.getItem('user')||'{}');
-    if(stored.full_name){
-      const letter = (stored.full_name[0]||'П').toUpperCase();
-      document.getElementById('profileAv').textContent = letter;
-      document.getElementById('profileName').textContent = stored.full_name;
-      document.getElementById('profileCo').textContent = stored.company_name || 'Участник LASTOP';
-    }
-  }
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    const{user={}}=await r.json();localStorage.setItem('user',JSON.stringify(user));applyUser(user);
+  }catch{const u=JSON.parse(localStorage.getItem('user')||'{}');if(u.full_name)applyUser(u);}
 })();
-
-document.getElementById('profileTrigger').addEventListener('click',function(){
-  const drop = document.getElementById('profileDrop');
-  const chev = document.getElementById('profileChev');
-  const open = drop.classList.toggle('open');
-  chev.classList.toggle('open', open);
-});
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.profile-block')){
-    document.getElementById('profileDrop').classList.remove('open');
-    document.getElementById('profileChev').classList.remove('open');
-  }
-});
-
-document.getElementById('logoutBtn').addEventListener('click',async function(e){
-  e.preventDefault();
-  try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+token()}});}catch(_){ }
-  localStorage.removeItem('token');localStorage.removeItem('user');
-  window.location.href='/login.html';
-});
-
-let searchTimer;
-document.getElementById('searchInput').addEventListener('input',function(e){
-  clearTimeout(searchTimer);
-  const q = e.target.value.trim();
-  if(!q) return;
-  searchTimer = setTimeout(()=>{window.location.href='/search.html?q='+encodeURIComponent(q);},600);
-});
-document.getElementById('searchInput').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    const q=this.value.trim();
-    if(q) window.location.href='/search.html?q='+encodeURIComponent(q);
-  }
-});
-
-const avatarColors = ['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A'];
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function timeAgo(ts){
-  if(!ts) return '';
-  const diff = Math.max(1,Math.floor((Date.now()-new Date(ts).getTime())/60000));
-  if(diff<60) return diff+' мин назад';
-  if(diff<1440) return Math.floor(diff/60)+' ч назад';
-  return Math.floor(diff/1440)+' д назад';
-}
-function buildPost(p, idx){
-  const color = avatarColors[idx % avatarColors.length];
-  const letter = (p.author_name||'?')[0].toUpperCase();
-  const tags = Array.isArray(p.tags) ? p.tags.filter(Boolean) : [];
-  return `
-  <article class="post" data-id="${p.id}">
-    <div class="post-head">
-      <div class="av" style="background:${color}">${letter}</div>
-      <div class="post-meta">
-        <div class="post-author">${escHtml(p.author_name||'Автор')}</div>
-        <div class="post-time">${timeAgo(p.created_at)}</div>
-      </div>
-    </div>
-    ${p.title?`<div class="post-title">${escHtml(p.title)}</div>`:''}
-    <div class="post-body">${escHtml(p.content||'')}</div>
-    ${tags.length?`<div class="post-tags">${tags.map(t=>`<span class="tag">#${escHtml(t)}</span>`).join('')}</div>`:''}
-    <div class="post-actions">
-      <button class="post-act" onclick="likePost('${p.id}',this)">${p.likes_count||0}</button>
-      <button class="post-act" onclick="showComments('${p.id}')">${p.comments_count||0}</button>
-      <button class="post-act">Поделиться</button>
-    </div>
-  </article>`;
+function applyUser(u){
+  const n=u.full_name||u.name||'Пользователь';
+  document.getElementById('profileAv').textContent=(n[0]||'П').toUpperCase();
+  document.getElementById('profileName').textContent=n;
+  document.getElementById('profileCo').textContent=u.company_name||u.position||'Участник LASTOP';
 }
 
+/* search */
+let sT;
+document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(sT);const q=e.target.value.trim();if(q.length>1)sT=setTimeout(()=>location.href='/search.html?q='+encodeURIComponent(q),600);});
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(q)location.href='/search.html?q='+encodeURIComponent(q);}});
+
+/* profile dropdown */
+document.getElementById('profileTrigger').addEventListener('click',()=>{
+  const d=document.getElementById('profileDrop'),c=document.getElementById('profileChev');
+  const o=d.classList.toggle('open');c.classList.toggle('open',o);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.profile-block')){document.getElementById('profileDrop').classList.remove('open');document.getElementById('profileChev').classList.remove('open');}});
+
+/* logout */
+document.getElementById('logoutBtn').addEventListener('click',async e=>{
+  e.preventDefault();try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  localStorage.clear();location.href='/login.html';
+});
+
+/* posts */
+const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A'];
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':Math.floor(m/1440)+' д назад';}
+function buildPost(p,i){
+  const c=AVC[(p.author_name||'').charCodeAt(0)%AVC.length]||AVC[i%AVC.length];
+  const tags=Array.isArray(p.tags)?p.tags.filter(Boolean):[];
+  const imgUrl=Array.isArray(p.images)&&p.images[0]?p.images[0]:p.image_url||'';
+  return`<article class="post" data-id="${p.id}">
+  <div class="post-head"><div class="av" style="background:${c}">${(p.author_name||'?')[0].toUpperCase()}</div>
+  <div class="post-meta"><div class="post-author">${esc(p.author_name||'Автор')}</div><div class="post-time">${ago(p.created_at)}</div></div></div>
+  ${imgUrl?`<img class="post-img" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
+  ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
+  <div class="post-body">${esc(p.content||'')}</div>
+  ${tags.length?`<div class="post-tags">${tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
+  <div class="post-actions">
+    <button class="post-act${p.is_liked?' liked':''}" onclick="likePost('${p.id}',this)">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>${p.likes_count||0}</span></button>
+    <button class="post-act" onclick="location.href='/dashboard.html?post=${p.id}'">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>${p.comments_count||0}</span></button>
+    <button class="post-act" onclick="sharePost('${p.id}')">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Поделиться</button>
+  </div></article>`;
+}
 async function loadPosts(){
-  const container = document.getElementById('postsList');
+  const ct=document.getElementById('postsList');
   try{
-    const r = await fetch(API+'/news',{headers:{Authorization:'Bearer '+token()}});
-    if(!r.ok) throw new Error('not ok');
-    const d = await r.json();
-    const posts = d.posts||[];
-    if(!posts.length){
-      container.innerHTML='<div style="padding:20px;text-align:center;color:var(--gmt);font-size:13px">Публикаций пока нет. Будьте первым!</div>';
-      return;
-    }
-    container.innerHTML = posts.map((p,i)=>buildPost(p,i)).join('');
-  }catch(e){
-    container.innerHTML='<div style="padding:20px;text-align:center;color:var(--gmt);font-size:13px">Не удалось загрузить ленту. Проверьте соединение.</div>';
-  }
+    const r=await fetch(API+'/news',{headers:{Authorization:'Bearer '+tk()}});if(!r.ok)throw 0;
+    const{posts=[]}=await r.json();
+    if(!posts.length){ct.innerHTML='<div style="padding:32px;text-align:center;color:var(--gmt);font-size:13px">📭 Публикаций пока нет. Будьте первым!</div>';return;}
+    ct.innerHTML=posts.map((p,i)=>buildPost(p,i)).join('');
+  }catch{ct.innerHTML='<div style="padding:20px;text-align:center;color:var(--gmt);font-size:13px">Не удалось загрузить ленту.</div>';}
 }
-
-async function likePost(id, btn){
-  try{
-    const r = await fetch(API+'/posts/'+id+'/like',{method:'POST',headers:{Authorization:'Bearer '+token()}});
-    if(r.ok){
-      const cur = parseInt(btn.textContent.trim())||0;
-      btn.textContent = (cur+1);
-      btn.style.color='var(--g)';
-    }
-  }catch(_){ }
+async function likePost(id,btn){
+  const liked=btn.classList.contains('liked'),m=liked?'DELETE':'POST';
+  try{const r=await fetch(API+'/posts/'+id+'/like',{method:m,headers:{Authorization:'Bearer '+tk()}});if(r.ok){btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(liked?-1:1);}}catch{}
 }
 function showComments(id){window.location.href='/dashboard.html?post='+id;}
 
@@ -455,18 +453,14 @@ document.getElementById('modalSubmit').addEventListener('click', async function(
   const content = document.getElementById('postContentInput').value.trim();
   if(!content) return;
   try{
-    const r = await fetch(API+'/posts?author_type=user',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},
-      body: JSON.stringify({title:title||null,content,short_description:content.slice(0,180),privacy_level:'public',tags:[]})
-    });
-    if(r.ok){
-      document.getElementById('postTitleInput').value='';
-      document.getElementById('postContentInput').value='';
-      modalBg.classList.remove('open');
-      loadPosts();
-    }
-  }catch(_){ }
+    let imgUrls=[];
+    for(const img of imgs){try{const fd=new FormData();fd.append('file',img.file);const ur=await fetch(API+'/upload',{method:'POST',headers:{Authorization:'Bearer '+tk()},body:fd});if(ur.ok){const d=await ur.json();imgUrls.push(d.url||d.path||'');}}catch{}}
+    const body={title:title||null,content,short_description:content.slice(0,180),tags,privacy_level:'public'};
+    if(imgUrls.length)body.images=imgUrls;
+    const r=await fetch(API+'/posts?author_type='+postType,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    if(r.ok){closeModal();loadPosts();}
+  }catch{}
+  sub.disabled=false;sub.textContent='Опубликовать';
 });
 
 loadPosts();
