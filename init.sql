@@ -175,35 +175,61 @@ VALUES (
 )
 ON CONFLICT (email) DO NOTHING;
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_moderator BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+
 CREATE TABLE IF NOT EXISTS forum_sections (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(180) NOT NULL UNIQUE,
+    name VARCHAR(120) NOT NULL,
     description TEXT NOT NULL DEFAULT '',
-    creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    color_idx SMALLINT NOT NULL DEFAULT 0 CHECK (color_idx BETWEEN 0 AND 5),
+    sort_order INT NOT NULL DEFAULT 0,
     topics_count INT NOT NULL DEFAULT 0,
-    posts_count INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    messages_count INT NOT NULL DEFAULT 0,
+    last_author VARCHAR(200),
+    last_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
 );
+CREATE INDEX IF NOT EXISTS idx_forum_sections_sort ON forum_sections(sort_order, id) WHERE deleted_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS forum_topics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     section_id UUID NOT NULL REFERENCES forum_sections(id) ON DELETE CASCADE,
-    title VARCHAR(200) NOT NULL,
-    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    posts_count INT NOT NULL DEFAULT 0,
+    author_id UUID NOT NULL REFERENCES users(id),
+    title VARCHAR(300) NOT NULL,
+    tags TEXT[] NOT NULL DEFAULT '{}',
+    replies_count INT NOT NULL DEFAULT 0,
     views_count INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    is_hot BOOLEAN NOT NULL DEFAULT false,
+    is_pinned BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
 );
-CREATE INDEX IF NOT EXISTS idx_forum_topics_section_updated ON forum_topics(section_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_forum_topics_section ON forum_topics(section_id, is_pinned DESC, created_at DESC) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_forum_topics_author ON forum_topics(author_id) WHERE deleted_at IS NULL;
 
-CREATE TABLE IF NOT EXISTS forum_posts (
+CREATE TABLE IF NOT EXISTS forum_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
-    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    parent_id UUID REFERENCES forum_messages(id),
+    author_id UUID NOT NULL REFERENCES users(id),
+    text TEXT NOT NULL,
+    likes_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
 );
-CREATE INDEX IF NOT EXISTS idx_forum_posts_topic_created ON forum_posts(topic_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_forum_messages_topic ON forum_messages(topic_id, created_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_forum_messages_parent ON forum_messages(parent_id) WHERE parent_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_forum_messages_author ON forum_messages(author_id) WHERE deleted_at IS NULL;
+
+CREATE TABLE IF NOT EXISTS forum_message_likes (
+    message_id UUID NOT NULL REFERENCES forum_messages(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (message_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_forum_likes_user ON forum_message_likes(user_id);

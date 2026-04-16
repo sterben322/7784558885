@@ -150,10 +150,10 @@ func searchCompanies(data *GlobalSearchData, query string, limit int) error {
 func searchForumSections(data *GlobalSearchData, query string, limit int) error {
 	rows, err := database.DB.Query(`
 		SELECT id::text,
-		       title,
+		       name,
 		       COALESCE(NULLIF(description, ''), 'Раздел форума')
 		FROM forum_sections
-		WHERE COALESCE(title, '') ILIKE '%' || $1 || '%'
+		WHERE COALESCE(name, '') ILIKE '%' || $1 || '%'
 		   OR COALESCE(description, '') ILIKE '%' || $1 || '%'
 		ORDER BY updated_at DESC
 		LIMIT $2
@@ -180,7 +180,7 @@ func searchForumTopics(data *GlobalSearchData, query string, limit int) error {
 	rows, err := database.DB.Query(`
 		SELECT t.id::text,
 		       t.title,
-		       s.title,
+		       s.name,
 		       t.section_id::text
 		FROM forum_topics t
 		JOIN forum_sections s ON s.id = t.section_id

@@ -308,14 +308,12 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
     <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума…" autocomplete="off">
   </div>
   <button class="icon-btn" title="Уведомления">
@@ -371,7 +369,8 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
     <div class="conv-header">
       <h2>Сообщения</h2>
       <div class="conv-search">
-            <input type="search" id="convSearch" placeholder="Поиск по чатам…">
+        <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
+        <input type="search" id="convSearch" placeholder="Поиск по чатам…">
       </div>
     </div>
     <div class="conv-list" id="convList"></div>
@@ -408,7 +407,8 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
             <svg viewBox="0 0 24 24"><polygon points="23,7 16,12 23,17 23,7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
           </button>
           <button class="h-btn" title="Поиск в чате">
-                  </button>
+            <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
+          </button>
           <button class="h-btn" title="Профиль" onclick="openUinfo()">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>
@@ -519,8 +519,6 @@ const MAX_ATTACHMENT_SIZE=50*1024*1024;
 let typingPollTimer=null,typingStopTimer=null,lastTypingSent=false,typingRequestAt=0;
 let activeMessagesRequestId=0;
 
-/* ── LOGO ── */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* ── AUTH ── */
 (async()=>{

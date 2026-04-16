@@ -232,14 +232,12 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
     <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума…" autocomplete="off">
   </div>
   <button class="icon-btn" title="Уведомления">
@@ -431,8 +429,6 @@ const params=new URLSearchParams(location.search);
 const companyId=params.get('id');
 let companyData=null, isOwnCompany=false, isFollowed=false;
 
-/* ── LOGO ── */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* ── AUTH + LOAD ── */
 (async()=>{
