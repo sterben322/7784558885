@@ -190,11 +190,11 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
   </div>
   <button class="icon-btn" title="Уведомления" onclick="alert('Уведомлений нет')">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span class="badge br">3</span>
+    <span class="badge br" id="notificationsBadge" style="display:none">0</span>
   </button>
   <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
     <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-    <span class="badge bg">7</span>
+    <span class="badge bg" id="messagesBadge" style="display:none">0</span>
   </button>
   <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -422,6 +422,29 @@ async function likePost(id, btn){
 }
 function showComments(id){window.location.href='/dashboard.html?post='+id;}
 
+function applyBadgeCount(elementId, count){
+  const el = document.getElementById(elementId);
+  if(!el) return;
+  const safeCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+  if(safeCount <= 0){
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'flex';
+  el.textContent = safeCount > 99 ? '99+' : String(safeCount);
+}
+
+async function loadTopbarCounters(){
+  try{
+    const r = await fetch(API+'/dashboard/stats',{headers:{Authorization:'Bearer '+token()}});
+    if(!r.ok) return;
+    const payload = await r.json();
+    const stats = payload.stats || {};
+    applyBadgeCount('notificationsBadge', stats.unread_notifications);
+    applyBadgeCount('messagesBadge', stats.unread_messages);
+  }catch(_){ }
+}
+
 const modalBg = document.getElementById('modalBg');
 document.getElementById('composeBtn').addEventListener('click',()=>modalBg.classList.add('open'));
 document.getElementById('modalClose').addEventListener('click',()=>modalBg.classList.remove('open'));
@@ -447,6 +470,7 @@ document.getElementById('modalSubmit').addEventListener('click', async function(
 });
 
 loadPosts();
+loadTopbarCounters();
 </script>
 </body>
 </html>
