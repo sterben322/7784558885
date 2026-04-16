@@ -513,6 +513,7 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function avc(name){return AVC[(name||'').charCodeAt(0)%AVC.length]||AVC[0];}
 
 let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
+let typingPollTimer=null,typingStopTimer=null,lastTypingSent=false,typingRequestAt=0;
 
 /* ── LOGO ── */
 (()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
@@ -594,17 +595,30 @@ function getDemoConvs(){
 }
 
 function renderConvList(chats){
+  const normalized=chats.map(normalizeConversation);
   const list=document.getElementById('convList');
-  list.innerHTML='<div class="conv-section">Все чаты</div>'+chats.map(c=>convItemHtml(c)).join('');
+  list.innerHTML='<div class="conv-section">Все чаты</div>'+normalized.map(c=>convItemHtml(c)).join('');
   list.querySelectorAll('.conv-item').forEach(el=>{
     el.addEventListener('click',()=>{
       const id=el.dataset.id;
-      const chat=chats.find(c=>c.id===id);
+      const chat=normalized.find(c=>c.id===id);
       selectConv(chat||{id,name:el.querySelector('.conv-name').textContent});
       list.querySelectorAll('.conv-item').forEach(x=>x.classList.remove('active'));
       el.classList.add('active');
     });
   });
+}
+
+function normalizeConversation(c){
+  const previewText=typeof c.last_message==='string'?c.last_message:(c.last_message?.text||'');
+  const previewAt=c.last_time||c.last_message?.created_at||null;
+  const isMine=c.last_message?.is_mine===true;
+  return{
+    ...c,
+    name:c.name||'Диалог',
+    type:c.type||'direct',
+    last_message:{text:previewText,created_at:previewAt,is_mine:isMine}
+  };
 }
 
 function convItemHtml(c){
@@ -638,6 +652,13 @@ function convItemHtml(c){
 
 /* ── SELECT CONVERSATION ── */
 function selectConv(conv){
+  if(currentConv&&currentConv.id!==conv.id){
+    sendTypingState(false);
+  }
+  if(typingPollTimer){clearInterval(typingPollTimer);typingPollTimer=null;}
+  if(typingStopTimer){clearTimeout(typingStopTimer);typingStopTimer=null;}
+  setTypingVisible(false);
+  lastTypingSent=false;
   currentConv=conv;
   const color=avc(conv.name);
   document.getElementById('chatEmpty').style.display='none';
@@ -664,10 +685,19 @@ async function loadMessages(convId){
     const r=await fetch(API+'/chats/'+convId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{messages=[]}=await r.json();
-    renderMessages(messages);
+    renderMessages(messages.map(normalizeMessage));
   }catch{
     renderMessages(getDemoMessages(convId));
   }
+}
+
+function normalizeMessage(msg){
+  return{
+    ...msg,
+    text:msg.text??msg.content??'',
+    is_mine:msg.is_mine??(msg.sender_id===myUserId),
+    sender_name:msg.sender_name||'Пользователь'
+  };
 }
 
 function getDemoMessages(convId){
@@ -740,13 +770,44 @@ function buildBubble(msg,isOut,showAvatar,showName,isLast){
 
 /* ── TYPING INDICATOR ── */
 function showTypingAfterDelay(){
-  if(!currentConv||currentConv.is_online===false)return;
-  setTimeout(()=>{
-    const tr=document.getElementById('typingRow');
-    tr.style.display='flex';
+  if(!currentConv)return;
+  if(typingPollTimer)clearInterval(typingPollTimer);
+  pollTyping();
+  typingPollTimer=setInterval(pollTyping,2000);
+}
+
+async function pollTyping(){
+  if(!currentConv)return;
+  try{
+    const r=await fetch(API+'/chats/'+currentConv.id+'/typing',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    setTypingVisible(Boolean(data.typing));
+  }catch{
+    setTypingVisible(false);
+  }
+}
+
+function setTypingVisible(visible){
+  const tr=document.getElementById('typingRow');
+  tr.style.display=visible?'flex':'none';
+  if(visible){
     document.getElementById('msgsWrap').scrollTop=99999;
-    setTimeout(()=>{tr.style.display='none';},3200);
-  },1200);
+  }
+}
+
+async function sendTypingState(typing){
+  if(!currentConv)return;
+  if(lastTypingSent===typing&&Date.now()-typingRequestAt<1500)return;
+  typingRequestAt=Date.now();
+  lastTypingSent=typing;
+  try{
+    await fetch(API+'/chats/'+currentConv.id+'/typing',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({typing})
+    });
+  }catch{}
 }
 
 /* ── CONTEXT MENU ── */
@@ -815,6 +876,12 @@ function checkSendable(){
   sendBtn.disabled=!(hasText||hasFiles);
 }
 msgInput.addEventListener('input',checkSendable);
+msgInput.addEventListener('input',()=>{
+  if(!currentConv)return;
+  sendTypingState(true);
+  if(typingStopTimer)clearTimeout(typingStopTimer);
+  typingStopTimer=setTimeout(()=>sendTypingState(false),2200);
+});
 msgInput.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
 });
@@ -833,6 +900,7 @@ async function sendMessage(){
     reply_to:replyTo?{sender_name:replyTo.is_mine?myName:replyTo.sender_name,text:replyTo.text}:null
   };
   msgInput.textContent='';checkSendable();
+  sendTypingState(false);
   replyTo=null;document.getElementById('replyBar').classList.remove('show');
   attachFiles=[];renderAttachStrip();
   const wrap=document.getElementById('msgsWrap');
@@ -842,7 +910,7 @@ async function sendMessage(){
     await fetch(API+'/chats/'+currentConv.id+'/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
-      body:JSON.stringify({text,reply_to_id:replyTo?.id||null})
+      body:JSON.stringify({content:text,reply_to_id:replyTo?.id||null})
     });
   }catch{}
   setTimeout(()=>{

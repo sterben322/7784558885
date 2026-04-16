@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"lastop/database"
 	"lastop/models"
@@ -14,6 +16,13 @@ import (
 )
 
 var errForbidden = errors.New("forbidden")
+
+var typingState = struct {
+	mu    sync.Mutex
+	chats map[uuid.UUID]map[uuid.UUID]time.Time
+}{
+	chats: make(map[uuid.UUID]map[uuid.UUID]time.Time),
+}
 
 func parseUUIDParam(c *gin.Context, key string) (uuid.UUID, bool) {
 	value := strings.TrimSpace(c.Param(key))
@@ -338,13 +347,17 @@ func SendConversationMessage(c *gin.Context) {
 	}
 
 	var req struct {
-		Content string `json:"content" binding:"required"`
+		Content string `json:"content"`
+		Text    string `json:"text"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonError(c, http.StatusBadRequest, "Content is required")
 		return
 	}
 	req.Content = strings.TrimSpace(req.Content)
+	if req.Content == "" {
+		req.Content = strings.TrimSpace(req.Text)
+	}
 	if req.Content == "" {
 		jsonError(c, http.StatusBadRequest, "Content is required")
 		return
@@ -363,6 +376,95 @@ func SendConversationMessage(c *gin.Context) {
 	_, _ = database.DB.Exec(`UPDATE chat_participants SET last_read_at = NOW() WHERE chat_id = $1 AND user_id = $2`, conversationID, senderID)
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Message sent", "message_id": messageID})
+}
+
+func SetConversationTyping(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
+	conversationID, ok := parseUUIDParam(c, "id")
+	if !ok {
+		return
+	}
+	userID := currentUserID(c)
+	if err := requireConversationParticipant(conversationID, userID); err != nil {
+		if errors.Is(err, errForbidden) {
+			jsonError(c, http.StatusForbidden, "Access denied")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
+		return
+	}
+
+	var req struct {
+		Typing bool `json:"typing"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		jsonError(c, http.StatusBadRequest, "Invalid payload")
+		return
+	}
+
+	typingState.mu.Lock()
+	defer typingState.mu.Unlock()
+	chatState, ok := typingState.chats[conversationID]
+	if !ok {
+		chatState = make(map[uuid.UUID]time.Time)
+		typingState.chats[conversationID] = chatState
+	}
+	if req.Typing {
+		chatState[userID] = time.Now().UTC().Add(6 * time.Second)
+	} else {
+		delete(chatState, userID)
+	}
+	if len(chatState) == 0 {
+		delete(typingState.chats, conversationID)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"typing": req.Typing})
+}
+
+func GetConversationTyping(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
+	conversationID, ok := parseUUIDParam(c, "id")
+	if !ok {
+		return
+	}
+	userID := currentUserID(c)
+	if err := requireConversationParticipant(conversationID, userID); err != nil {
+		if errors.Is(err, errForbidden) {
+			jsonError(c, http.StatusForbidden, "Access denied")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
+		return
+	}
+
+	now := time.Now().UTC()
+	isTyping := false
+
+	typingState.mu.Lock()
+	defer typingState.mu.Unlock()
+	chatState, ok := typingState.chats[conversationID]
+	if ok {
+		for participantID, expiresAt := range chatState {
+			if expiresAt.Before(now) {
+				delete(chatState, participantID)
+				continue
+			}
+			if participantID != userID {
+				isTyping = true
+			}
+		}
+		if len(chatState) == 0 {
+			delete(typingState.chats, conversationID)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"typing": isTyping})
 }
 
 // Backward-compatible endpoints.
