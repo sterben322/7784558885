@@ -102,9 +102,10 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.POST("/forum/sections", handlers.CreateForumSection)
 		api.GET("/forum/sections/:id/topics", handlers.GetSectionTopics)
 		api.POST("/forum/sections/:id/topics", handlers.CreateSectionTopic)
-		api.GET("/forum/topics/:id", handlers.GetTopicDiscussion)
-		api.POST("/forum/topics/:id/posts", handlers.AddTopicPost)
-		api.PUT("/forum/posts/:id", handlers.UpdateForumPost)
+		api.GET("/forum/topics/:id/messages", handlers.GetTopicMessages)
+		api.POST("/forum/topics/:id/messages", handlers.AddTopicPost)
+		api.POST("/forum/messages/:id/like", handlers.LikeForumMessage)
+		api.DELETE("/forum/messages/:id/like", handlers.UnlikeForumMessage)
 
 		api.GET("/chats", handlers.GetChats)
 		api.GET("/chats/:id/messages", handlers.GetMessages)
