@@ -441,7 +441,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
         <div class="input-row">
           <label class="input-attach-btn" title="Прикрепить файл">
             <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            <input type="file" id="attachInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
+            <input type="file" id="attachInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" multiple>
           </label>
           <div class="input-wrap" id="msgInput" contenteditable="true" data-placeholder="Написать сообщение…"></div>
           <button class="send-btn" id="sendBtn" disabled>
@@ -513,6 +513,7 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function avc(name){return AVC[(name||'').charCodeAt(0)%AVC.length]||AVC[0];}
 
 let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
+const MAX_ATTACHMENT_SIZE=50*1024*1024;
 let typingPollTimer=null,typingStopTimer=null,lastTypingSent=false,typingRequestAt=0;
 
 /* ── LOGO ── */
@@ -692,12 +693,31 @@ async function loadMessages(convId){
 }
 
 function normalizeMessage(msg){
+  const attachmentSize=typeof msg.attachment_size==='number'
+    ?msg.attachment_size
+    :Number(msg.attachment_size||0);
+  const file=msg.attachment_url?{
+    name:msg.attachment_name||'Файл',
+    size:formatFileSize(attachmentSize),
+    url:msg.attachment_url
+  }:null;
   return{
     ...msg,
     text:msg.text??msg.content??'',
+    file,
+    image_url:msg.image_url||(msg.attachment_type?.startsWith('image/')?msg.attachment_url:null),
     is_mine:msg.is_mine??(msg.sender_id===myUserId),
     sender_name:msg.sender_name||'Пользователь'
   };
+}
+
+function formatFileSize(bytes){
+  if(!Number.isFinite(bytes)||bytes<=0)return '';
+  const units=['Б','КБ','МБ','ГБ'];
+  let value=bytes,idx=0;
+  while(value>=1024&&idx<units.length-1){value/=1024;idx++;}
+  const precision=value>=100||idx===0?0:1;
+  return`${value.toFixed(precision)} ${units[idx]}`;
 }
 
 function getDemoMessages(convId){
@@ -758,7 +778,7 @@ function buildBubble(msg,isOut,showAvatar,showName,isLast){
   const avHtml=isOut?'':`<div class="msg-avatar${showAvatar?'':' hidden'}" style="background:${color}">${(msg.sender_name||'?')[0].toUpperCase()}</div>`;
   const nameHtml=showName?`<div class="bubble-name">${esc(msg.sender_name)}</div>`:'';
   const replyHtml=msg.reply_to?`<div class="reply-preview"><div class="reply-preview-name">${esc(msg.reply_to.sender_name)}</div><div class="reply-preview-text">${esc(msg.reply_to.text)}</div></div>`:'';
-  const fileHtml=msg.file?`<div class="bubble-file"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></div>`:''
+  const fileHtml=msg.file?`<a class="bubble-file" href="${esc(msg.file.url||'#')}" target="_blank" rel="noopener noreferrer"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></a>`:''
   const imgHtml=msg.image_url?`<img class="bubble-img" src="${esc(msg.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';
   const timeStr=new Date(msg.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const checkHtml=isOut?`<span class="bubble-check${msg.read?'':' unread'}"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/>${msg.read?'<polyline points="20,2 9,13 4,8"/>':''}</svg></span>`:'';
@@ -849,9 +869,14 @@ document.getElementById('replyClose').addEventListener('click',()=>{
 document.getElementById('attachInput').addEventListener('change',function(){
   Array.from(this.files).forEach(f=>{
     if(attachFiles.length>=5)return;
+    if(f.size>MAX_ATTACHMENT_SIZE){
+      alert(`Файл «${f.name}» превышает лимит 50 МБ.`);
+      return;
+    }
     attachFiles.push(f);
   });
   renderAttachStrip();this.value='';
+  checkSendable();
 });
 function renderAttachStrip(){
   const strip=document.getElementById('attachStrip');
@@ -865,7 +890,7 @@ function renderAttachStrip(){
     return`<div class="attach-prev" style="display:grid;place-items:center;background:var(--gl)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><button class="attach-prev-rm" onclick="removeAttach(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
   }).join('');
 }
-function removeAttach(i){attachFiles.splice(i,1);renderAttachStrip();}
+function removeAttach(i){attachFiles.splice(i,1);renderAttachStrip();checkSendable();}
 
 /* ── INPUT / SEND ── */
 const msgInput=document.getElementById('msgInput');
@@ -890,33 +915,58 @@ async function sendMessage(){
   const text=msgInput.textContent.trim();
   if(!text&&!attachFiles.length)return;
   if(!currentConv)return;
-  const msg={
-    id:'local-'+Date.now(),
-    text,
+  const baseMsg={
     sender_name:myName,
     is_mine:true,
     created_at:new Date().toISOString(),
     read:false,
     reply_to:replyTo?{sender_name:replyTo.is_mine?myName:replyTo.sender_name,text:replyTo.text}:null
   };
+  const replyToId=replyTo?.id||null;
+  const pendingFiles=[...attachFiles];
+  const hasText=Boolean(text);
+  if(hasText){
+    const textMsg={id:'local-'+Date.now(),text,...baseMsg};
+    const wrap=document.getElementById('msgsWrap');
+    wrap.appendChild(buildBubble(textMsg,true,true,false,true));
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  pendingFiles.forEach((f,idx)=>{
+    const localUrl=URL.createObjectURL(f);
+    const fileMsg={
+      id:`local-file-${Date.now()}-${idx}`,
+      text:'',
+      file:{name:f.name,size:formatFileSize(f.size),url:localUrl},
+      image_url:f.type.startsWith('image/')?localUrl:null,
+      ...baseMsg
+    };
+    const wrap=document.getElementById('msgsWrap');
+    wrap.appendChild(buildBubble(fileMsg,true,true,false,true));
+    wrap.scrollTop=wrap.scrollHeight;
+  });
   msgInput.textContent='';checkSendable();
   sendTypingState(false);
   replyTo=null;document.getElementById('replyBar').classList.remove('show');
   attachFiles=[];renderAttachStrip();
-  const wrap=document.getElementById('msgsWrap');
-  const el=buildBubble(msg,true,true,false,true);
-  wrap.appendChild(el);wrap.scrollTop=wrap.scrollHeight;
   try{
-    await fetch(API+'/chats/'+currentConv.id+'/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
-      body:JSON.stringify({content:text,reply_to_id:replyTo?.id||null})
-    });
+    if(hasText){
+      await fetch(API+'/chats/'+currentConv.id+'/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+        body:JSON.stringify({content:text,reply_to_id:replyToId})
+      });
+    }
+    for(const file of pendingFiles){
+      const fd=new FormData();
+      fd.append('attachment',file);
+      await fetch(API+'/chats/'+currentConv.id+'/messages',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+tk()},
+        body:fd
+      });
+    }
   }catch{}
-  setTimeout(()=>{
-    const s=wrap.querySelector(`[data-id="${msg.id}"] .bubble-check`);
-    if(s)s.classList.remove('unread');
-  },1500);
+  setTimeout(()=>loadMessages(currentConv.id),700);
 }
 sendBtn.addEventListener('click',sendMessage);
 

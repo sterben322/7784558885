@@ -87,6 +87,10 @@ func main() {
 	routes.RegisterProtectedRoutes(r)
 
 	r.Static("/assets", "./web/assets")
+	r.Static("/uploads", "./web/uploads")
+	if err := os.MkdirAll(filepath.Join("web", "uploads", "chat"), 0o755); err != nil {
+		log.Fatalf("failed to create uploads directory: %v", err)
+	}
 
 	pageRoutes := map[string]string{
 		"/":                      "index.html",
