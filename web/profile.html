@@ -233,10 +233,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -422,8 +419,6 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function avc(n){return AVC[(n||'').charCodeAt(0)%AVC.length]||AVC[0];}
 function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':Math.floor(m/1440)+' д назад';}
 
-/* ── LOGO ── */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* ── AUTH + INIT ── */
 (async()=>{

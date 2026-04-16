@@ -213,10 +213,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -328,8 +325,6 @@ const SEC_ICONS=[
 const SEC_COLORS=['#E8F5EE','#E6F1FB','#FAEEDA','#F1EFE8','#FBEAF0','#EAF3DE'];
 const SEC_TEXT=['#1A6A3C','#185FA5','#633806','#444441','#72243E','#27500A'];
 
-/* ── LOGO ── */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* ── AUTH + INIT ── */
 (async()=>{

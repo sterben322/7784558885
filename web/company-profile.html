@@ -233,10 +233,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -433,8 +430,6 @@ const params=new URLSearchParams(location.search);
 const companyId=params.get('id');
 let companyData=null, isOwnCompany=false, isFollowed=false;
 
-/* ── LOGO ── */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* ── AUTH + LOAD ── */
 (async()=>{

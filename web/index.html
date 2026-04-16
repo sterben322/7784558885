@@ -198,10 +198,7 @@ textarea.mfield{min-height:100px;resize:vertical}
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img id="logo-img" alt="LASTOP GROUP">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<div class="logo-cell" aria-hidden="true"></div>
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -350,9 +347,6 @@ textarea.mfield{min-height:100px;resize:vertical}
 const API='/api',tk=()=>localStorage.getItem('token');
 const MAX_IMG=5,MAX_MB=10;
 let imgs=[],postType='user';
-
-/* logo */
-(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
 /* auth guard */
 (async()=>{
