@@ -85,12 +85,12 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .post-menu{width:24px;height:24px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s;flex-shrink:0}
 .post-menu:hover{background:var(--gp);color:var(--t)}
 .post-menu svg{width:16px;height:16px;fill:currentColor}
-.post-body-row{display:flex;align-items:flex-start;gap:16px}
-.post-text{flex:1;min-width:0}
-.post-title{font-size:15px;font-weight:700;color:var(--t);margin-bottom:5px;line-height:1.4}
-.post-body{font-size:13px;color:var(--tm);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-body-row{display:grid;grid-template-columns:1fr 120px;grid-template-rows:auto auto;column-gap:14px;row-gap:5px}
+.post-body-row.no-img{grid-template-columns:1fr}
+.post-title{grid-column:1;grid-row:1;font-size:15px;font-weight:700;color:var(--t);line-height:1.4}
+.post-body{grid-column:1;grid-row:2;font-size:13px;color:var(--tm);line-height:1.55}
 .post-body.expanded{display:block}
-.post-thumb{width:120px;height:80px;border-radius:var(--rm);object-fit:cover;flex-shrink:0;border:1px solid var(--bdr)}
+.post-thumb{grid-column:2;grid-row:1/3;width:120px;min-height:80px;height:100%;border-radius:var(--rm);object-fit:cover;border:1px solid var(--bdr);align-self:stretch}
 .post-footer{display:flex;align-items:center;gap:0;margin-top:10px;padding-top:8px;border-top:1px solid var(--bdr)}
 .post-tags{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
 .tag{padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s}
@@ -406,11 +406,9 @@ function buildPost(p,i){
     </div>
     <button class="post-menu" title="Действия"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
   </div>
-  <div class="post-body-row">
-    <div class="post-text">
-      ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
-      <div class="post-body">${esc(p.content||'')}</div>
-    </div>
+  <div class="post-body-row${imgUrl?'':' no-img'}">
+    ${p.title?`<div class="post-title">${esc(p.title)}</div>`:''}
+    <div class="post-body">${esc(p.content||'')}</div>
     ${imgUrl?`<img class="post-thumb" src="${esc(imgUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'' }
   </div>
   <div class="post-footer">
@@ -466,56 +464,26 @@ zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag
 zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
 zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
 
-function renderImgGrid(){
-  const grid=document.getElementById('imgGrid'),zone=document.getElementById('imgZone');
-  if(!imgs.length){grid.style.display='none';zone.style.display='';return;}
-  grid.style.display='flex';zone.style.display=imgs.length>=MAX_IMG?'none':'';
-  grid.innerHTML=imgs.map((img,i)=>`
-    <div class="img-thumb"><img src="${img.dataUrl}" alt=""><button class="img-thumb-rm" onclick="removeImg(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('')+
-    (imgs.length<MAX_IMG?`<label class="img-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onchange="addImgs(this.files)"></label>`:'');
-}
-function removeImg(i){imgs.splice(i,1);renderImgGrid();}
-function addImgs(files){
-  Array.from(files).slice(0,MAX_IMG-imgs.length).forEach(f=>{
-    if(f.size>MAX_MB*1024*1024)return;
-    const rd=new FileReader();rd.onload=e=>{imgs.push({file:f,dataUrl:e.target.result});renderImgGrid();};rd.readAsDataURL(f);
-  });
-}
-document.getElementById('imgInput').addEventListener('change',function(){addImgs(this.files);this.value='';});
-const iz=document.getElementById('imgZone');
-iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('drag-over');});
-iz.addEventListener('dragleave',()=>iz.classList.remove('drag-over'));
-iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
-
-const modalBg = document.getElementById('modalBg');
-function openModal(){modalBg.classList.add('open');}
+/* ── MODAL ── */
+const mbg=document.getElementById('modalBg');
+function openModal(photo=false){mbg.classList.add('open');if(photo)setTimeout(()=>document.getElementById('imgInput').click(),150);}
 function closeModal(){
-  modalBg.classList.remove('open');
-  imgs=[];renderImgGrid();
-  document.getElementById('mTitle').value='';
-  document.getElementById('mContent').value='';
-  document.getElementById('mTags').value='';
-  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));
-  postType='user';
+  mbg.classList.remove('open');imgs=[];renderImgGrid();
+  document.getElementById('mTitle').value='';document.getElementById('mContent').value='';document.getElementById('mTags').value='';
+  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));postType='user';
 }
-document.getElementById('composeBtn').addEventListener('click',openModal);
+document.getElementById('composeTrigger').addEventListener('click',()=>openModal());
+document.getElementById('composePhotoPill').addEventListener('click',()=>openModal(true));
 document.getElementById('modalX').addEventListener('click',closeModal);
 document.getElementById('modalCancel').addEventListener('click',closeModal);
-modalBg.addEventListener('click',e=>{if(e.target===modalBg)closeModal();});
-document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  postType=b.dataset.type;
-}));
+mbg.addEventListener('click',e=>{if(e.target===mbg)closeModal();});
+document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));b.classList.add('active');postType=b.dataset.type;}));
 
-document.getElementById('modalSubmit').addEventListener('click', async ()=>{
-  const content = document.getElementById('mContent').value.trim();
-  if(!content) return;
-  const title = document.getElementById('mTitle').value.trim();
-  const tags = document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const sub=document.getElementById('modalSubmit');
-  sub.disabled=true;
-  sub.textContent='Публикация…';
+document.getElementById('modalSubmit').addEventListener('click',async()=>{
+  const content=document.getElementById('mContent').value.trim();if(!content)return;
+  const title=document.getElementById('mTitle').value.trim();
+  const tags=document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const sub=document.getElementById('modalSubmit');sub.disabled=true;sub.textContent='Публикация…';
   try{
     let imgUrls=[];
     for(const img of imgs){try{const fd=new FormData();fd.append('file',img.file);const ur=await fetch(API+'/upload',{method:'POST',headers:{Authorization:'Bearer '+tk()},body:fd});if(ur.ok){const d=await ur.json();imgUrls.push(d.url||d.path||'');}}catch{}}
@@ -524,8 +492,7 @@ document.getElementById('modalSubmit').addEventListener('click', async ()=>{
     const r=await fetch(API+'/posts?author_type='+postType,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
     if(r.ok){closeModal();loadPosts();}
   }catch{}
-  sub.disabled=false;
-  sub.textContent='Опубликовать';
+  sub.disabled=false;sub.textContent='Опубликовать';
 });
 
 loadPosts();
