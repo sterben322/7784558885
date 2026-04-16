@@ -30,8 +30,8 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 /* ═══ TOPBAR ═══ */
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
 .search-wrap{flex:1;position:relative;display:flex;align-items:center}
-.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
-.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap svg{display:none}
+.search-wrap input{width:100%;height:34px;padding:0 12px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
 .search-wrap input:focus{border-color:var(--gm)}
 .search-wrap input::placeholder{color:var(--gmt)}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
@@ -162,7 +162,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="search-wrap">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <svg viewBox="0 0 24 24"><circle cx="1" cy="1" r="6"></circle><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
     <input type="search" id="searchInput" placeholder="Поиск компаний, отраслей, тегов…" autocomplete="off">
   </div>
   <button class="icon-btn" title="Уведомления">
