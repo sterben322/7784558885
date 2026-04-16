@@ -218,13 +218,18 @@ type Chat struct {
 }
 
 type Message struct {
-	ID         uuid.UUID `json:"id"`
-	ChatID     uuid.UUID `json:"chat_id"`
-	SenderID   uuid.UUID `json:"sender_id"`
-	SenderName string    `json:"sender_name"`
-	Content    string    `json:"content"`
-	Read       bool      `json:"read"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID             uuid.UUID `json:"id"`
+	ChatID         uuid.UUID `json:"chat_id"`
+	SenderID       uuid.UUID `json:"sender_id"`
+	SenderName     string    `json:"sender_name"`
+	Content        string    `json:"content"`
+	Read           bool      `json:"read"`
+	CreatedAt      time.Time `json:"created_at"`
+	AttachmentURL  *string   `json:"attachment_url,omitempty"`
+	AttachmentName *string   `json:"attachment_name,omitempty"`
+	AttachmentSize *int64    `json:"attachment_size,omitempty"`
+	AttachmentType *string   `json:"attachment_type,omitempty"`
+	ImageURL       *string   `json:"image_url,omitempty"`
 }
 
 type DashboardStats struct {

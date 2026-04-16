@@ -3,7 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +21,8 @@ import (
 )
 
 var errForbidden = errors.New("forbidden")
+
+const maxChatAttachmentSize int64 = 50 << 20
 
 var typingState = struct {
 	mu    sync.Mutex
@@ -299,7 +306,8 @@ func GetConversationMessages(c *gin.Context) {
 	}
 
 	rows, err := database.DB.Query(`
-		SELECT m.id, m.chat_id, m.content, m.sender_id, u.full_name, m.read, m.created_at
+		SELECT m.id, m.chat_id, m.content, m.sender_id, u.full_name, m.read, m.created_at,
+			m.attachment_url, m.attachment_name, m.attachment_size, m.attachment_type, m.image_url
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE m.chat_id = $1
@@ -314,7 +322,20 @@ func GetConversationMessages(c *gin.Context) {
 	messages := make([]models.Message, 0)
 	for rows.Next() {
 		var msg models.Message
-		if err := rows.Scan(&msg.ID, &msg.ChatID, &msg.Content, &msg.SenderID, &msg.SenderName, &msg.Read, &msg.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&msg.ID,
+			&msg.ChatID,
+			&msg.Content,
+			&msg.SenderID,
+			&msg.SenderName,
+			&msg.Read,
+			&msg.CreatedAt,
+			&msg.AttachmentURL,
+			&msg.AttachmentName,
+			&msg.AttachmentSize,
+			&msg.AttachmentType,
+			&msg.ImageURL,
+		); err != nil {
 			jsonError(c, http.StatusInternalServerError, "Failed to parse messages")
 			return
 		}
@@ -346,28 +367,74 @@ func SendConversationMessage(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Content string `json:"content"`
-		Text    string `json:"text"`
+	content := ""
+	var attachmentURL *string
+	var attachmentName *string
+	var attachmentSize *int64
+	var attachmentType *string
+	var imageURL *string
+	hasMultipart := strings.HasPrefix(strings.ToLower(c.GetHeader("Content-Type")), "multipart/form-data")
+
+	if hasMultipart {
+		if err := c.Request.ParseMultipartForm(maxChatAttachmentSize + (1 << 20)); err != nil {
+			jsonError(c, http.StatusBadRequest, "Invalid form data")
+			return
+		}
+		content = strings.TrimSpace(c.PostForm("content"))
+		if content == "" {
+			content = strings.TrimSpace(c.PostForm("text"))
+		}
+		fileHeader, err := c.FormFile("attachment")
+		if err != nil && !errors.Is(err, http.ErrMissingFile) {
+			jsonError(c, http.StatusBadRequest, "Invalid attachment")
+			return
+		}
+		if fileHeader != nil {
+			url, name, size, fileType, isImage, saveErr := saveChatAttachment(fileHeader)
+			if saveErr != nil {
+				switch {
+				case errors.Is(saveErr, errAttachmentTooLarge):
+					jsonError(c, http.StatusBadRequest, "File size exceeds 50MB limit")
+				default:
+					jsonError(c, http.StatusInternalServerError, "Failed to save attachment")
+				}
+				return
+			}
+			attachmentURL = &url
+			attachmentName = &name
+			attachmentSize = &size
+			attachmentType = &fileType
+			if isImage {
+				imageURL = &url
+			}
+		}
+	} else {
+		var req struct {
+			Content string `json:"content"`
+			Text    string `json:"text"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			jsonError(c, http.StatusBadRequest, "Content is required")
+			return
+		}
+		content = strings.TrimSpace(req.Content)
+		if content == "" {
+			content = strings.TrimSpace(req.Text)
+		}
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		jsonError(c, http.StatusBadRequest, "Content is required")
-		return
-	}
-	req.Content = strings.TrimSpace(req.Content)
-	if req.Content == "" {
-		req.Content = strings.TrimSpace(req.Text)
-	}
-	if req.Content == "" {
-		jsonError(c, http.StatusBadRequest, "Content is required")
+
+	if content == "" && attachmentURL == nil {
+		jsonError(c, http.StatusBadRequest, "Content or attachment is required")
 		return
 	}
 
 	messageID := uuid.New()
 	if _, err := database.DB.Exec(`
-		INSERT INTO messages (id, chat_id, sender_id, content)
-		VALUES ($1, $2, $3, $4)
-	`, messageID, conversationID, senderID, req.Content); err != nil {
+		INSERT INTO messages (
+			id, chat_id, sender_id, content, attachment_url, attachment_name, attachment_size, attachment_type, image_url
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, messageID, conversationID, senderID, content, attachmentURL, attachmentName, attachmentSize, attachmentType, imageURL); err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to send message")
 		return
 	}
@@ -375,7 +442,71 @@ func SendConversationMessage(c *gin.Context) {
 	_, _ = database.DB.Exec(`UPDATE chat_participants SET unread_count = unread_count + 1 WHERE chat_id = $1 AND user_id != $2`, conversationID, senderID)
 	_, _ = database.DB.Exec(`UPDATE chat_participants SET last_read_at = NOW() WHERE chat_id = $1 AND user_id = $2`, conversationID, senderID)
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Message sent", "message_id": messageID})
+	c.JSON(http.StatusCreated, gin.H{
+		"message":         "Message sent",
+		"message_id":      messageID,
+		"attachment_url":  attachmentURL,
+		"attachment_name": attachmentName,
+		"attachment_size": attachmentSize,
+		"attachment_type": attachmentType,
+		"image_url":       imageURL,
+	})
+}
+
+var errAttachmentTooLarge = errors.New("attachment too large")
+
+func saveChatAttachment(fileHeader *multipart.FileHeader) (url, fileName string, fileSize int64, contentType string, isImage bool, err error) {
+	if fileHeader == nil {
+		return "", "", 0, "", false, errors.New("missing file")
+	}
+	if fileHeader.Size > maxChatAttachmentSize {
+		return "", "", 0, "", false, errAttachmentTooLarge
+	}
+	src, err := fileHeader.Open()
+	if err != nil {
+		return "", "", 0, "", false, err
+	}
+	defer src.Close()
+
+	head := make([]byte, 512)
+	n, _ := io.ReadFull(src, head)
+	contentType = http.DetectContentType(head[:n])
+	isImage = strings.HasPrefix(contentType, "image/")
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", "", 0, "", false, err
+	}
+
+	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+	storedName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+	relPath := filepath.Join("uploads", "chat", storedName)
+	fullPath := filepath.Join("web", relPath)
+	if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+		return "", "", 0, "", false, err
+	}
+
+	dst, err := os.Create(fullPath)
+	if err != nil {
+		return "", "", 0, "", false, err
+	}
+	defer dst.Close()
+
+	written, err := io.Copy(dst, src)
+	if err != nil {
+		_ = os.Remove(fullPath)
+		return "", "", 0, "", false, err
+	}
+	if written > maxChatAttachmentSize {
+		_ = os.Remove(fullPath)
+		return "", "", 0, "", false, errAttachmentTooLarge
+	}
+	fileSize = written
+	fileName = strings.TrimSpace(fileHeader.Filename)
+	if fileName == "" {
+		fileName = "attachment"
+	}
+
+	url = "/" + filepath.ToSlash(relPath)
+	return url, fileName, fileSize, contentType, isImage, nil
 }
 
 func SetConversationTyping(c *gin.Context) {
