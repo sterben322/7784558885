@@ -466,26 +466,56 @@ zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag
 zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
 zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
 
-/* ── MODAL ── */
-const mbg=document.getElementById('modalBg');
-function openModal(photo=false){mbg.classList.add('open');if(photo)setTimeout(()=>document.getElementById('imgInput').click(),150);}
-function closeModal(){
-  mbg.classList.remove('open');imgs=[];renderImgGrid();
-  document.getElementById('mTitle').value='';document.getElementById('mContent').value='';document.getElementById('mTags').value='';
-  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));postType='user';
+function renderImgGrid(){
+  const grid=document.getElementById('imgGrid'),zone=document.getElementById('imgZone');
+  if(!imgs.length){grid.style.display='none';zone.style.display='';return;}
+  grid.style.display='flex';zone.style.display=imgs.length>=MAX_IMG?'none':'';
+  grid.innerHTML=imgs.map((img,i)=>`
+    <div class="img-thumb"><img src="${img.dataUrl}" alt=""><button class="img-thumb-rm" onclick="removeImg(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('')+
+    (imgs.length<MAX_IMG?`<label class="img-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onchange="addImgs(this.files)"></label>`:'');
 }
-document.getElementById('composeTrigger').addEventListener('click',()=>openModal());
-document.getElementById('composePhotoPill').addEventListener('click',()=>openModal(true));
+function removeImg(i){imgs.splice(i,1);renderImgGrid();}
+function addImgs(files){
+  Array.from(files).slice(0,MAX_IMG-imgs.length).forEach(f=>{
+    if(f.size>MAX_MB*1024*1024)return;
+    const rd=new FileReader();rd.onload=e=>{imgs.push({file:f,dataUrl:e.target.result});renderImgGrid();};rd.readAsDataURL(f);
+  });
+}
+document.getElementById('imgInput').addEventListener('change',function(){addImgs(this.files);this.value='';});
+const iz=document.getElementById('imgZone');
+iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('drag-over');});
+iz.addEventListener('dragleave',()=>iz.classList.remove('drag-over'));
+iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('drag-over');addImgs(e.dataTransfer.files);});
+
+const modalBg = document.getElementById('modalBg');
+function openModal(){modalBg.classList.add('open');}
+function closeModal(){
+  modalBg.classList.remove('open');
+  imgs=[];renderImgGrid();
+  document.getElementById('mTitle').value='';
+  document.getElementById('mContent').value='';
+  document.getElementById('mTags').value='';
+  document.querySelectorAll('.pttab').forEach(b=>b.classList.toggle('active',b.dataset.type==='user'));
+  postType='user';
+}
+document.getElementById('composeBtn').addEventListener('click',openModal);
 document.getElementById('modalX').addEventListener('click',closeModal);
 document.getElementById('modalCancel').addEventListener('click',closeModal);
-mbg.addEventListener('click',e=>{if(e.target===mbg)closeModal();});
-document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));b.classList.add('active');postType=b.dataset.type;}));
+modalBg.addEventListener('click',e=>{if(e.target===modalBg)closeModal();});
+document.querySelectorAll('.pttab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.pttab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  postType=b.dataset.type;
+}));
 
-document.getElementById('modalSubmit').addEventListener('click',async()=>{
-  const content=document.getElementById('mContent').value.trim();if(!content)return;
-  const title=document.getElementById('mTitle').value.trim();
-  const tags=document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const sub=document.getElementById('modalSubmit');sub.disabled=true;sub.textContent='Публикация…';
+document.getElementById('modalSubmit').addEventListener('click', async ()=>{
+  const content = document.getElementById('mContent').value.trim();
+  if(!content) return;
+  const title = document.getElementById('mTitle').value.trim();
+  const tags = document.getElementById('mTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const sub=document.getElementById('modalSubmit');
+  sub.disabled=true;
+  sub.textContent='Публикация…';
   try{
     let imgUrls=[];
     for(const img of imgs){try{const fd=new FormData();fd.append('file',img.file);const ur=await fetch(API+'/upload',{method:'POST',headers:{Authorization:'Bearer '+tk()},body:fd});if(ur.ok){const d=await ur.json();imgUrls.push(d.url||d.path||'');}}catch{}}
@@ -494,7 +524,8 @@ document.getElementById('modalSubmit').addEventListener('click',async()=>{
     const r=await fetch(API+'/posts?author_type='+postType,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
     if(r.ok){closeModal();loadPosts();}
   }catch{}
-  sub.disabled=false;sub.textContent='Опубликовать';
+  sub.disabled=false;
+  sub.textContent='Опубликовать';
 });
 
 loadPosts();
