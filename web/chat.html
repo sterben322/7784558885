@@ -1,274 +1,986 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Чаты</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Чат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13);
+  --msg-out:#DCF5E7;--msg-out-border:#C0DECA;
+  --msg-in:#FFFFFF;--msg-in-border:#DDE8E2
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+
+/* ═══ SHELL ═══ */
+.shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar""nav chat";height:100vh;gap:10px;padding:10px}
+
+/* ═══ LOGO ═══ */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+
+/* ═══ TOPBAR ═══ */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+
+/* ═══ LEFT NAV ═══ */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ CHAT AREA ═══ */
+.chat-area{grid-area:chat;display:grid;grid-template-columns:300px 1fr;border-radius:var(--rxl);overflow:hidden;border:1px solid var(--bdr);box-shadow:var(--sh)}
+
+/* ─── CONVERSATIONS LIST ─── */
+.conv-panel{background:var(--w);display:flex;flex-direction:column;border-right:1px solid var(--bdr)}
+.conv-header{padding:12px 14px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.conv-header h2{font-size:15px;font-weight:800;color:var(--t);margin-bottom:10px}
+.conv-search{position:relative;display:flex;align-items:center}
+.conv-search svg{position:absolute;left:10px;color:var(--gmt);pointer-events:none;width:13px;height:13px}
+.conv-search input{width:100%;height:30px;padding:0 10px 0 30px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:12px;color:var(--t);outline:none;transition:border-color .2s}
+.conv-search input:focus{border-color:var(--gm)}
+.conv-search input::placeholder{color:var(--gmt)}
+.conv-list{flex:1;overflow-y:auto;padding:6px}
+.conv-list::-webkit-scrollbar{width:3px}
+.conv-list::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* conversation item */
+.conv-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--rm);cursor:pointer;transition:background .15s;position:relative}
+.conv-item:hover{background:var(--gp)}
+.conv-item.active{background:var(--gl)}
+.conv-item.active .conv-name{color:var(--g)}
+.cav{width:40px;height:40px;border-radius:var(--rm);font-size:14px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0;position:relative}
+.cav-online{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:#22CC66;border:2px solid var(--w)}
+.conv-body{flex:1;min-width:0}
+.conv-row{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:2px}
+.conv-name{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.conv-time{font-size:10px;color:var(--gmt);flex-shrink:0}
+.conv-preview{font-size:12px;color:var(--gmt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.conv-preview .you{color:var(--g);font-weight:600}
+.conv-unread{min-width:18px;height:18px;border-radius:99px;background:var(--g);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0}
+.conv-unread.muted{background:var(--gmt)}
+.conv-section{padding:6px 10px 4px;font-size:10px;font-weight:700;color:var(--gmt);letter-spacing:.07em;text-transform:uppercase}
+
+/* ─── MESSAGE PANEL ─── */
+.msg-panel{display:flex;flex-direction:column;background:var(--bg);position:relative}
+
+/* chat header */
+.chat-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--w);border-bottom:1px solid var(--bdr);flex-shrink:0;min-height:56px}
+.chat-hav{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0;position:relative}
+.chat-hav-online{position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:#22CC66;border:2px solid var(--w)}
+.chat-hinfo{flex:1;min-width:0}
+.chat-hname{font-size:14px;font-weight:700;color:var(--t)}
+.chat-hstatus{font-size:11px;color:var(--gmt);margin-top:1px}
+.chat-hactions{display:flex;gap:4px}
+.h-btn{width:32px;height:32px;border-radius:var(--r);border:none;background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s,color .15s}
+.h-btn:hover{background:var(--gp);color:var(--g)}
+.h-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* messages scroll */
+.msgs-wrap{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px}
+.msgs-wrap::-webkit-scrollbar{width:4px}
+.msgs-wrap::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* date divider */
+.date-div{text-align:center;margin:12px 0 8px;position:relative}
+.date-div span{background:rgba(30,138,76,.10);color:var(--gm);font-size:11px;font-weight:600;padding:3px 12px;border-radius:99px}
+
+/* message bubble */
+.msg-group{display:flex;flex-direction:column;gap:1px;margin-bottom:6px}
+.msg-row{display:flex;align-items:flex-end;gap:8px}
+.msg-row.out{flex-direction:row-reverse}
+.msg-avatar{width:26px;height:26px;border-radius:8px;font-size:10px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0;align-self:flex-end;margin-bottom:0}
+.msg-avatar.hidden{visibility:hidden}
+.bubble{max-width:68%;padding:8px 12px;border-radius:var(--rxl);font-size:13px;line-height:1.55;position:relative;word-break:break-word}
+.bubble.in{background:var(--msg-in);border:1px solid var(--msg-in-border);border-radius:var(--rxl) var(--rxl) var(--rxl) 4px}
+.bubble.out{background:var(--msg-out);border:1px solid var(--msg-out-border);border-radius:var(--rxl) var(--rxl) 4px var(--rxl)}
+.bubble.in.tail{border-radius:4px var(--rxl) var(--rxl) var(--rxl)}
+.bubble.out.tail{border-radius:var(--rxl) 4px var(--rxl) var(--rxl)}
+.bubble-name{font-size:11px;font-weight:700;color:var(--g);margin-bottom:3px}
+.bubble-text{color:var(--t)}
+.bubble-img{width:100%;max-width:280px;border-radius:var(--rm);display:block;margin-bottom:4px;border:1px solid var(--bdr)}
+.bubble-file{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer}
+.bubble-file-icon{width:32px;height:32px;border-radius:var(--r);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
+.bubble-file-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bubble-file-info{flex:1;min-width:0}
+.bubble-file-name{font-size:12px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubble-file-size{font-size:10px;color:var(--gmt)}
+.bubble-meta{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:4px}
+.bubble-time{font-size:10px;color:var(--gmt)}
+.bubble-check{display:flex;align-items:center;color:var(--g)}
+.bubble-check svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bubble-check.unread{color:var(--gmt)}
+
+/* reply preview inside bubble */
+.reply-preview{background:rgba(30,138,76,.08);border-left:3px solid var(--g);border-radius:4px var(--r) var(--r) 4px;padding:4px 8px;margin-bottom:6px;cursor:pointer}
+.reply-preview-name{font-size:11px;font-weight:700;color:var(--g);margin-bottom:1px}
+.reply-preview-text{font-size:11px;color:var(--gmt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* typing indicator */
+.typing-row{display:flex;align-items:flex-end;gap:8px;margin-bottom:6px}
+.typing-bubble{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl) var(--rxl) var(--rxl) 4px;padding:10px 14px;display:flex;gap:4px;align-items:center}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--gmt);animation:tdot 1.2s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+/* ─── INPUT AREA ─── */
+.input-area{padding:10px 14px 12px;background:var(--w);border-top:1px solid var(--bdr);flex-shrink:0}
+
+/* reply bar above input */
+.reply-bar{display:flex;align-items:center;gap:8px;padding:6px 10px 8px;margin-bottom:4px;display:none}
+.reply-bar.show{display:flex}
+.reply-bar-line{width:3px;border-radius:99px;background:var(--g);flex-shrink:0;align-self:stretch}
+.reply-bar-body{flex:1;min-width:0}
+.reply-bar-name{font-size:11px;font-weight:700;color:var(--g)}
+.reply-bar-text{font-size:12px;color:var(--gmt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reply-bar-close{width:22px;height:22px;border-radius:50%;border:none;background:var(--gp);cursor:pointer;display:grid;place-items:center;color:var(--gmt);flex-shrink:0;transition:background .15s}
+.reply-bar-close:hover{background:var(--gl);color:var(--g)}
+.reply-bar-close svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+
+/* image preview strip */
+.attach-strip{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:8px;display:none}
+.attach-strip.show{display:flex}
+.attach-prev{position:relative;width:60px;height:48px;border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr);flex-shrink:0}
+.attach-prev img{width:100%;height:100%;object-fit:cover}
+.attach-prev-rm{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.55);border:none;cursor:pointer;display:grid;place-items:center}
+.attach-prev-rm svg{width:7px;height:7px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+
+.input-row{display:flex;align-items:flex-end;gap:8px}
+.input-attach-btn{width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--gmt);transition:background .15s,color .15s,border-color .15s;flex-shrink:0;position:relative}
+.input-attach-btn:hover{background:var(--gl);color:var(--g);border-color:var(--gb)}
+.input-attach-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.input-attach-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.input-wrap{flex:1;min-height:36px;max-height:120px;background:var(--gp);border:1.5px solid var(--bdr);border-radius:var(--rm);padding:8px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;resize:none;overflow-y:auto;transition:border-color .2s,min-height .15s;line-height:1.5}
+.input-wrap:focus{border-color:var(--gm)}
+.input-wrap:empty::before{content:attr(data-placeholder);color:var(--gmt);pointer-events:none}
+.input-wrap::-webkit-scrollbar{width:3px}
+.input-wrap::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.send-btn{width:36px;height:36px;border-radius:var(--rm);border:none;background:var(--g);display:grid;place-items:center;cursor:pointer;color:#fff;transition:background .15s,transform .1s;flex-shrink:0}
+.send-btn:hover{background:var(--gm)}
+.send-btn:active{transform:scale(.93)}
+.send-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.send-btn:disabled{background:var(--gb);cursor:not-allowed}
+
+/* empty state — no chat selected */
+.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;padding:40px}
+.chat-empty-icon{width:64px;height:64px;border-radius:20px;background:var(--gl);display:grid;place-items:center;color:var(--g)}
+.chat-empty-icon svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.chat-empty h3{font-size:16px;font-weight:700;color:var(--t);text-align:center}
+.chat-empty p{font-size:13px;color:var(--gmt);text-align:center;max-width:260px;line-height:1.55}
+
+/* profile block for nav */
+.profile-block{background:var(--gp);border-radius:var(--rm);position:relative;margin-bottom:2px}
+.profile-trigger{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;user-select:none;border-radius:var(--rm);transition:background .15s}
+.profile-trigger:hover{background:var(--gl)}
+.pav{width:30px;height:30px;border-radius:var(--r);background:var(--g);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:12px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pco{font-size:10px;color:var(--gmt);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{flex-shrink:0;color:var(--gmt);transition:transform .22s;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chev.open{transform:rotate(180deg)}
+.dropdown{overflow:hidden;max-height:0;transition:max-height .25s ease;border-top:1px solid transparent}
+.dropdown.open{max-height:260px;border-top-color:var(--bdr)}
+.dd-inner{padding:4px 6px 6px;display:flex;flex-direction:column;gap:2px}
+.dd-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;color:var(--tm);transition:background .15s,color .15s;text-decoration:none}
+.dd-item:hover{background:var(--gl);color:var(--g)}
+.dd-item.danger{color:#C04040}
+.dd-item.danger:hover{background:#FFF0F0;color:#B03030}
+.dd-div{height:1px;background:var(--bdr);margin:3px 2px}
+.dd-item svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ─── CONTEXT MENU ─── */
+.ctx-menu{position:absolute;background:var(--w);border:1px solid var(--bdr);border-radius:var(--rm);box-shadow:var(--shm);z-index:100;min-width:160px;padding:4px;display:none}
+.ctx-menu.show{display:block}
+.ctx-mi{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;color:var(--tm);transition:background .15s}
+.ctx-mi:hover{background:var(--gp);color:var(--g)}
+.ctx-mi.red{color:var(--red)}
+.ctx-mi.red:hover{background:#FFF0F0}
+.ctx-mi svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.bubble{animation:fadeIn .2s ease both}
+
+/* ─── USER INFO PANEL (Telegram-style slide-in) ─── */
+.uinfo-overlay{position:absolute;inset:0;z-index:50;pointer-events:none;border-radius:var(--rxl);overflow:hidden}
+.uinfo-overlay.open{pointer-events:all}
+.uinfo-backdrop{position:absolute;inset:0;background:rgba(15,25,18,.3);opacity:0;transition:opacity .28s ease}
+.uinfo-overlay.open .uinfo-backdrop{opacity:1}
+.uinfo-panel{position:absolute;top:0;right:0;width:280px;height:100%;background:var(--w);border-left:1px solid var(--bdr);box-shadow:-6px 0 32px rgba(30,138,76,.10);transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.uinfo-overlay.open .uinfo-panel{transform:translateX(0)}
+
+/* panel header strip */
+.uinfo-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.uinfo-top-title{font-size:14px;font-weight:700;color:var(--t)}
+.uinfo-close{width:28px;height:28px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
+.uinfo-close:hover{background:var(--gl);color:var(--g)}
+.uinfo-close svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+/* avatar + name block */
+.uinfo-hero{display:flex;flex-direction:column;align-items:center;padding:20px 16px 16px;gap:10px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.uinfo-av{width:72px;height:72px;border-radius:var(--rl);font-size:26px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.uinfo-name{font-size:16px;font-weight:800;color:var(--t);text-align:center}
+.uinfo-status{font-size:12px;color:var(--gmt);text-align:center;margin-top:2px}
+.uinfo-online{color:var(--g);font-weight:600}
+
+/* quick actions row */
+.uinfo-actions{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.uinfo-act{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:var(--rm);background:var(--gp);border:none;cursor:pointer;transition:background .15s}
+.uinfo-act:hover{background:var(--gl)}
+.uinfo-act svg{width:18px;height:18px;fill:none;stroke:var(--g);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.uinfo-act span{font-size:10px;font-weight:600;color:var(--gm)}
+
+/* scrollable body */
+.uinfo-body{flex:1;overflow-y:auto;padding:0}
+.uinfo-body::-webkit-scrollbar{width:3px}
+.uinfo-body::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* info fields */
+.uinfo-section{padding:10px 0;border-bottom:1px solid var(--bdr)}
+.uinfo-section:last-child{border-bottom:none}
+.uinfo-field{display:flex;align-items:center;gap:12px;padding:8px 16px;cursor:pointer;transition:background .12s}
+.uinfo-field:hover{background:var(--gp)}
+.uinfo-field-icon{width:18px;height:18px;display:grid;place-items:center;flex-shrink:0;color:var(--gmt)}
+.uinfo-field-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.uinfo-field-body{flex:1;min-width:0}
+.uinfo-field-val{font-size:13px;font-weight:500;color:var(--t)}
+.uinfo-field-val.link{color:var(--g)}
+.uinfo-field-label{font-size:11px;color:var(--gmt);margin-top:1px}
+.uinfo-field-extra{margin-left:auto;color:var(--gmt)}
+.uinfo-field-extra svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+
+/* stat rows */
+.uinfo-stat{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;transition:background .12s}
+.uinfo-stat:hover{background:var(--gp)}
+.uinfo-stat-icon{width:32px;height:32px;border-radius:var(--r);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
+.uinfo-stat-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.uinfo-stat-label{font-size:13px;font-weight:500;color:var(--t)}
+.uinfo-stat-count{margin-left:auto;font-size:12px;font-weight:600;color:var(--gmt)}
+
+/* action rows */
+.uinfo-action-row{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;transition:background .12s}
+.uinfo-action-row:hover{background:var(--gp)}
+.uinfo-action-row svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:var(--gmt);flex-shrink:0}
+.uinfo-action-row span{font-size:13px;font-weight:500;color:var(--t)}
+.uinfo-action-row.danger svg{color:var(--red)}
+.uinfo-action-row.danger span{color:var(--red)}
+
+/* make chat-hname clickable */
+.chat-hname{cursor:pointer;transition:color .15s}
+.chat-hname:hover{color:var(--g)}
+
+/* responsive */
+@media(max-width:1100px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}}
+@media(max-width:860px){.conv-panel{display:none}}
+@media(max-width:1200px){.uinfo-panel{width:260px}}
+</style>
 </head>
-<body class="bg-[#f6f8fa] text-[#273244]">
-<header class="bg-white border-b">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/dashboard.html" class="font-bold text-lg">LASTOP</a>
-        <nav class="flex items-center gap-4 text-sm flex-wrap justify-end">
-            <a href="/dashboard.html" class="text-gray-600 hover:text-black">Главная</a>
-            <a href="/profile.html" class="text-gray-600 hover:text-black">Профиль</a>
-            <a href="/chat.html" class="font-semibold text-[#2b8662]">Чаты</a>
-        </nav>
-    </div>
+<body>
+<div class="shell">
+
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img id="logo-img" alt="LASTOP GROUP">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
 </header>
 
-<div class="max-w-6xl mx-auto p-4 md:p-6">
-    <div id="chatMessage" class="hidden mb-4 rounded-xl px-3 py-2 text-sm"></div>
-    <div class="grid gap-4 md:grid-cols-[340px_minmax(0,1fr)]">
-        <aside class="rounded-2xl border border-[#e4eaee] bg-white p-4 space-y-4">
-            <h2 class="text-lg font-semibold">Чаты</h2>
-
-            <div class="rounded-xl border border-[#edf2f4] p-3 space-y-2">
-                <div class="text-sm font-semibold">Новый чат с пользователем</div>
-                <input id="usersSearch" type="text" class="w-full rounded-lg border border-[#dbe4e8] px-2 py-2 text-sm" placeholder="Имя или email">
-                <select id="usersSelect" class="w-full rounded-lg border border-[#dbe4e8] px-2 py-2 text-sm">
-                    <option value="">Выберите пользователя</option>
-                </select>
-                <button id="startChatBtn" class="w-full rounded-lg bg-[#2b8662] px-3 py-2 text-sm font-semibold text-white hover:bg-[#246f52] disabled:opacity-60 disabled:cursor-not-allowed">
-                    Написать
-                </button>
-            </div>
-
-            <div id="chatsList" class="space-y-2"></div>
-            <p id="chatsEmpty" class="hidden text-sm text-[#8a97a5]">Диалогов пока нет.</p>
-        </aside>
-
-        <section class="rounded-2xl border border-[#e4eaee] bg-white p-4 flex flex-col min-h-[560px]">
-            <div id="chatHeader" class="border-b border-[#edf2f4] pb-3 mb-3 text-lg font-semibold">Выберите диалог</div>
-            <div id="messagesList" class="flex-1 overflow-auto space-y-2 pr-1">
-                <div class="text-sm text-[#8a97a5]">Сообщения появятся здесь после выбора чата.</div>
-            </div>
-            <form id="messageForm" class="mt-3 border-t border-[#edf2f4] pt-3 flex gap-2">
-                <input id="messageInput" type="text" placeholder="Введите сообщение" class="flex-1 rounded-lg border border-[#dbe4e8] px-3 py-2 text-sm" disabled>
-                <button id="sendBtn" type="submit" class="rounded-lg bg-[#2b8662] px-4 py-2 text-sm font-semibold text-white hover:bg-[#246f52] disabled:opacity-60" disabled>
-                    Отправить
-                </button>
-            </form>
-        </section>
+<!-- NAV -->
+<nav class="nav">
+  <div class="profile-block">
+    <div class="profile-trigger" id="profileTrigger">
+      <div class="pav" id="profileAv">АВ</div>
+      <div class="pinfo"><div class="pname" id="profileName">Загрузка…</div><div class="pco" id="profileCo">—</div></div>
+      <svg class="chev" id="profileChev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
+    <div class="dropdown" id="profileDrop">
+      <div class="dd-inner">
+        <a class="dd-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</a>
+        <a class="dd-item" href="/settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
+        <div class="dd-div"></div>
+        <a class="dd-item danger" href="#" id="logoutBtn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Выход</a>
+      </div>
+    </div>
+  </div>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item active" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
+
+<!-- CHAT AREA -->
+<div class="chat-area">
+
+  <!-- LEFT: conversations list -->
+  <div class="conv-panel">
+    <div class="conv-header">
+      <h2>Сообщения</h2>
+      <div class="conv-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="convSearch" placeholder="Поиск по чатам…">
+      </div>
+    </div>
+    <div class="conv-list" id="convList"></div>
+  </div>
+
+  <!-- RIGHT: message panel -->
+  <div class="msg-panel" id="msgPanel">
+    <!-- Empty state — shown by default -->
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3>Выберите чат</h3>
+      <p>Откройте переписку слева или начните новый диалог с участником платформы</p>
+    </div>
+
+    <!-- Active chat (hidden until conv selected) -->
+    <div id="activeChat" style="display:none;flex-direction:column;height:100%;position:relative">
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="chat-hav" id="chatHav" style="background:#5AB080">
+          <span id="chatHavLetter">А</span>
+          <div class="chat-hav-online" id="chatOnlineDot"></div>
+        </div>
+        <div class="chat-hinfo" style="cursor:pointer" onclick="openUinfo()">
+          <div class="chat-hname" id="chatHname">Имя</div>
+          <div class="chat-hstatus" id="chatHstatus">онлайн</div>
+        </div>
+        <div class="chat-hactions">
+          <button class="h-btn" title="Аудиозвонок">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </button>
+          <button class="h-btn" title="Видеозвонок">
+            <svg viewBox="0 0 24 24"><polygon points="23,7 16,12 23,17 23,7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          </button>
+          <button class="h-btn" title="Поиск в чате">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button class="h-btn" title="Профиль" onclick="openUinfo()">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages scroll -->
+      <div class="msgs-wrap" id="msgsWrap"></div>
+
+      <!-- Typing indicator (hidden) -->
+      <div class="typing-row" id="typingRow" style="display:none;padding:0 20px 6px">
+        <div class="chat-hav" id="typingAv" style="width:26px;height:26px;border-radius:8px;font-size:10px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0;background:#5AB080"></div>
+        <div class="typing-bubble">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area">
+        <div class="reply-bar" id="replyBar">
+          <div class="reply-bar-line"></div>
+          <div class="reply-bar-body">
+            <div class="reply-bar-name" id="replyName">Имя</div>
+            <div class="reply-bar-text" id="replyText">текст</div>
+          </div>
+          <button class="reply-bar-close" id="replyClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="attach-strip" id="attachStrip"></div>
+        <div class="input-row">
+          <label class="input-attach-btn" title="Прикрепить файл">
+            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <input type="file" id="attachInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
+          </label>
+          <div class="input-wrap" id="msgInput" contenteditable="true" data-placeholder="Написать сообщение…"></div>
+          <button class="send-btn" id="sendBtn" disabled>
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9 22,2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- User info panel overlay -->
+      <div class="uinfo-overlay" id="uinfoOverlay">
+        <div class="uinfo-backdrop" id="uinfoBackdrop" onclick="closeUinfo()"></div>
+        <div class="uinfo-panel" id="uinfoPanel">
+          <div class="uinfo-top">
+            <span class="uinfo-top-title">Информация</span>
+            <button class="uinfo-close" onclick="closeUinfo()">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <div class="uinfo-hero">
+            <div class="uinfo-av" id="uinfoAv">А</div>
+            <div>
+              <div class="uinfo-name" id="uinfoName">Имя</div>
+              <div class="uinfo-status" id="uinfoStatus">был(а) недавно</div>
+            </div>
+          </div>
+
+          <div class="uinfo-actions">
+            <button class="uinfo-act" title="Написать">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Чат</span>
+            </button>
+            <button class="uinfo-act" title="Аудиозвонок">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>Звонок</span>
+            </button>
+            <button class="uinfo-act" title="Видеозвонок">
+              <svg viewBox="0 0 24 24"><polygon points="23,7 16,12 23,17 23,7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              <span>Видео</span>
+            </button>
+            <button class="uinfo-act" title="Ещё">
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              <span>Ещё</span>
+            </button>
+          </div>
+
+          <div class="uinfo-body" id="uinfoBody">
+            <!-- Filled dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div>
+</div>
+
+<!-- Context menu -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-mi" id="ctxReply"><svg viewBox="0 0 24 24"><polyline points="9,17 4,12 9,7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>Ответить</div>
+  <div class="ctx-mi" id="ctxCopy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Копировать</div>
+  <div class="ctx-mi" id="ctxForward"><svg viewBox="0 0 24 24"><polyline points="15,17 20,12 15,7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>Переслать</div>
+  <div class="ctx-mi red" id="ctxDelete"><svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Удалить</div>
 </div>
 
 <script>
-const token = localStorage.getItem('token');
-if (!token) window.location.href = '/login.html';
+const API='/api',tk=()=>localStorage.getItem('token');
+const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function avc(name){return AVC[(name||'').charCodeAt(0)%AVC.length]||AVC[0];}
 
-const state = {
-    conversations: [],
-    users: [],
-    activeConversationId: null,
-    sending: false,
-};
+let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
 
-function setMessage(text, ok = true) {
-    const el = document.getElementById('chatMessage');
-    el.textContent = text;
-    el.className = `mb-4 rounded-xl px-3 py-2 text-sm ${ok ? 'bg-[#e9f7ef] text-[#2a7d5b]' : 'bg-[#fdeeee] text-[#b94242]'}`;
-    el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 3200);
-}
+/* ── LOGO ── */
+(()=>{const i=document.getElementById('logo-img');i.src='/assets/lastop-group-logo.svg';i.onerror=()=>i.style.display='none';})();
 
-async function api(path, options = {}) {
-    const response = await fetch(path, {
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            ...(options.headers || {})
-        }
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        throw new Error(payload.message || payload.error || 'Ошибка запроса');
+/* ── AUTH ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    const{user={}}=await r.json();
+    localStorage.setItem('user',JSON.stringify(user));
+    myUserId=user.id;myName=user.full_name||user.name||'Я';
+    const n=myName;
+    document.getElementById('profileAv').textContent=(n[0]||'П').toUpperCase();
+    document.getElementById('profileName').textContent=n;
+    document.getElementById('profileCo').textContent=user.company_name||user.position||'Участник LASTOP';
+  }catch{
+    const u=JSON.parse(localStorage.getItem('user')||'{}');
+    if(u.full_name){
+      myName=u.full_name;myUserId=u.id;
+      document.getElementById('profileAv').textContent=(myName[0]||'П').toUpperCase();
+      document.getElementById('profileName').textContent=myName;
+      document.getElementById('profileCo').textContent=u.company_name||'Участник LASTOP';
     }
-    return payload;
-}
-
-function formatTime(value) {
-    if (!value) return '';
-    const dt = new Date(value);
-    if (Number.isNaN(dt.getTime())) return '';
-    return dt.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-}
-
-function renderChats() {
-    const list = document.getElementById('chatsList');
-    const empty = document.getElementById('chatsEmpty');
-    if (!state.conversations.length) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-    empty.classList.add('hidden');
-    list.innerHTML = state.conversations.map(c => {
-        const active = c.id === state.activeConversationId;
-        const peerLink = c.peer_user_id ? `<a href="/profile.html?userId=${c.peer_user_id}" class="text-xs text-[#6a7988] hover:underline">Профиль</a>` : '';
-        return `
-        <button data-open-chat="${c.id}" class="w-full text-left rounded-xl border px-3 py-2 ${active ? 'border-[#2b8662] bg-[#eff7f3]' : 'border-[#edf2f4] hover:bg-[#f8fbfb]'}">
-            <div class="flex items-center justify-between gap-2">
-                <div class="font-semibold text-sm truncate">${c.name || 'Диалог'}</div>
-                ${c.unread_count > 0 ? `<span class="rounded-full bg-[#dd4d4d] px-2 py-0.5 text-xs font-semibold text-white">${c.unread_count}</span>` : ''}
-            </div>
-            <div class="mt-1 text-xs text-[#8a97a5] truncate">${c.last_message || 'Пока нет сообщений'}</div>
-            <div class="mt-1 flex items-center justify-between text-[11px] text-[#9aa7b5]"><span>${formatTime(c.last_time)}</span>${peerLink}</div>
-        </button>`;
-    }).join('');
-}
-
-function renderUsersSelect() {
-    const select = document.getElementById('usersSelect');
-    const options = ['<option value="">Выберите пользователя</option>']
-        .concat(state.users.map(u => `<option value="${u.id}">${u.full_name}${u.is_private_profile ? ' 🔒' : ''}</option>`));
-    select.innerHTML = options.join('');
-}
-
-async function loadConversations() {
-    const data = await api('/api/chat/conversations');
-    state.conversations = data.conversations || [];
-    renderChats();
-}
-
-async function loadUsers(search = '') {
-    const data = await api(`/api/users?q=${encodeURIComponent(search.trim())}`);
-    state.users = data.users || [];
-    renderUsersSelect();
-}
-
-function renderMessages(messages) {
-    const list = document.getElementById('messagesList');
-    if (!messages.length) {
-        list.innerHTML = '<div class="text-sm text-[#8a97a5]">Пока нет сообщений. Напишите первое сообщение.</div>';
-        return;
-    }
-    list.innerHTML = messages.map(m => `
-        <div class="rounded-xl border border-[#edf2f4] px-3 py-2">
-            <div class="flex items-center justify-between gap-2">
-                <div class="text-sm font-semibold">${m.sender_name || 'Пользователь'}</div>
-                <div class="text-xs text-[#95a1ad]">${formatTime(m.created_at)}</div>
-            </div>
-            <div class="mt-1 text-sm">${m.content}</div>
-        </div>
-    `).join('');
-    list.scrollTop = list.scrollHeight;
-}
-
-async function openConversation(id) {
-    state.activeConversationId = id;
-    renderChats();
-    document.getElementById('messageInput').disabled = false;
-    document.getElementById('sendBtn').disabled = false;
-
-    const details = await api(`/api/chat/conversations/${id}`);
-    document.getElementById('chatHeader').textContent = details.conversation?.name || 'Диалог';
-
-    const data = await api(`/api/chat/conversations/${id}/messages`);
-    renderMessages(data.messages || []);
-    await loadConversations();
-}
-
-async function startConversationWithUser(userId) {
-    const data = await api(`/api/chat/conversations/start/${userId}`, { method: 'POST' });
-    const conversationId = data.conversation?.id;
-    if (!conversationId) throw new Error('Не удалось создать чат');
-    await loadConversations();
-    await openConversation(conversationId);
-}
-
-async function onSendMessage(event) {
-    event.preventDefault();
-    if (!state.activeConversationId || state.sending) return;
-    const input = document.getElementById('messageInput');
-    const content = input.value.trim();
-    if (!content) return;
-
-    state.sending = true;
-    document.getElementById('sendBtn').disabled = true;
-    try {
-        await api(`/api/chat/conversations/${state.activeConversationId}/messages`, {
-            method: 'POST',
-            body: JSON.stringify({ content })
-        });
-        input.value = '';
-        const data = await api(`/api/chat/conversations/${state.activeConversationId}/messages`);
-        renderMessages(data.messages || []);
-        await loadConversations();
-    } finally {
-        state.sending = false;
-        document.getElementById('sendBtn').disabled = false;
-    }
-}
-
-function bindEvents() {
-    document.getElementById('chatsList').addEventListener('click', async (event) => {
-        const btn = event.target.closest('[data-open-chat]');
-        if (!btn) return;
-        try {
-            await openConversation(btn.dataset.openChat);
-        } catch (e) {
-            setMessage(e.message, false);
-        }
-    });
-
-    document.getElementById('startChatBtn').addEventListener('click', async () => {
-        const userId = document.getElementById('usersSelect').value;
-        if (!userId) {
-            setMessage('Сначала выберите пользователя', false);
-            return;
-        }
-        const btn = document.getElementById('startChatBtn');
-        btn.disabled = true;
-        try {
-            await startConversationWithUser(userId);
-        } catch (e) {
-            setMessage(e.message, false);
-        } finally {
-            btn.disabled = false;
-        }
-    });
-
-    document.getElementById('usersSearch').addEventListener('input', async (event) => {
-        try {
-            await loadUsers(event.target.value || '');
-        } catch (e) {
-            setMessage(e.message, false);
-        }
-    });
-
-    document.getElementById('messageForm').addEventListener('submit', async (event) => {
-        try {
-            await onSendMessage(event);
-        } catch (e) {
-            setMessage(e.message, false);
-        }
-    });
-}
-
-(async function init() {
-    try {
-        bindEvents();
-        await Promise.all([loadConversations(), loadUsers()]);
-        const params = new URLSearchParams(window.location.search);
-        const initialConversation = params.get('conversation');
-        const userId = params.get('userId');
-        if (userId) {
-            await startConversationWithUser(userId);
-            return;
-        }
-        if (initialConversation) {
-            await openConversation(initialConversation);
-        }
-    } catch (e) {
-        setMessage(e.message, false);
-    }
+  }
+  loadConversations();
 })();
+
+/* ── PROFILE DROPDOWN ── */
+document.getElementById('profileTrigger').addEventListener('click',()=>{
+  const d=document.getElementById('profileDrop'),c=document.getElementById('profileChev');
+  const o=d.classList.toggle('open');c.classList.toggle('open',o);
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.profile-block')){
+    document.getElementById('profileDrop').classList.remove('open');
+    document.getElementById('profileChev').classList.remove('open');
+  }
+  if(!e.target.closest('.ctx-menu')&&!e.target.closest('.bubble'))
+    document.getElementById('ctxMenu').classList.remove('show');
+});
+
+/* ── LOGOUT ── */
+document.getElementById('logoutBtn').addEventListener('click',async e=>{
+  e.preventDefault();
+  try{await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  localStorage.clear();location.href='/login.html';
+});
+
+/* ── SEARCH ── */
+let sT;
+document.getElementById('searchInput').addEventListener('input',e=>{
+  clearTimeout(sT);const q=e.target.value.trim();
+  if(q.length>1)sT=setTimeout(()=>location.href='/search.html?q='+encodeURIComponent(q),600);
+});
+
+/* ── CONVERSATIONS ── */
+async function loadConversations(){
+  try{
+    const r=await fetch(API+'/chats',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{chats=[]}=await r.json();
+    renderConvList(chats);
+  }catch{
+    renderConvList(getDemoConvs());
+  }
+}
+
+function getDemoConvs(){
+  return[
+    {id:'1',name:'Алексей Иванов',last_message:{text:'Отлично, договорились!',created_at:new Date(Date.now()-300000).toISOString(),is_mine:true},unread_count:0,is_online:true,type:'user'},
+    {id:'2',name:'NorthBridge Logistics',last_message:{text:'Прайс-лист во вложении',created_at:new Date(Date.now()-1800000).toISOString(),is_mine:false},unread_count:3,is_online:false,type:'company'},
+    {id:'3',name:'Логистика СНГ',last_message:{text:'Добро пожаловать в группу!',created_at:new Date(Date.now()-86400000).toISOString(),is_mine:false},unread_count:12,is_online:false,type:'group'},
+    {id:'4',name:'Марина Соколова',last_message:{text:'Спасибо за информацию',created_at:new Date(Date.now()-172800000).toISOString(),is_mine:false},unread_count:0,is_online:true,type:'user'},
+    {id:'5',name:'Volga Industrial',last_message:{text:'Пришлите реквизиты',created_at:new Date(Date.now()-259200000).toISOString(),is_mine:true},unread_count:0,is_online:false,type:'company'},
+    {id:'6',name:'Дмитрий Козлов',last_message:{text:'Можем встретиться в среду?',created_at:new Date(Date.now()-432000000).toISOString(),is_mine:false},unread_count:1,is_online:false,type:'user'},
+  ];
+}
+
+function renderConvList(chats){
+  const list=document.getElementById('convList');
+  list.innerHTML='<div class="conv-section">Все чаты</div>'+chats.map(c=>convItemHtml(c)).join('');
+  list.querySelectorAll('.conv-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const id=el.dataset.id;
+      const chat=chats.find(c=>c.id===id);
+      selectConv(chat||{id,name:el.querySelector('.conv-name').textContent});
+      list.querySelectorAll('.conv-item').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+}
+
+function convItemHtml(c){
+  const color=avc(c.name);
+  const letter=(c.name||'?')[0].toUpperCase();
+  const timeStr=formatTime(c.last_message?.created_at);
+  const preview=c.last_message?.text||'';
+  const unread=c.unread_count||0;
+  const isGroup=c.type==='group'||c.type==='community';
+  const avatarIcon=isGroup
+    ?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+    :letter;
+  return`<div class="conv-item" data-id="${esc(c.id)}">
+    <div class="cav" style="background:${color}">
+      ${avatarIcon}
+      ${c.is_online?'<div class="cav-online"></div>':''}
+    </div>
+    <div class="conv-body">
+      <div class="conv-row">
+        <span class="conv-name">${esc(c.name)}</span>
+        <span class="conv-time">${timeStr}</span>
+      </div>
+      <div class="conv-preview">
+        ${c.last_message?.is_mine?'<span class="you">Вы:</span>':''}
+        ${esc(preview.slice(0,50))}
+      </div>
+    </div>
+    ${unread?`<span class="conv-unread">${unread>99?'99+':unread}</span>`:''}
+  </div>`;
+}
+
+/* ── SELECT CONVERSATION ── */
+function selectConv(conv){
+  currentConv=conv;
+  const color=avc(conv.name);
+  document.getElementById('chatEmpty').style.display='none';
+  const ac=document.getElementById('activeChat');
+  ac.style.display='flex';
+  document.getElementById('chatHav').style.background=color;
+  document.getElementById('chatHavLetter').textContent=(conv.name||'?')[0].toUpperCase();
+  document.getElementById('chatHname').textContent=conv.name||'';
+  document.getElementById('chatHstatus').textContent=conv.is_online?'онлайн':'был(а) недавно';
+  document.getElementById('chatOnlineDot').style.display=conv.is_online?'block':'none';
+  document.getElementById('typingAv').style.background=color;
+  loadMessages(conv.id);
+}
+
+async function loadMessages(convId){
+  const wrap=document.getElementById('msgsWrap');
+  wrap.innerHTML='<div style="display:flex;justify-content:center;padding:40px"><div style="width:20px;height:20px;border:2px solid var(--gb);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  if(!document.getElementById('spinStyle')){
+    const s=document.createElement('style');
+    s.id='spinStyle';s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+  }
+  try{
+    const r=await fetch(API+'/chats/'+convId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{messages=[]}=await r.json();
+    renderMessages(messages);
+  }catch{
+    renderMessages(getDemoMessages(convId));
+  }
+}
+
+function getDemoMessages(convId){
+  const now=Date.now();
+  const demos={
+    '1':[
+      {id:'m1',text:'Добрый день! Интересует партнёрство по маршруту Москва — Алматы.',sender_name:'Алексей Иванов',is_mine:false,created_at:new Date(now-7200000).toISOString(),read:true},
+      {id:'m2',text:'Здравствуйте! Да, мы как раз расширяем маршрутную сеть в этом направлении. Какие объёмы вас интересуют?',sender_name:myName,is_mine:true,created_at:new Date(now-7000000).toISOString(),read:true},
+      {id:'m3',text:'Ориентировочно 20–30 тонн в месяц. Возможна регулярность.',sender_name:'Алексей Иванов',is_mine:false,created_at:new Date(now-6800000).toISOString(),read:true},
+      {id:'m4',text:'Отлично, под такой объём можем сделать выгодный тариф. Давайте подготовлю КП к пятнице?',sender_name:myName,is_mine:true,created_at:new Date(now-3600000).toISOString(),read:true},
+      {id:'m5',text:'Звучит хорошо. Также интересует страхование груза — вы предоставляете такую услугу?',sender_name:'Алексей Иванов',is_mine:false,created_at:new Date(now-3400000).toISOString(),read:true},
+      {id:'m6',text:'Да, работаем со страховыми партнёрами. Всё включу в КП.',sender_name:myName,is_mine:true,created_at:new Date(now-3200000).toISOString(),read:true},
+      {id:'m7',text:'Отлично, договорились!',sender_name:'Алексей Иванов',is_mine:false,created_at:new Date(now-300000).toISOString(),read:true},
+    ],
+    '2':[
+      {id:'n1',text:'Здравствуйте! Можете прислать актуальный прайс на ваши услуги?',sender_name:myName,is_mine:true,created_at:new Date(now-86400000).toISOString(),read:true},
+      {id:'n2',text:'Конечно! Подготовим и пришлём в течение дня.',sender_name:'NorthBridge Logistics',is_mine:false,created_at:new Date(now-82800000).toISOString(),read:true},
+      {id:'n3',text:'Прайс-лист во вложении',sender_name:'NorthBridge Logistics',is_mine:false,created_at:new Date(now-1800000).toISOString(),read:false,file:{name:'price_list_2026.pdf',size:'124 КБ'}},
+    ],
+    '3':[
+      {id:'g1',text:'Добро пожаловать в группу «Логистика СНГ»! Здесь мы обсуждаем маршруты, тарифы и партнёрства.',sender_name:'Администратор',is_mine:false,created_at:new Date(now-86400000).toISOString(),read:true},
+      {id:'g2',text:'Спасибо! Рад быть частью сообщества.',sender_name:myName,is_mine:true,created_at:new Date(now-80000000).toISOString(),read:true},
+      {id:'g3',text:'Коллеги, кто работает с Казахстаном — поделитесь контактами таможенных брокеров?',sender_name:'Марина Соколова',is_mine:false,created_at:new Date(now-3600000).toISOString(),read:false},
+    ],
+  };
+  return demos[convId]||[{id:'x1',text:'Начните переписку!',sender_name:currentConv?.name||'',is_mine:false,created_at:new Date().toISOString(),read:true}];
+}
+
+function renderMessages(messages){
+  const wrap=document.getElementById('msgsWrap');
+  wrap.innerHTML='';
+  let lastDate='',lastSender='',lastIsOut=null;
+  messages.forEach((msg,idx)=>{
+    const d=new Date(msg.created_at);
+    const dateStr=d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long'});
+    if(dateStr!==lastDate){
+      lastDate=dateStr;lastSender='';lastIsOut=null;
+      const div=document.createElement('div');
+      div.className='date-div';div.innerHTML=`<span>${dateStr}</span>`;
+      wrap.appendChild(div);
+    }
+    const isOut=msg.is_mine;
+    const showAvatar=!isOut&&(msg.sender_name!==lastSender||lastIsOut!==isOut);
+    const showName=showAvatar&&(currentConv?.type==='group'||currentConv?.type==='community');
+    lastSender=msg.sender_name;lastIsOut=isOut;
+    const el=buildBubble(msg,isOut,showAvatar,showName,idx===messages.length-1);
+    wrap.appendChild(el);
+  });
+  wrap.scrollTop=wrap.scrollHeight;
+  showTypingAfterDelay();
+}
+
+function buildBubble(msg,isOut,showAvatar,showName,isLast){
+  const row=document.createElement('div');
+  row.className='msg-row'+(isOut?' out':'');
+  row.dataset.id=msg.id;
+  const color=avc(msg.sender_name);
+  const avHtml=isOut?'':`<div class="msg-avatar${showAvatar?'':' hidden'}" style="background:${color}">${(msg.sender_name||'?')[0].toUpperCase()}</div>`;
+  const nameHtml=showName?`<div class="bubble-name">${esc(msg.sender_name)}</div>`:'';
+  const replyHtml=msg.reply_to?`<div class="reply-preview"><div class="reply-preview-name">${esc(msg.reply_to.sender_name)}</div><div class="reply-preview-text">${esc(msg.reply_to.text)}</div></div>`:'';
+  const fileHtml=msg.file?`<div class="bubble-file"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></div>`:''
+  const imgHtml=msg.image_url?`<img class="bubble-img" src="${esc(msg.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';
+  const timeStr=new Date(msg.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const checkHtml=isOut?`<span class="bubble-check${msg.read?'':' unread'}"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/>${msg.read?'<polyline points="20,2 9,13 4,8"/>':''}</svg></span>`:'';
+  const tail=showAvatar?'tail':'';
+  row.innerHTML=`${avHtml}<div class="bubble ${isOut?'out':'in'} ${tail}" data-msgid="${esc(msg.id)}">${nameHtml}${replyHtml}${imgHtml}${fileHtml}${msg.text?`<div class="bubble-text">${esc(msg.text)}</div>`:''}<div class="bubble-meta"><span class="bubble-time">${timeStr}</span>${checkHtml}</div></div>`;
+  row.querySelector('.bubble').addEventListener('contextmenu',e=>{e.preventDefault();showCtxMenu(e,msg,isOut);});
+  return row;
+}
+
+/* ── TYPING INDICATOR ── */
+function showTypingAfterDelay(){
+  if(!currentConv||currentConv.is_online===false)return;
+  setTimeout(()=>{
+    const tr=document.getElementById('typingRow');
+    tr.style.display='flex';
+    document.getElementById('msgsWrap').scrollTop=99999;
+    setTimeout(()=>{tr.style.display='none';},3200);
+  },1200);
+}
+
+/* ── CONTEXT MENU ── */
+let ctxMsg=null;
+function showCtxMenu(e,msg,isOut){
+  ctxMsg=msg;
+  const menu=document.getElementById('ctxMenu');
+  menu.style.left=Math.min(e.clientX,window.innerWidth-170)+'px';
+  menu.style.top=Math.min(e.clientY,window.innerHeight-160)+'px';
+  menu.classList.add('show');
+  document.getElementById('ctxDelete').style.display=isOut?'flex':'none';
+}
+document.getElementById('ctxReply').addEventListener('click',()=>{
+  if(!ctxMsg)return;
+  replyTo=ctxMsg;
+  document.getElementById('replyName').textContent=ctxMsg.is_mine?myName:ctxMsg.sender_name;
+  document.getElementById('replyText').textContent=ctxMsg.text||'Вложение';
+  document.getElementById('replyBar').classList.add('show');
+  document.getElementById('msgInput').focus();
+  document.getElementById('ctxMenu').classList.remove('show');
+});
+document.getElementById('ctxCopy').addEventListener('click',()=>{
+  if(ctxMsg?.text)navigator.clipboard.writeText(ctxMsg.text).catch(()=>{});
+  document.getElementById('ctxMenu').classList.remove('show');
+});
+document.getElementById('ctxForward').addEventListener('click',()=>{document.getElementById('ctxMenu').classList.remove('show');});
+document.getElementById('ctxDelete').addEventListener('click',()=>{
+  if(ctxMsg){
+    document.querySelector(`[data-id="${ctxMsg.id}"]`)?.remove();
+    ctxMsg=null;
+  }
+  document.getElementById('ctxMenu').classList.remove('show');
+});
+document.getElementById('replyClose').addEventListener('click',()=>{
+  replyTo=null;document.getElementById('replyBar').classList.remove('show');
+});
+
+/* ── ATTACH FILES ── */
+document.getElementById('attachInput').addEventListener('change',function(){
+  Array.from(this.files).forEach(f=>{
+    if(attachFiles.length>=5)return;
+    attachFiles.push(f);
+  });
+  renderAttachStrip();this.value='';
+});
+function renderAttachStrip(){
+  const strip=document.getElementById('attachStrip');
+  if(!attachFiles.length){strip.classList.remove('show');strip.innerHTML='';return;}
+  strip.classList.add('show');
+  strip.innerHTML=attachFiles.map((f,i)=>{
+    if(f.type.startsWith('image/')){
+      const url=URL.createObjectURL(f);
+      return`<div class="attach-prev"><img src="${url}" alt=""><button class="attach-prev-rm" onclick="removeAttach(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+    }
+    return`<div class="attach-prev" style="display:grid;place-items:center;background:var(--gl)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><button class="attach-prev-rm" onclick="removeAttach(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+  }).join('');
+}
+function removeAttach(i){attachFiles.splice(i,1);renderAttachStrip();}
+
+/* ── INPUT / SEND ── */
+const msgInput=document.getElementById('msgInput');
+const sendBtn=document.getElementById('sendBtn');
+function checkSendable(){
+  const hasText=msgInput.textContent.trim().length>0;
+  const hasFiles=attachFiles.length>0;
+  sendBtn.disabled=!(hasText||hasFiles);
+}
+msgInput.addEventListener('input',checkSendable);
+msgInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+});
+
+async function sendMessage(){
+  const text=msgInput.textContent.trim();
+  if(!text&&!attachFiles.length)return;
+  if(!currentConv)return;
+  const msg={
+    id:'local-'+Date.now(),
+    text,
+    sender_name:myName,
+    is_mine:true,
+    created_at:new Date().toISOString(),
+    read:false,
+    reply_to:replyTo?{sender_name:replyTo.is_mine?myName:replyTo.sender_name,text:replyTo.text}:null
+  };
+  msgInput.textContent='';checkSendable();
+  replyTo=null;document.getElementById('replyBar').classList.remove('show');
+  attachFiles=[];renderAttachStrip();
+  const wrap=document.getElementById('msgsWrap');
+  const el=buildBubble(msg,true,true,false,true);
+  wrap.appendChild(el);wrap.scrollTop=wrap.scrollHeight;
+  try{
+    await fetch(API+'/chats/'+currentConv.id+'/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({text,reply_to_id:replyTo?.id||null})
+    });
+  }catch{}
+  setTimeout(()=>{
+    const s=wrap.querySelector(`[data-id="${msg.id}"] .bubble-check`);
+    if(s)s.classList.remove('unread');
+  },1500);
+}
+sendBtn.addEventListener('click',sendMessage);
+
+/* ── CONV SEARCH ── */
+document.getElementById('convSearch').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  document.querySelectorAll('.conv-item').forEach(el=>{
+    el.style.display=el.querySelector('.conv-name').textContent.toLowerCase().includes(q)?'':'none';
+  });
+});
+
+/* ── USER INFO PANEL ── */
+function openUinfo(){
+  if(!currentConv)return;
+  const overlay=document.getElementById('uinfoOverlay');
+  const color=avc(currentConv.name);
+  document.getElementById('uinfoAv').textContent=(currentConv.name||'?')[0].toUpperCase();
+  document.getElementById('uinfoAv').style.background=color;
+  document.getElementById('uinfoName').textContent=currentConv.name||'';
+  const isOnline=currentConv.is_online;
+  const statusEl=document.getElementById('uinfoStatus');
+  statusEl.innerHTML=isOnline
+    ?'<span class="uinfo-online">онлайн</span>'
+    :'был(а) сегодня в '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('uinfoBody').innerHTML=buildUinfoBody(currentConv);
+  overlay.classList.add('open');
+}
+function closeUinfo(){
+  document.getElementById('uinfoOverlay').classList.remove('open');
+}
+
+function buildUinfoBody(conv){
+  const isUser=conv.type==='user'||!conv.type;
+  const isCompany=conv.type==='company';
+  const isGroup=conv.type==='group'||conv.type==='community';
+  let html='';
+
+  /* contact fields */
+  html+=`<div class="uinfo-section">`;
+  if(isUser){
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+      '+7 900 000 00 00','Телефон',false,false
+    );
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+      '@'+conv.name.replace(/\s+/g,'_').toLowerCase(),'Имя пользователя',true,true
+    );
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      'Участник с 2024 года','На платформе',false,false
+    );
+  }
+  if(isCompany){
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
+      conv.name,'Компания',false,false
+    );
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+      'lastop.group/company','Сайт',true,false
+    );
+  }
+  if(isGroup){
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      '24 участника','Группа',false,false
+    );
+    html+=uinfoField(
+      `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
+      'Открытая группа','Тип',false,false
+    );
+  }
+  html+=`</div>`;
+
+  /* media stats */
+  html+=`<div class="uinfo-section">`;
+  const stats=[
+    {icon:`<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,label:'Сообщений в Избранном',count:5},
+    {icon:`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>`,label:'Фотографии',count:Math.floor(Math.random()*500+50)},
+    {icon:`<svg viewBox="0 0 24 24"><polygon points="23,7 16,12 23,17 23,7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,label:'Видео',count:Math.floor(Math.random()*200+10)},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,label:'Файлы',count:Math.floor(Math.random()*300+20)},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,label:'Ссылки',count:Math.floor(Math.random()*100+5)},
+  ];
+  stats.forEach(s=>{
+    html+=`<div class="uinfo-stat"><div class="uinfo-stat-icon">${s.icon}</div><span class="uinfo-stat-label">${s.label}</span><span class="uinfo-stat-count">${s.count}</span></div>`;
+  });
+  html+=`</div>`;
+
+  /* action rows */
+  html+=`<div class="uinfo-section">`;
+  const actions=[
+    {icon:`<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,label:'Поделиться контактом',danger:false},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18,2 22,6 12,16 8,16 8,12 18,2"/></svg>`,label:'Редактировать контакт',danger:false},
+    {icon:`<svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,label:'Удалить контакт',danger:false},
+    {icon:`<svg viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,label:'Заблокировать',danger:true},
+  ];
+  actions.forEach(a=>{
+    html+=`<div class="uinfo-action-row${a.danger?' danger':''}">${a.icon}<span>${a.label}</span></div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+
+function uinfoField(iconSvg,val,label,isLink,hasQr){
+  return`<div class="uinfo-field">
+    <div class="uinfo-field-icon">${iconSvg}</div>
+    <div class="uinfo-field-body">
+      <div class="uinfo-field-val${isLink?' link':''}">${esc(val)}</div>
+      <div class="uinfo-field-label">${esc(label)}</div>
+    </div>
+    ${hasQr?`<div class="uinfo-field-extra"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>`:''}
+  </div>`;
+}
+
+/* ── FORMAT TIME ── */
+function formatTime(ts){
+  if(!ts)return'';
+  const d=new Date(ts),now=new Date();
+  const diff=(now-d)/86400000;
+  if(diff<1)return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(diff<7)return['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()];
+  return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
+}
+
+/* Escape closes panels */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeUinfo();
+    document.getElementById('ctxMenu').classList.remove('show');
+  }
+});
 </script>
 </body>
 </html>
