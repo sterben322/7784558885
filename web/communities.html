@@ -348,42 +348,34 @@ async function loadCommunities(cat='',q=''){
   }
 }
 
-/* ── RENDER GRID ── */
-function renderGrid(list){
-  const grid=document.getElementById('coGrid');
-  if(!list.length){
-    grid.innerHTML=`<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--gmt)">
-      <div style="font-size:28px;margin-bottom:12px">🌐</div>
-      <div style="font-size:14px;font-weight:600">Сообществ не найдено</div>
-      <div style="font-size:12px;margin-top:6px">Создайте первое или измените фильтр</div>
-    </div>`;
-    return;
-  }
-  grid.innerHTML=list.map((co,i)=>buildCard(co,i)).join('');
-}
-function buildCard(co,i){
-  const bg=avc(co.name); const ltr=letter(co.name);
-  const tags=(co.tags||[]).slice(0,3).map(t=>`<span class="co-tag">#${esc(t)}</span>`).join('');
-  const catIcon=CATICONS[co.category]||'';
-  const bannerStyle=co.banner_url?`background:url('${esc(co.banner_url)}') center/cover no-repeat`:`background:linear-gradient(135deg,${bg},${bg}cc)`;
-  const avStyle=co.avatar_url?`background:url('${esc(co.avatar_url)}') center/cover no-repeat;background-color:${bg}`:`background:${bg}`;
-  const avContent=co.avatar_url?'':`${ltr}`;
-  const joinClass=co.is_member?'in':'out';
-  const joinText=co.is_member?'✓ В сообществе':'+ Вступить';
-  return`<div class="co-card" style="animation-delay:${(i%9*0.04).toFixed(2)}s" onclick="goProfile(${co.id})">
-    <div class="co-banner" style="${bannerStyle}"></div>
-    <div class="co-av-wrap"><div class="co-av" style="${avStyle}">${avContent}</div></div>
-    <div class="co-body">
-      <div class="co-name">${esc(co.name)}</div>
-      <div class="co-cat">${catIcon}${esc(co.category||'Сообщество')}</div>
-      <div class="co-desc">${esc(co.description||co.short_description||'')}</div>
-      ${tags?`<div class="co-tags">${tags}</div>`:''}
-      <div class="co-footer">
-        <div class="co-stat"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${num(co.members_count||0)} участников</div>
-        <button class="co-join ${joinClass}" onclick="event.stopPropagation();toggleJoin(${co.id},this)" data-id="${co.id}" data-member="${co.is_member?1:0}">${joinText}</button>
-      </div>
-    </div>
-  </div>`;
+function communityCard(community) {
+    const tags = getCommunityTags(community);
+    return `
+        <article class="rounded-[22px] border border-[#e8ecee] bg-white px-5 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${community.name}</h3>
+                    <p class="mt-1 text-sm text-[#7f8b98]">Владелец: ${community.owner_name || 'Не указан'}</p>
+                    <p class="mt-3 text-[15px] leading-6 text-[#697685]">${community.description || 'Описание отсутствует'}</p>
+                </div>
+                <span class="rounded-full ${community.is_private ? 'bg-[#fff2ee] text-[#b0553d]' : 'bg-[#eef7f2] text-[#5f8f7b]'} px-3 py-1 text-xs font-semibold">${community.is_private ? 'Приватное' : 'Открытое'}</span>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2.5">
+                ${tags.length ? tags.map((tag) => `<span class="rounded-full bg-[#eef2f6] px-3 py-1.5 text-[12px] font-medium text-[#5f7081]">#${tag}</span>`).join('') : '<span class="text-xs text-[#97a3af]">Теги не указаны</span>'}
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Участники</dt><dd class="text-lg font-semibold text-[#344153]">${community.members_count || 0}</dd></div>
+                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Публикации</dt><dd class="text-lg font-semibold text-[#344153]">${community.posts_count || 0}</dd></div>
+            </dl>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+                <a href="/community-profile.html?id=${encodeURIComponent(community.id)}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть сообщество</a>
+                <button data-join-community="${community.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Присоединиться</button>
+            </div>
+        </article>
+    `;
 }
 
 /* ── JOIN / LEAVE ── */

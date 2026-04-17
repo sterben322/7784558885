@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Сообщество</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
+
+/* ── LOGO / TOPBAR / NAV — identical to other pages ── */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── MAIN ── */
+.main{grid-area:main;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+
+/* ── HERO PROFILE ── */
+.hero-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh);flex-shrink:0}
+.hero-banner{height:96px;position:relative;overflow:hidden;cursor:pointer}
+.hero-banner::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.09)}
+.hero-banner::after{content:'';position:absolute;bottom:-20px;left:30%;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)}
+.banner-edit{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.35);border:none;border-radius:var(--r);color:#fff;padding:4px 10px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;opacity:0;transition:opacity .2s;display:none}
+.hero-banner:hover .banner-edit{opacity:1}
+.hero-body{padding:0 20px 20px}
+.hero-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hero-av{width:68px;height:68px;border-radius:16px;border:4px solid var(--w);display:grid;place-items:center;font-size:26px;font-weight:800;color:#fff;margin-top:-34px;position:relative;flex-shrink:0;cursor:pointer;background:#5AB080}
+.av-badge{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--g);border:2px solid var(--w);display:grid;place-items:center}
+.av-badge svg{width:9px;height:9px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round}
+.hero-actions{display:flex;gap:8px;padding-top:8px;flex-wrap:wrap}
+.btn-msg{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--rm);background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:13px;font-weight:600;transition:background .15s}
+.btn-msg:hover{background:var(--gm)}
+.btn-msg svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
+.btn-join{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:all .15s}
+.btn-join:hover{border-color:var(--g);color:var(--g);background:var(--gl)}
+.btn-join.in{background:var(--g);color:#fff;border-color:var(--g)}
+.btn-join.in:hover{background:var(--red);border-color:var(--red)}
+.btn-settings{padding:8px 14px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;cursor:pointer;color:var(--gmt);transition:all .15s;display:none}
+.btn-settings:hover{background:var(--gp);border-color:var(--gb)}
+.btn-settings svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.hero-name{font-size:20px;font-weight:800;color:var(--t);margin-top:10px;line-height:1.25}
+.hero-cat{font-size:13px;color:var(--gmt);margin-top:3px;display:flex;align-items:center;gap:5px}
+.hero-cat svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.privacy-pill{display:inline-flex;align-items:center;gap:4px;background:var(--gp);border:1px solid var(--bdr);border-radius:99px;padding:2px 10px;font-size:11px;color:var(--gmt);margin-left:8px}
+.privacy-pill svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+
+/* STATUS PILL */
+.status-pill{display:inline-flex;align-items:center;gap:6px;background:var(--gl);border:1px solid var(--gb);border-radius:99px;padding:4px 12px 4px 8px;margin-top:10px;transition:all .2s}
+.status-pill.editable{cursor:pointer}
+.status-pill.editable:hover{background:var(--gb)}
+.status-pill svg{width:11px;height:11px;stroke:var(--g);fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.status-pill span{font-size:12px;color:var(--t);font-weight:500}
+.status-pill .sp-edit{width:16px;height:16px;fill:none;stroke:var(--gmt);stroke-width:1.8;stroke-linecap:round;margin-left:4px;opacity:0;transition:opacity .15s}
+.status-pill.editable:hover .sp-edit{opacity:1}
+.status-none{font-size:12px;color:var(--gmt);margin-top:10px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.status-none svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.status-none:hover{color:var(--g)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.stat-card{background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px 14px;text-align:center}
+.stat-n{font-size:20px;font-weight:800;color:var(--g)}
+.stat-l{font-size:10px;font-weight:600;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+
+/* ── FEED ── */
+.feed-label{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.feed-label span{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase}
+.feed-label::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* COMPOSE */
+.compose-box{background:var(--w);border:1.5px dashed var(--gb);border-radius:var(--rxl);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;flex-shrink:0;transition:all .15s}
+.compose-box:hover{background:var(--gp);border-color:var(--gm)}
+.compose-plus{width:32px;height:32px;border-radius:var(--rm);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
+.compose-box span{font-size:13px;color:var(--gmt);font-weight:500}
+
+/* POST */
+.post{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;flex-shrink:0;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both}
+.post:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.av{width:36px;height:36px;border-radius:var(--rm);font-size:13px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.post-meta{flex:1;min-width:0}
+.post-author{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-time{font-size:11px;color:var(--gmt);margin-top:1px}
+.post-title{font-size:15px;font-weight:700;color:var(--t);margin-bottom:6px;line-height:1.4}
+.post-body{font-size:13px;color:var(--tm);line-height:1.65}
+.post-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tag{padding:3px 10px;border-radius:99px;background:var(--gl);color:var(--g);font-size:11px;font-weight:600}
+.post-actions{display:flex;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr);align-items:center}
+.post-act{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gmt);cursor:pointer;transition:color .15s;background:none;border:none;font-family:inherit}
+.post-act:hover{color:var(--g)}
+.post-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.post-act.liked{color:var(--red)}
+.post-views{margin-left:auto;font-size:11px;color:var(--gmt);display:flex;align-items:center;gap:4px}
+.post-views svg{width:13px;height:13px}
+
+/* ── RIGHT ── */
+.info-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.info-row:last-child{border-bottom:none;padding-bottom:0}
+.info-icon{width:26px;height:26px;border-radius:var(--r);background:var(--gp);display:grid;place-items:center;flex-shrink:0}
+.info-icon svg{width:13px;height:13px;fill:none;stroke:var(--gmt);stroke-width:1.6;stroke-linecap:round}
+.info-val{font-size:13px;font-weight:600;color:var(--t)}
+.info-lbl{font-size:10px;color:var(--gmt);margin-top:1px}
+.info-link{color:var(--g);cursor:pointer;text-decoration:none}
+.info-link:hover{text-decoration:underline}
+
+/* MEMBERS GRID */
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mem-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;border-radius:var(--r);cursor:pointer;transition:background .15s;text-decoration:none}
+.mem-item:hover{background:var(--gp)}
+.mem-av{width:34px;height:34px;border-radius:var(--r);font-size:12px;font-weight:700;color:#fff;display:grid;place-items:center;position:relative}
+.mem-online{position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:#22CC66;border:2px solid var(--w)}
+.mem-name{font-size:10px;color:var(--gmt);text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mem-more{background:var(--gp);border-radius:var(--r);height:34px;display:grid;place-items:center;font-size:11px;color:var(--gmt);cursor:pointer;border:none;width:100%;font-family:inherit;transition:background .15s}
+.mem-more:hover{background:var(--gl);color:var(--g)}
+
+/* SIMILAR */
+.sim-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);cursor:pointer}
+.sim-item:last-child{border-bottom:none;padding-bottom:0}
+.sim-item:hover .sim-name{color:var(--g)}
+.sim-av{width:30px;height:30px;border-radius:var(--r);font-size:12px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.sim-name{font-size:12px;font-weight:600;color:var(--t);transition:color .15s}
+.sim-cnt{font-size:10px;color:var(--gmt);margin-top:1px}
+.sim-btn{padding:3px 12px;border-radius:99px;border:1.5px solid var(--gb);background:var(--gl);color:var(--g);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-left:auto;flex-shrink:0}
+.sim-btn:hover{background:var(--g);color:#fff;border-color:var(--g)}
+.sim-btn.in{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* STATUS MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:420px;transform:translateY(14px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal-head h3{font-size:15px;font-weight:800;color:var(--t)}
+.modal-x{width:28px;height:28px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt)}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.modal-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp)}
+.modal-input:focus{border-color:var(--gm)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn-sec{padding:7px 16px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:7px 20px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+
+/* POST COMPOSE MODAL */
+.cm-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp);margin-bottom:10px}
+.cm-input:focus{border-color:var(--gm)}
+.cm-input::placeholder{color:var(--gmt)}
+.cm-ta{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px 12px;font-family:inherit;font-size:13px;color:var(--t);resize:none;min-height:110px;outline:none;transition:border-color .2s;background:var(--gp)}
+.cm-ta:focus{border-color:var(--gm)}
+.cm-ta::placeholder{color:var(--gmt)}
+
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.ad-btn:hover{opacity:.88}
+
+@media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:1000px){.shell{grid-template-columns:220px 1fr;grid-template-areas:"logo topbar""nav main"}.right{display:none}}
+@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" onerror="this.style.display='none'">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Назад" onclick="location.href='/communities.html'">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg">7</span>
+  </button>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item" href="/companies.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item active" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HERO -->
+  <div class="hero-card" id="heroCard">
+    <div class="hero-banner" id="heroBanner" style="background:linear-gradient(135deg,#185FA5,#378ADD)">
+      <button class="banner-edit" id="bannerEditBtn">Изменить баннер</button>
+    </div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="hero-av" id="heroAv">Л</div>
+        <div class="hero-actions">
+          <button class="btn-msg" id="btnMsg" onclick="startChat()">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Написать
+          </button>
+          <button class="btn-join" id="btnJoin" onclick="toggleJoin()">Вступить</button>
+          <button class="btn-settings" id="btnSettings" onclick="location.href='?id='+coID+'&edit=1'">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="hero-name" id="heroName">Загрузка…</div>
+      <div class="hero-cat" id="heroCat"></div>
+      <div id="statusArea"></div>
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="stat-n" id="statPosts">—</div><div class="stat-l">Посты</div></div>
+        <div class="stat-card"><div class="stat-n" id="statMembers">—</div><div class="stat-l">Участники</div></div>
+        <div class="stat-card"><div class="stat-n" id="statActivity">—</div><div class="stat-l">Активность</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPOSE (shown only for members) -->
+  <div class="compose-box" id="composeBox" style="display:none" onclick="openPostModal()">
+    <div class="compose-plus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    <span>Написать публикацию в сообщество…</span>
+  </div>
+
+  <div class="feed-label"><span>Публикации</span></div>
+  <div id="postsList"></div>
+  <div style="height:10px;flex-shrink:0"></div>
+</div>
+
+<!-- RIGHT -->
+<aside class="right">
+  <div class="card" id="aboutCard">
+    <div class="block-title">О сообществе</div>
+    <div id="aboutInfo"></div>
+  </div>
+  <div class="card" id="membersCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="block-title" style="margin-bottom:0">Участники · <span id="membersCountTitle">—</span></div>
+      <span style="font-size:11px;color:var(--g);cursor:pointer" onclick="location.href='?id='+coID+'&tab=members'">Все →</span>
+    </div>
+    <div class="mem-grid" id="membersGrid"></div>
+  </div>
+  <div class="card" id="similarCard">
+    <div class="block-title">Похожие сообщества</div>
+    <div id="similarList"></div>
+  </div>
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">LogisticsPro 2026</div>
+      <div class="ad-sub">Выставка · Москва · май</div>
+      <button class="ad-btn">Узнать подробнее</button>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="modal-bg" id="statusModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Статус сообщества</h3>
+      <button class="modal-x" onclick="closeStatusModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <input class="modal-input" id="statusInput" placeholder="Например: Обсуждаем новые маршруты через Казахстан" maxlength="200">
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="clearStatus()">Очистить</button>
+      <button class="btn-sec" onclick="closeStatusModal()">Отмена</button>
+      <button class="btn-pri" onclick="saveStatus()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- POST MODAL -->
+<div class="modal-bg" id="postModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3>Новая публикация</h3>
+      <button class="modal-x" onclick="closePostModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <input class="cm-input" id="pmTitle" placeholder="Заголовок (необязательно)">
+    <textarea class="cm-ta" id="pmContent" placeholder="Что хотите сообщить сообществу?"></textarea>
+    <input class="cm-input" id="pmTags" placeholder="Теги через запятую: логистика, снг…" style="margin-top:8px">
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closePostModal()">Отмена</button>
+      <button class="btn-pri" id="pmSubmit" onclick="submitPost()">Опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='/api', tk=()=>localStorage.getItem('token');
+const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function avc(n){return COLORS[(n||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
+function letter(n){return((n||'?')[0]).toUpperCase();}
+function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
+function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин':m<1440?Math.floor(m/60)+' ч':Math.floor(m/1440)+' д';}
+
+const params=new URLSearchParams(location.search);
+const coID=parseInt(params.get('id'))||0;
+let community=null, myUserID=0, isMember=false, isOwner=false;
+
+/* ── AUTH ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{user={}}=await r.json();
+    myUserID=user.id;
+    localStorage.setItem('user',JSON.stringify(user));
+  }catch{const u=JSON.parse(localStorage.getItem('user')||'{}');myUserID=u.id||0;}
+  if(coID) load();
+  else location.href='/communities.html';
+})();
+
+/* ── LOAD COMMUNITY ── */
+async function load(){
+  try{
+    const r=await fetch(`${API}/communities/${coID}`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{community:co}=await r.json();
+    community=co;
+    isMember=co.is_member;
+    isOwner=co.is_owner;
+    renderHero(co);
+  }catch{
+    community=getDemoComm();
+    isMember=community.is_member;
+    isOwner=community.is_owner;
+    renderHero(community);
+  }
+  loadPosts();
+  loadMembers();
+  loadSimilar();
+}
+
+/* ── RENDER HERO ── */
+function renderHero(co){
+  document.title=`LASTOP GROUP — ${co.name}`;
+  const bg=avc(co.name);
+
+  // banner
+  const banner=document.getElementById('heroBanner');
+  if(co.banner_url) banner.style.background=`url('${esc(co.banner_url)}') center/cover no-repeat`;
+  else banner.style.background=`linear-gradient(135deg,${bg},${bg}cc)`;
+  if(isOwner){document.getElementById('bannerEditBtn').style.display='block';}
+
+  // avatar
+  const av=document.getElementById('heroAv');
+  if(co.avatar_url){av.style.background=`url('${esc(co.avatar_url)}') center/cover no-repeat`;av.style.backgroundColor=bg;av.innerHTML='';}
+  else{av.style.background=bg;av.textContent=letter(co.name);}
+
+  document.getElementById('heroName').textContent=co.name;
+
+  // category
+  const catEl=document.getElementById('heroCat');
+  const privacyLabel={open:'Открытое',closed:'Закрытое',invite:'По приглашению'}[co.privacy]||'Открытое';
+  const privacyIcon = co.privacy==='open'
+    ? '<circle cx="12" cy="12" r="10"/>'
+    : '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v13H2z"/>';
+  catEl.innerHTML=`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${esc(co.category||'Сообщество')}
+    <span class="privacy-pill"><svg viewBox="0 0 24 24">${privacyIcon}</svg>${privacyLabel}</span>`;
+
+  // status
+  renderStatus(co.status);
+
+  // stats
+  document.getElementById('statPosts').textContent=num(co.posts_count||0);
+  document.getElementById('statMembers').textContent=num(co.members_count||0);
+  document.getElementById('statActivity').textContent=num(co.activity_count||0);
+  document.getElementById('membersCountTitle').textContent=num(co.members_count||0);
+
+  // join button
+  updateJoinBtn();
+  if(isOwner) document.getElementById('btnSettings').style.display='block';
+
+  // compose
+  if(isMember) document.getElementById('composeBox').style.display='flex';
+
+  // about (right sidebar)
+  const about=[];
+  if(co.website?.valid||co.website) about.push(`<div class="info-row"><div class="info-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div><a class="info-val info-link" href="${esc(co.website?.String||co.website||'')}" target="_blank">${esc(co.website?.String||co.website||'')}</a><div class="info-lbl">Сайт</div></div></div>`);
+  about.push(`<div class="info-row"><div class="info-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="info-val">${new Date(co.created_at).toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</div><div class="info-lbl">Основано</div></div></div>`);
+  if(co.region?.valid||co.region) about.push(`<div class="info-row"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="info-val">${esc(co.region?.String||co.region||'')}</div><div class="info-lbl">Регион</div></div></div>`);
+  about.push(`<div class="info-row" style="border-bottom:none;padding-bottom:0"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="info-val">${privacyLabel}</div><div class="info-lbl">Тип доступа</div></div></div>`);
+  document.getElementById('aboutInfo').innerHTML=about.join('');
+}
+
+/* ── STATUS ── */
+function renderStatus(status){
+  const area=document.getElementById('statusArea');
+  const s=status?.String||status||'';
+  if(s){
+    area.innerHTML=`<div class="status-pill${isOwner?' editable':''}" onclick="${isOwner?'openStatusModal()':''}">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+      <span>${esc(s)}</span>
+      ${isOwner?'<svg class="sp-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>':''}
+    </div>`;
+  } else if(isOwner){
+    area.innerHTML=`<div class="status-none" onclick="openStatusModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить статус сообщества</div>`;
+  } else area.innerHTML='';
+}
+function openStatusModal(){
+  document.getElementById('statusInput').value=community?.status?.String||community?.status||'';
+  document.getElementById('statusModal').classList.add('open');
+  setTimeout(()=>document.getElementById('statusInput').focus(),150);
+}
+function closeStatusModal(){document.getElementById('statusModal').classList.remove('open');}
+async function saveStatus(){
+  const status=document.getElementById('statusInput').value.trim();
+  try{
+    const r=await fetch(`${API}/communities/${coID}/status`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({status})});
+    if(r.ok){if(community)community.status={String:status,Valid:!!status};renderStatus({String:status});}
+  }catch{if(community)community.status={String:status,Valid:!!status};renderStatus({String:status});}
+  closeStatusModal();
+}
+async function clearStatus(){
+  document.getElementById('statusInput').value='';
+  await saveStatus();
+}
+document.getElementById('statusModal').addEventListener('click',e=>{if(e.target===document.getElementById('statusModal'))closeStatusModal();});
+
+/* ── JOIN ── */
+function updateJoinBtn(){
+  const btn=document.getElementById('btnJoin');
+  if(isMember){btn.textContent='✓ Я участник';btn.className='btn-join in';}
+  else{btn.textContent='Вступить';btn.className='btn-join';}
+  if(isMember)document.getElementById('composeBox').style.display='flex';
+  else document.getElementById('composeBox').style.display='none';
+}
+async function toggleJoin(){
+  const method=isMember?'DELETE':'POST';
+  try{
+    const r=await fetch(`${API}/communities/${coID}/join`,{method,headers:{Authorization:'Bearer '+tk()}});
+    if(r.ok){isMember=!isMember;updateJoinBtn();}
+  }catch{isMember=!isMember;updateJoinBtn();}
+}
+
+/* ── CHAT ── */
+function startChat(){location.href=`/chat.html?community=${coID}`;}
+
+/* ── POSTS ── */
+async function loadPosts(){
+  const container=document.getElementById('postsList');
+  container.innerHTML=skel(3);
+  try{
+    const r=await fetch(`${API}/communities/${coID}/posts`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{posts=[]}=await r.json();
+    renderPosts(posts.length?posts:getDemoPosts());
+  }catch{renderPosts(getDemoPosts());}
+}
+function renderPosts(list){
+  const c=document.getElementById('postsList');
+  if(!list.length){c.innerHTML=`<div style="padding:24px;text-align:center;color:var(--gmt);font-size:13px">Публикаций пока нет. Будьте первым!</div>`;return;}
+  c.innerHTML=list.map((p,i)=>`
+    <article class="post" data-id="${p.id}" style="animation-delay:${(i*.06).toFixed(2)}s">
+      <div class="post-head">
+        <div class="av" style="background:${avc(p.author_name)}">${letter(p.author_name)}</div>
+        <div class="post-meta"><div class="post-author">${esc(p.author_name)}</div><div class="post-time">${ago(p.created_at)} назад</div></div>
+      </div>
+      ${p.title?.String||p.title?`<div class="post-title">${esc(p.title?.String||p.title)}</div>`:''}
+      <div class="post-body">${esc(p.content||'')}</div>
+      ${(p.tags||[]).length?`<div class="post-tags">${(p.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
+      <div class="post-actions">
+        <button class="post-act${p.is_liked?' liked':''}" onclick="likePost(${p.id},this)">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span>${p.likes_count||0}</span>
+        </button>
+        <button class="post-act"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>${p.comments_count||0}</span></button>
+        <button class="post-act"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Поделиться</button>
+        <div class="post-views"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${Math.floor(Math.random()*900+100)}</div>
+      </div>
+    </article>`).join('');
+}
+
+async function likePost(id,btn){
+  const liked=btn.classList.contains('liked'), method=liked?'DELETE':'POST';
+  try{
+    const r=await fetch(`${API}/posts/${id}/like`,{method,headers:{Authorization:'Bearer '+tk()}});
+    if(r.ok){btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(liked?-1:1);}
+  }catch{btn.classList.toggle('liked');const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(btn.classList.contains('liked')?1:-1);}
+}
+
+/* ── POST MODAL ── */
+function openPostModal(){document.getElementById('postModal').classList.add('open');setTimeout(()=>document.getElementById('pmContent').focus(),150);}
+function closePostModal(){document.getElementById('postModal').classList.remove('open');}
+document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closePostModal();});
+async function submitPost(){
+  const content=document.getElementById('pmContent').value.trim();
+  if(!content)return;
+  const btn=document.getElementById('pmSubmit');
+  btn.disabled=true;btn.textContent='Публикуем…';
+  const tags=document.getElementById('pmTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  try{
+    const r=await fetch(`${API}/communities/${coID}/posts`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({title:document.getElementById('pmTitle').value.trim()||null,content,tags})
+    });
+    if(r.ok){closePostModal();document.getElementById('pmTitle').value='';document.getElementById('pmContent').value='';document.getElementById('pmTags').value='';loadPosts();}
+  }catch{closePostModal();loadPosts();}
+  btn.disabled=false;btn.textContent='Опубликовать';
+}
+
+/* ── MEMBERS ── */
+async function loadMembers(){
+  try{
+    const r=await fetch(`${API}/communities/${coID}/members?limit=8`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{members=[]}=await r.json();
+    renderMembers(members.length?members:getDemoMembers());
+  }catch{renderMembers(getDemoMembers());}
+}
+function renderMembers(list){
+  document.getElementById('membersGrid').innerHTML=list.slice(0,7).map(m=>`
+    <a class="mem-item" href="/profile.html?id=${m.user_id}">
+      <div class="mem-av" style="background:${avc(m.full_name)}">${letter(m.full_name)}${m.is_online?'<div class="mem-online"></div>':''}</div>
+      <div class="mem-name">${esc((m.full_name||'').split(' ')[0])}</div>
+    </a>`).join('')+
+    `<button class="mem-more" onclick="location.href='/communities.html?id=${coID}&tab=members'">+ещё</button>`;
+}
+
+/* ── SIMILAR ── */
+async function loadSimilar(){
+  try{
+    const cat=community?.category||'';
+    const r=await fetch(`${API}/communities?category=${encodeURIComponent(cat)}&limit=5`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{communities=[]}=await r.json();
+    const sim=communities.filter(c=>c.id!==coID).slice(0,3);
+    renderSimilar(sim.length?sim:getDemoSimilar());
+  }catch{renderSimilar(getDemoSimilar());}
+}
+function renderSimilar(list){
+  document.getElementById('similarList').innerHTML=list.map(co=>`
+    <div class="sim-item" onclick="location.href='/community-profile.html?id=${co.id}'">
+      <div class="sim-av" style="background:${avc(co.name)}">${letter(co.name)}</div>
+      <div><div class="sim-name">${esc(co.name)}</div><div class="sim-cnt">${num(co.members_count||0)} участников</div></div>
+      <button class="sim-btn${co.is_member?' in':''}" onclick="event.stopPropagation();joinSim(${co.id},this)">${co.is_member?'✓ В сообщ.':'Вступить'}</button>
+    </div>`).join('');
+}
+async function joinSim(id,btn){
+  const isIn=btn.classList.contains('in'), method=isIn?'DELETE':'POST';
+  try{await fetch(`${API}/communities/${id}/join`,{method,headers:{Authorization:'Bearer '+tk()}});}catch{}
+  const now=!isIn; btn.classList.toggle('in',now); btn.textContent=now?'✓ В сообщ.':'Вступить';
+}
+
+/* ── SKELETON ── */
+function skel(n){return Array(n).fill(0).map(()=>`
+  <div style="background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;margin-bottom:10px">
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <div style="width:36px;height:36px;border-radius:var(--rm);background:var(--bg);animation:pulse 1.4s ease-in-out infinite"></div>
+      <div style="flex:1"><div style="height:12px;width:40%;background:var(--bg);border-radius:6px;margin-bottom:6px;animation:pulse 1.4s ease-in-out infinite"></div><div style="height:10px;width:25%;background:var(--bg);border-radius:6px;animation:pulse 1.4s ease-in-out infinite"></div></div>
+    </div>
+    <div style="height:13px;width:75%;background:var(--bg);border-radius:6px;margin-bottom:7px;animation:pulse 1.4s ease-in-out infinite"></div>
+    <div style="height:11px;width:100%;background:var(--bg);border-radius:6px;animation:pulse 1.4s ease-in-out infinite"></div>
+  </div>`).join('');}
+
+/* ── DEMO DATA ── */
+function getDemoComm(){return{id:coID||1,name:'Логистика СНГ',description:'Обсуждаем маршруты, перевозчиков и тарифы по СНГ и за его пределами',category:'Логистика и транспорт',privacy:'open',status:{String:'Обсуждаем новые маршруты через Казахстан',Valid:true},tags:['снг','маршруты','экспорт'],members_count:2400,posts_count:84,activity_count:12000,is_member:true,is_owner:false,created_at:'2022-01-15T00:00:00Z',website:{String:'snglogs.ru',Valid:true},region:{String:'Москва и СНГ',Valid:true}};}
+function getDemoPosts(){return[{id:1,author_name:'Логистика СНГ',content:'Новый маршрут Москва — Алматы через Оренбург: опыт коллег? После закрытия казахстанской таможни на основном КПП многие переходят на альтернативный маршрут. Кто уже пробовал — поделитесь сроками и ценами.',likes_count:18,comments_count:9,is_liked:false,created_at:new Date(Date.now()-7200000).toISOString()},{id:2,author_name:'Алексей Иванов',content:'Рейтинг перевозчиков Москва–Алматы за апрель 2026. Собрал отзывы по 12 перевозчикам на маршруте. FastCargo и NorthBridge лидируют по соотношению цена/срок.',tags:['рейтинг','перевозчики'],likes_count:34,comments_count:21,is_liked:true,created_at:new Date(Date.now()-86400000).toISOString()},{id:3,author_name:'Марина Соколова',content:'Коллеги, кто оформлял ТТН при мультимодальной перевозке авто+ж/д? Столкнулась с проблемой — один экспедитор требует отдельные накладные, другой принимает единый коносамент.',likes_count:7,comments_count:5,is_liked:false,created_at:new Date(Date.now()-172800000).toISOString()}];}
+function getDemoMembers(){return[{user_id:1,full_name:'Алексей Иванов',is_online:true},{user_id:2,full_name:'Марина Соколова',is_online:false},{user_id:3,full_name:'Дмитрий Козлов',is_online:true},{user_id:4,full_name:'Ольга Павлова',is_online:false},{user_id:5,full_name:'Сергей Новиков',is_online:true},{user_id:6,full_name:'Елена Морозова',is_online:false},{user_id:7,full_name:'Игорь Белов',is_online:false}];}
+function getDemoSimilar(){return[{id:2,name:'Экспортёры РФ',members_count:1100,is_member:false},{id:5,name:'Фармлогистика',members_count:430,is_member:false},{id:6,name:'АПК и экспорт',members_count:680,is_member:false}];}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeStatusModal();closePostModal();}});
+</script>
+</body>
+</html>
