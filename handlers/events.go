@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lastop/lastop/database"
-	"github.com/lastop/lastop/models"
+	"lastop/database"
+	"lastop/models"
 )
 
 // ══════════════════════════════════════════════════════════════════
