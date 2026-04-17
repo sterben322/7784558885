@@ -127,6 +127,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .bubble-name{font-size:11px;font-weight:700;color:var(--g);margin-bottom:3px}
 .bubble-text{color:var(--t)}
 .bubble-img{width:100%;max-width:280px;border-radius:var(--rm);display:block;margin-bottom:4px;border:1px solid var(--bdr)}
+.bubble-img-btn{border:none;background:transparent;padding:0;cursor:zoom-in;width:100%}
 .bubble-file{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer}
 .bubble-file-icon{width:32px;height:32px;border-radius:var(--r);background:var(--gl);display:grid;place-items:center;flex-shrink:0;color:var(--g)}
 .bubble-file-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -228,6 +229,14 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .ctx-mi.red{color:var(--red)}
 .ctx-mi.red:hover{background:#FFF0F0}
 .ctx-mi svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ─── IMAGE VIEWER ─── */
+.img-viewer{position:fixed;inset:0;z-index:200;background:rgba(10,14,12,.74);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:20px}
+.img-viewer.open{display:flex}
+.img-viewer-content{position:relative;max-width:min(96vw,1200px);max-height:92vh;display:flex;align-items:center;justify-content:center}
+.img-viewer img{max-width:100%;max-height:92vh;border-radius:12px;box-shadow:0 14px 48px rgba(0,0,0,.35);object-fit:contain}
+.img-viewer-close{position:absolute;top:-10px;right:-10px;width:34px;height:34px;border:none;border-radius:50%;background:rgba(255,255,255,.9);color:#243328;cursor:pointer;display:grid;place-items:center}
+.img-viewer-close svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 
 /* animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -510,6 +519,13 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 </div>
 <input type="file" id="editAttachInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none">
 
+<div class="img-viewer" id="imgViewer">
+  <div class="img-viewer-content">
+    <button class="img-viewer-close" id="imgViewerClose" aria-label="Закрыть изображение"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <img id="imgViewerImage" src="" alt="Изображение">
+  </div>
+</div>
+
 <script>
 const API='/api',tk=()=>localStorage.getItem('token');
 const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
@@ -520,6 +536,22 @@ let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
 const messagesCache=new Map();
 const MAX_ATTACHMENT_SIZE=50*1024*1024;
 let typingPollTimer=null,typingStopTimer=null,lastTypingSent=false,typingRequestAt=0;
+
+const imgViewer=document.getElementById('imgViewer');
+const imgViewerImage=document.getElementById('imgViewerImage');
+function openImageViewer(src){
+  if(!src)return;
+  imgViewerImage.src=src;
+  imgViewer.classList.add('open');
+}
+function closeImageViewer(){
+  imgViewer.classList.remove('open');
+  imgViewerImage.src='';
+}
+document.getElementById('imgViewerClose').addEventListener('click',closeImageViewer);
+imgViewer.addEventListener('click',e=>{
+  if(e.target===imgViewer)closeImageViewer();
+});
 let activeMessagesRequestId=0;
 
 
@@ -788,16 +820,35 @@ function buildBubble(msg,isOut,showAvatar,showName,isLast){
   const color=avc(msg.sender_name);
   const avHtml=isOut?'':`<div class="msg-avatar${showAvatar?'':' hidden'}" style="background:${color}">${(msg.sender_name||'?')[0].toUpperCase()}</div>`;
   const nameHtml=showName?`<div class="bubble-name">${esc(msg.sender_name)}</div>`:'';
-  const replyHtml=msg.reply_to?`<div class="reply-preview"><div class="reply-preview-name">${esc(msg.reply_to.sender_name)}</div><div class="reply-preview-text">${esc(msg.reply_to.text)}</div></div>`:'';
-  const fileHtml=msg.file?`<a class="bubble-file" href="${esc(msg.file.url||'#')}" target="_blank" rel="noopener noreferrer"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></a>`:''
-  const imgHtml=msg.image_url?`<img class="bubble-img" src="${esc(msg.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';
+  const replyHtml=msg.reply_to?`<div class="reply-preview" data-reply-id="${esc(msg.reply_to.id||'')}"><div class="reply-preview-name">${esc(msg.reply_to.sender_name)}</div><div class="reply-preview-text">${esc(msg.reply_to.text)}</div></div>`:'';
+  const showImage=Boolean(msg.image_url);
+  const showFile=Boolean(msg.file)&&!showImage;
+  const fileHtml=showFile?`<a class="bubble-file" href="${esc(msg.file.url||'#')}" target="_blank" rel="noopener noreferrer"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></a>`:'';
+  const imgHtml=showImage?`<button type="button" class="bubble-img-btn" data-image-url="${esc(msg.image_url)}"><img class="bubble-img" src="${esc(msg.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'"></button>`:'';
   const timeStr=new Date(msg.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const editedHtml=msg.is_edited?'<span style="font-size:11px;color:var(--gmt);margin-right:6px">(изменено)</span>':'';
   const checkHtml=isOut?`<span class="bubble-check${msg.read?'':' unread'}"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/>${msg.read?'<polyline points="20,2 9,13 4,8"/>':''}</svg></span>`:'';
   const tail=showAvatar?'tail':'';
   row.innerHTML=`${avHtml}<div class="bubble ${isOut?'out':'in'} ${tail}" data-msgid="${esc(msg.id)}">${nameHtml}${replyHtml}${imgHtml}${fileHtml}${msg.text?`<div class="bubble-text">${esc(msg.text)}</div>`:''}<div class="bubble-meta">${editedHtml}<span class="bubble-time">${timeStr}</span>${checkHtml}</div></div>`;
-  row.querySelector('.bubble').addEventListener('contextmenu',e=>{e.preventDefault();showCtxMenu(e,msg,isOut);});
+  const bubble=row.querySelector('.bubble');
+  bubble.addEventListener('contextmenu',e=>{e.preventDefault();showCtxMenu(e,msg,isOut);});
+  bubble.querySelector('.reply-preview')?.addEventListener('click',()=>{
+    scrollToMessage(msg.reply_to?.id);
+  });
+  bubble.querySelector('.bubble-img-btn')?.addEventListener('click',()=>{
+    if(msg.image_url)openImageViewer(msg.image_url);
+  });
   return row;
+}
+
+function scrollToMessage(messageId){
+  if(!messageId)return;
+  const target=document.querySelector(`.bubble[data-msgid="${CSS.escape(messageId)}"]`);
+  if(!target)return;
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  target.style.transition='box-shadow .35s ease';
+  target.style.boxShadow='0 0 0 2px rgba(34,160,90,.55)';
+  setTimeout(()=>{target.style.boxShadow='none';},900);
 }
 
 /* ── TYPING INDICATOR ── */
@@ -1057,6 +1108,7 @@ async function sendMessage(){
     for(const file of pendingFiles){
       const fd=new FormData();
       fd.append('attachment',file);
+      if(replyToId)fd.append('reply_to_id',replyToId);
       const fileResponse=await fetch(API+'/chats/'+currentConv.id+'/messages',{
         method:'POST',
         headers:{Authorization:'Bearer '+tk()},
@@ -1199,6 +1251,7 @@ function formatTime(ts){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     closeUinfo();
+    closeImageViewer();
     document.getElementById('ctxMenu').classList.remove('show');
   }
 });
