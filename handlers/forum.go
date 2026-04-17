@@ -112,12 +112,6 @@ func GetForumSections(c *gin.Context) {
 
 // CreateForumSection POST /api/forum/sections
 func CreateForumSection(c *gin.Context) {
-	userID := currentUserID(c)
-	if !isForumAdmin(c, userID.String()) {
-		jsonError(c, http.StatusForbidden, "only admins can create sections")
-		return
-	}
-
 	var body struct {
 		Name        string `json:"name" binding:"required,min=2,max=120"`
 		Description string `json:"description"`
@@ -693,12 +687,6 @@ func UnlikeForumMessage(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true})
-}
-
-func isForumAdmin(c *gin.Context, userID string) bool {
-	var isAdmin bool
-	_ = database.DB.QueryRowContext(c, `SELECT COALESCE(is_admin, false) FROM users WHERE id = $1::uuid`, userID).Scan(&isAdmin)
-	return isAdmin
 }
 
 func queryIntForum(c *gin.Context, key string, def int) int {
