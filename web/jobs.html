@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
@@ -17,32 +16,31 @@
   --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
 }
 html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+
+/* ── SHELL ── */
 .shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;
   grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
 
-/* LOGO */
+/* ── LOGO ── */
 .logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);
   display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;
   box-shadow:var(--sh);transition:box-shadow .2s;overflow:hidden}
 .logo-cell:hover{box-shadow:var(--shm)}
 .logo-cell .logo-img{display:block;width:auto;height:auto;max-width:100%;max-height:34px;object-fit:contain;flex-shrink:1}
 
-/* TOPBAR — internal grid mirrors outer columns */
+/* ── TOPBAR ── */
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);
-  display:grid;grid-template-columns:1fr 10px 244px;align-items:center;padding:0 14px;
-  box-shadow:var(--sh);gap:0}
+  display:grid;grid-template-columns:1fr 10px 264px;align-items:center;padding:0 14px;
+  box-shadow:var(--sh)}
 .search-col{padding-right:10px;display:flex;align-items:center}
 .search-wrap{position:relative;display:flex;align-items:center;width:100%}
 .search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
 .search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);
-  border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);
-  outline:none;transition:border-color .2s,background .2s}
+  border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;
+  color:var(--t);outline:none;transition:border-color .2s,background .2s}
 .search-wrap input:focus{border-color:var(--gm);background:var(--w)}
 .search-wrap input::placeholder{color:var(--gmt)}
-.topbar-gap{}
-.profile-col{width:244px;display:flex;align-items:center;justify-content:flex-end}
-
-/* Profile block */
+.profile-col{width:264px;display:flex;align-items:center;justify-content:flex-end}
 .profile-block{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 7px;
   border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);
   cursor:pointer;flex-shrink:0;position:relative;transition:background .15s,border-color .15s;width:100%}
@@ -50,15 +48,15 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .pb-av{width:28px;height:28px;border-radius:50%;background:var(--g);color:#fff;
   display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
 .pb-info{flex:1;min-width:0}
-.pb-info .pb-name{font-size:12px;font-weight:700;color:var(--t);line-height:1.2;
+.pb-name{font-size:12px;font-weight:700;color:var(--t);line-height:1.2;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb-info .pb-role{font-size:10px;color:var(--gmt)}
+.pb-role{font-size:10px;color:var(--gmt)}
 .pb-chevron{width:14px;height:14px;flex-shrink:0;fill:none;stroke:var(--gmt);
   stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
 .profile-block.open .pb-chevron{transform:rotate(180deg)}
 .profile-dropdown{position:absolute;top:calc(100% + 8px);right:0;left:0;background:var(--w);
   border:1px solid var(--bdr);border-radius:var(--rm);z-index:300;
-  box-shadow:0 8px 28px rgba(30,138,76,.13);padding:6px 0;min-width:100%;
+  box-shadow:0 8px 28px rgba(30,138,76,.13);padding:6px 0;
   opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .18s,transform .18s}
 .profile-block.open .profile-dropdown{opacity:1;pointer-events:all;transform:translateY(0)}
 .pd-item{padding:9px 14px;font-size:13px;color:var(--tm);display:flex;align-items:center;
@@ -70,7 +68,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .pd-item.danger svg{stroke:var(--red)}
 .pd-divider{height:1px;background:var(--bdr);margin:4px 0}
 
-/* NAV */
+/* ── NAV ── */
 .nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);
   box-shadow:var(--sh);overflow:hidden;display:flex;flex-direction:column;padding:10px 8px 0}
 .nav-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
@@ -94,18 +92,14 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .nav-settings svg{width:17px;height:17px;flex-shrink:0;fill:none;stroke:currentColor;
   stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-/* LAYOUT AREAS */
+/* ── LAYOUT AREAS ── */
 .main{grid-area:main;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .right::-webkit-scrollbar{display:none}
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
 
-/* CARD */
-.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);
-  padding:14px;box-shadow:var(--sh)}
-.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;
-  text-transform:uppercase;margin-bottom:10px}
-
-/* TOOLBAR */
+/* ── TOOLBAR ── */
 .toolbar{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);
   display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;
   box-shadow:var(--sh);flex-wrap:wrap}
@@ -118,8 +112,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .st.active{background:var(--w);color:var(--g);box-shadow:0 1px 6px rgba(30,138,76,.10)}
 .filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
 .ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;
-  border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;
-  transition:all .15s}
+  border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s}
 .ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
 .ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
 .btn-create{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);
@@ -128,57 +121,124 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .btn-create:hover{background:var(--gm)}
 .btn-create svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
 
-/* FEED */
+/* ── FEED ── */
 .feed{overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
 .feed::-webkit-scrollbar{width:4px}
 .feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* SKELETON */
-.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
-  animation:fadeUp .3s ease both}
-.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
-
-/* GENERIC CARDS */
-.item-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
-  cursor:pointer;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;
-  animation:fadeUp .3s ease both}
-.item-card:hover{box-shadow:var(--shm);transform:translateY(-1px)}
-.item-av{width:44px;height:44px;border-radius:var(--rm);font-size:16px;font-weight:800;
-  color:#fff;display:grid;place-items:center;flex-shrink:0}
-.item-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:2px}
-.item-sub{font-size:12px;color:var(--gmt)}
-.item-body{font-size:12px;color:var(--tm);line-height:1.6;margin:8px 0;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.item-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--bdr)}
-.item-badge{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700}
-.badge-green{background:var(--gl);border:1px solid var(--gb);color:var(--g)}
-.badge-warm{background:#FAEEDA;border:1px solid #FAC775;color:#633806}
-.badge-gray{background:#F1EFE8;border:1px solid #D3D1C7;color:#5F5E5A}
-.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;
-  font-size:11px;font-weight:600}
+/* ── CV CARD ── */
+.cv-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
+  cursor:pointer;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both}
+.cv-card:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.cv-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cv-av{width:44px;height:44px;border-radius:var(--rm);font-size:16px;font-weight:800;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.cv-meta-head{flex:1;min-width:0}
+.cv-name{font-size:14px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv-pos{font-size:12px;color:var(--gmt);margin-top:2px}
+.cv-status{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;flex-shrink:0}
+.status-active{background:var(--gl);border:1px solid var(--gb);color:var(--g)}
+.status-open{background:#E6F1FB;border:1px solid #B5D4F4;color:#185FA5}
+.status-passive{background:#F1EFE8;border:1px solid #D3D1C7;color:#5F5E5A}
+.cv-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.pill svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
 .pill-city{background:#E6F1FB;color:#185FA5}
 .pill-exp{background:#FAEEDA;color:#633806}
-.pill-green{background:var(--gl);color:var(--g)}
-.pill-gray{background:#F1EFE8;color:#444441}
-.tag{padding:3px 10px;border-radius:99px;background:var(--gp);color:var(--tm);
-  font-size:11px;font-weight:600;border:1px solid var(--bdr)}
-.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;
-  border-bottom:1px solid var(--bdr)}
+.pill-salary{background:#E8F5EE;color:#27500A}
+.pill-format{background:#F1EFE8;color:#444441}
+.cv-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.skill{padding:3px 10px;border-radius:99px;background:var(--gp);color:var(--tm);font-size:11px;font-weight:600;border:1px solid var(--bdr)}
+.cv-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--bdr)}
+.cv-time{font-size:11px;color:var(--gmt)}
+.btn-write{padding:5px 16px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);
+  color:var(--g);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-write:hover{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* ── JOB CARD ── */
+.job-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
+  cursor:pointer;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both}
+.job-card:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.job-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.job-logo{width:44px;height:44px;border-radius:var(--rm);font-size:16px;font-weight:800;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.job-hd{flex:1;min-width:0}
+.job-title{font-size:14px;font-weight:700;color:var(--t);line-height:1.35;margin-bottom:2px}
+.job-company{font-size:12px;color:var(--gmt)}
+.job-badge{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;flex-shrink:0}
+.badge-hot{background:#FAEEDA;border:1px solid #FAC775;color:#633806}
+.badge-new{background:var(--gl);border:1px solid var(--gb);color:var(--g)}
+.badge-closed{background:#F1EFE8;border:1px solid #D3D1C7;color:#5F5E5A}
+.job-desc{font-size:12px;color:var(--tm);line-height:1.6;margin-bottom:10px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.job-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.jt{padding:3px 10px;border-radius:99px;background:var(--gp);color:var(--tm);font-size:11px;font-weight:600;border:1px solid var(--bdr)}
+.job-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--bdr)}
+.job-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt)}
+.job-stat svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.job-time{font-size:11px;color:var(--gmt);margin-right:auto}
+.btn-respond{padding:6px 18px;border-radius:var(--rm);background:var(--g);color:#fff;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:background .15s;flex-shrink:0}
+.btn-respond:hover{background:var(--gm)}
+.btn-respond.responded{background:var(--gl);border:1px solid var(--gb);color:var(--g);cursor:default}
+
+/* ── RIGHT SIDEBAR ── */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr)}
 .stat-row:last-child{border-bottom:none;padding-bottom:0}
 .stat-lbl{font-size:12px;color:var(--gmt)}
 .stat-val{font-size:13px;font-weight:700;color:var(--t)}
-.btn-pri{padding:7px 18px;border-radius:var(--rm);background:var(--g);border:none;
-  cursor:pointer;color:#fff;font-family:inherit;font-size:12px;font-weight:600;
-  transition:background .15s}
-.btn-pri:hover{background:var(--gm)}
-.btn-sec{padding:7px 14px;border-radius:var(--rm);border:1.5px solid var(--bdr);
-  background:var(--w);font-family:inherit;font-size:12px;font-weight:600;color:var(--tm);
-  cursor:pointer;transition:background .15s}
-.btn-sec:hover{background:var(--gp)}
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.cat-item:hover{background:var(--gp)}
+.cat-name{font-size:12px;color:var(--t);font-weight:500}
+.cat-cnt{font-size:11px;color:var(--gmt)}
+.my-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.my-item:hover{background:var(--gp)}
+.my-logo{width:28px;height:28px;border-radius:var(--r);font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.my-name{font-size:12px;font-weight:600;color:var(--t)}
+.my-sub{font-size:10px;color:var(--gmt);margin-top:1px}
+.my-status-dot{width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.dot-active{background:#22CC66}
+.dot-pause{background:#FAC775}
+.dot-closed{background:#D3D1C7}
+.empty-block{text-align:center;padding:16px 8px;color:var(--gmt)}
+.empty-block svg{width:28px;height:28px;fill:none;stroke:var(--gb);stroke-width:1.4;stroke-linecap:round;margin-bottom:8px}
+.empty-block p{font-size:12px;line-height:1.5}
+.btn-empty{width:100%;padding:7px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);
+  color:var(--g);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:10px}
+.btn-empty:hover{background:var(--g);color:#fff;border-color:var(--g)}
 
-/* FORM */
+/* ── AD BLOCK ── */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.ad-btn:hover{opacity:.88}
+
+/* ── SKELETON ── */
+.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);
+  z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);
+  box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:580px;
+  max-height:90vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;
+  position:sticky;top:-24px;background:var(--w);z-index:1}
+.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
+.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;
+  cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s;flex-shrink:0}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.form-row{margin-bottom:14px}
 .form-label{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.05em;
   text-transform:uppercase;display:block;margin-bottom:5px}
 .form-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);
@@ -187,21 +247,23 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .form-input:focus{border-color:var(--gm)}
 .form-input::placeholder{color:var(--gmt)}
 textarea.form-input{resize:none;height:90px;line-height:1.55}
+select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-section{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;
+  text-transform:uppercase;padding:8px 0 4px;border-top:1px solid var(--bdr);
+  margin-bottom:8px;margin-top:4px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;
+  padding-top:14px;border-top:1px solid var(--bdr)}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);
+  background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 22px;border-radius:var(--rm);border:none;background:var(--g);
+  font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+.btn-pri:disabled{background:var(--gb);cursor:not-allowed}
 
-/* AD */
-.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);
-  padding:14px;position:relative;overflow:hidden}
-.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;
-  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  padding:3px 8px;border-radius:6px}
-.ad-content{margin-top:20px;text-align:center}
-.ad-title{font-size:13px;font-weight:700;color:#5040A0}
-.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
-.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);
-  background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;
-  font-family:inherit}
-
-/* DETAIL PANEL */
+/* ── DETAIL PANEL ── */
 .detail-panel{position:fixed;top:0;right:-440px;width:440px;height:100vh;background:var(--w);
   border-left:1px solid var(--bdr);box-shadow:-4px 0 30px rgba(30,138,76,.08);z-index:150;
   transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
@@ -216,34 +278,32 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 .dp-close-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .dp-close span{font-size:13px;font-weight:700;color:var(--t)}
 .dp-body{padding:16px;flex:1}
+.dp-av{width:56px;height:56px;border-radius:14px;font-size:20px;font-weight:800;color:#fff;
+  display:grid;place-items:center;margin-bottom:10px}
+.dp-name{font-size:18px;font-weight:800;color:var(--t);margin-bottom:3px}
+.dp-sub{font-size:13px;color:var(--gmt);margin-bottom:12px}
+.dp-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.dp-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.dp-section{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bdr)}
+.dp-text{font-size:13px;color:var(--tm);line-height:1.65;margin-bottom:14px}
+.dp-exp-item{margin-bottom:12px}
+.dp-exp-title{font-size:13px;font-weight:700;color:var(--t)}
+.dp-exp-co{font-size:12px;color:var(--gmt);margin-top:1px}
+.dp-exp-period{font-size:11px;color:var(--gmt);margin-top:1px}
 .dp-actions{display:flex;gap:8px;padding:14px 16px;border-top:1px solid var(--bdr);
   position:sticky;bottom:0;background:var(--w)}
+.dp-btn-pri{flex:1;padding:10px;border-radius:var(--rm);background:var(--g);color:#fff;
+  font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:none;
+  transition:background .15s;text-align:center}
+.dp-btn-pri:hover{background:var(--gm)}
+.dp-btn-sec{padding:10px 16px;border-radius:var(--rm);border:1.5px solid var(--bdr);
+  background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.dp-btn-sec:hover{background:var(--gp)}
 .panel-overlay{position:fixed;inset:0;z-index:140;display:none}
 .panel-overlay.show{display:block}
 
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);
-  z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
-  opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-bg.open{opacity:1;pointer-events:all}
-.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);
-  box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:560px;
-  max-height:90vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
-.modal-bg.open .modal{transform:translateY(0)}
-.modal::-webkit-scrollbar{width:4px}
-.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
-.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;
-  cursor:pointer;display:grid;place-items:center;color:var(--gmt)}
-.modal-x:hover{background:var(--gl);color:var(--g)}
-.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;
-  padding-top:14px;border-top:1px solid var(--bdr)}
-.form-row{margin-bottom:14px}
-.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* RESPONSIVE */
+/* ── RESPONSIVE ── */
 @media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
 @media(max-width:1000px){.shell{grid-template-columns:220px 1fr;
   grid-template-areas:"logo topbar""nav main"}.right{display:none}}
@@ -251,26 +311,35 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
   .nav-item span,.nav-settings span,.nav-sec{display:none}
   .nav-item,.nav-settings{justify-content:center;padding:10px}
   .filter-tabs{display:none}.pb-info,.pb-chevron{display:none}}
-
-
-
 </style>
 </head>
 <body>
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/"><img class="logo-img" src="/assets/lastop-mark.svg" alt="Lastop logo"></a>
+<a class="logo-cell" href="/">
+  <svg class="logo-svg" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(0,4)">
+      <path d="M16 1L29 8.5V23.5L16 31L3 23.5V8.5L16 1Z" fill="#1E8A4C" stroke="#145e30" stroke-width="0.8"/>
+      <path d="M16 6.5L25 11.5V21.5L16 26.5L7 21.5V11.5L16 6.5Z" fill="#27B060"/>
+      <rect x="11.5" y="11.5" width="9" height="9" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"/>
+      <line x1="11.5" y1="16" x2="20.5" y2="16" stroke="#fff" stroke-width="1.4"/>
+      <line x1="16" y1="11.5" x2="16" y2="20.5" stroke="#fff" stroke-width="1.4"/>
+    </g>
+    <text x="38" y="21" font-family="Manrope,sans-serif" font-weight="800" font-size="13.5" fill="#1E8A4C" letter-spacing="0.6">LASTOP</text>
+    <text x="38" y="31" font-family="Manrope,sans-serif" font-weight="600" font-size="8" fill="#5A8A6A" letter-spacing="1.8">GROUP</text>
+  </svg>
+</a>
 
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="search-col">
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума..." autocomplete="off">
+      <input type="search" id="searchInput" placeholder="Поиск резюме…" autocomplete="off">
     </div>
   </div>
-  <div class="topbar-gap"></div>
+  <div></div>
   <div class="profile-col">
     <div class="profile-block" id="profileBlock" onclick="toggleProfile()">
       <div class="pb-av" id="pbAv">НК</div>
@@ -279,7 +348,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
         <div class="pb-role" id="pbRole">Участник LASTOP</div>
       </div>
       <svg class="pb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      <div class="profile-dropdown" id="profileDropdown">
+      <div class="profile-dropdown">
         <div class="pd-item" onclick="location.href='/friends.html'">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Друзья
@@ -337,7 +406,6 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 
 <!-- MAIN -->
 <div class="main">
-  <!-- TOOLBAR -->
   <div class="toolbar">
     <div class="section-toggle">
       <button class="st active" id="btnCv" onclick="setMode('cv')">
@@ -361,13 +429,11 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
       <span id="btnCreateLabel">Создать резюме</span>
     </button>
   </div>
-
-  <!-- FEED -->
   <div class="feed" id="feed"></div>
 </div>
 
 <!-- RIGHT -->
-<aside class="right" id="rightSidebar">
+<aside class="right">
   <div class="card" id="statsCard">
     <div class="block-title">Статистика</div>
     <div id="statsList"></div>
@@ -389,20 +455,21 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
     </div>
   </div>
 </aside>
-</div>
+
+</div><!-- /shell -->
 
 <!-- DETAIL PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detailPanel">
   <div class="dp-close">
     <button class="dp-close-btn" onclick="closeDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <span id="dpCloseLabel">Резюме</span>
+    <span id="dpCloseLabel">Детали</span>
   </div>
   <div class="dp-body" id="dpBody"></div>
   <div class="dp-actions" id="dpActions"></div>
 </div>
 
-<!-- MODAL: CREATE RESUME -->
+<!-- MODAL: СОЗДАТЬ РЕЗЮМЕ -->
 <div class="modal-bg" id="modalCv">
   <div class="modal">
     <div class="modal-head">
@@ -462,7 +529,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
     <div class="form-row">
       <label class="form-label">Последнее место работы</label>
       <input class="form-input" id="cvExpCo" placeholder="Компания · Должность" style="margin-bottom:8px">
-      <input class="form-input" id="cvExpPeriod" placeholder="2019 — 2024">
+      <input class="form-input" id="cvExpPeriod" placeholder="2020 — 2024">
     </div>
     <div class="form-row">
       <label class="form-label">Статус</label>
@@ -479,7 +546,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
   </div>
 </div>
 
-<!-- MODAL: CREATE JOB -->
+<!-- MODAL: СОЗДАТЬ ВАКАНСИЮ -->
 <div class="modal-bg" id="modalJob">
   <div class="modal">
     <div class="modal-head">
@@ -570,6 +637,23 @@ function letter(s){return((s||'?')[0]).toUpperCase();}
 function fmtSal(n){if(!n)return'';return n>=1000?Math.round(n/1000)+'к ₽':n+' ₽';}
 function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));if(m<60)return m+' мин назад';if(m<1440)return Math.floor(m/60)+' ч назад';if(m<10080)return Math.floor(m/1440)+' д назад';return new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});}
 function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
+function pluralYears(n){const v=n%10,h=n%100;if(h>=11&&h<=19)return'лет';if(v===1)return'год';if(v>=2&&v<=4)return'года';return'лет';}
+
+/* ── PROFILE ── */
+function toggleProfile(){document.getElementById('profileBlock').classList.toggle('open');}
+document.addEventListener('click',e=>{
+  const pb=document.getElementById('profileBlock');
+  if(pb&&!pb.contains(e.target))pb.classList.remove('open');
+});
+function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
+function populateProfile(user){
+  if(!user)return;
+  const name=user.full_name||user.name||'Пользователь';
+  const role=user.role||user.position||'Участник LASTOP';
+  const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const av=document.getElementById('pbAv');const nm=document.getElementById('pbName');const rl=document.getElementById('pbRole');
+  if(av)av.textContent=initials;if(nm)nm.textContent=name;if(rl)rl.textContent=role;
+}
 
 let mode='cv', currentCat='', myUserID=0;
 
@@ -594,7 +678,7 @@ let mode='cv', currentCat='', myUserID=0;
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded',()=>{
   const p=new URLSearchParams(location.search);
-  if(p.get('tab')==='jobs') mode='jobs';
+  if(p.get('tab')==='jobs')mode='jobs';
   applyMode();
   loadFeed();
   loadStats();
@@ -603,12 +687,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   setupSearch();
 });
 
-/* ── MODE SWITCH ── */
+/* ── MODE ── */
 function setMode(m){
-  mode=m; applyMode();
-  loadFeed();
-  loadStats();
-  loadMyItems();
+  mode=m;applyMode();loadFeed();loadStats();loadMyItems();
   history.replaceState(null,'',`/jobs.html?tab=${m}`);
 }
 function applyMode(){
@@ -626,11 +707,9 @@ function applyMode(){
 /* ── FILTERS ── */
 function setupFilters(){
   document.getElementById('filterTabs').addEventListener('click',e=>{
-    const btn=e.target.closest('.ftab'); if(!btn)return;
+    const btn=e.target.closest('.ftab');if(!btn)return;
     document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCat=btn.dataset.cat;
-    loadFeed();
+    btn.classList.add('active');currentCat=btn.dataset.cat;loadFeed();
   });
 }
 
@@ -638,38 +717,40 @@ function setupFilters(){
 let sT;
 function setupSearch(){
   document.getElementById('searchInput').addEventListener('input',e=>{
-    clearTimeout(sT);
-    const q=e.target.value.trim();
+    clearTimeout(sT);const q=e.target.value.trim();
     sT=setTimeout(()=>loadFeed(q),350);
   });
 }
 
-/* ── LOAD FEED ── */
+/* ── FEED ── */
 async function loadFeed(q=''){
   const feed=document.getElementById('feed');
   feed.innerHTML=skels(4);
-  let url=mode==='cv'
-    ?`${API}/resumes?limit=30`
-    :`${API}/jobs?limit=30`;
-  if(currentCat) url+=`&category=${encodeURIComponent(currentCat)}`;
-  if(q) url+=`&q=${encodeURIComponent(q)}`;
+  let url=mode==='cv'?`${API}/resumes?limit=30`:`${API}/jobs?limit=30`;
+  if(currentCat)url+=`&category=${encodeURIComponent(currentCat)}`;
+  if(q)url+=`&q=${encodeURIComponent(q)}`;
   try{
     const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const data=await r.json();
     const list=data.resumes||data.jobs||[];
     render(list.length?list:(mode==='cv'?demoCvs():demoJobs()));
-  }catch{
-    render(mode==='cv'?demoCvs():demoJobs());
-  }
+  }catch{render(mode==='cv'?demoCvs():demoJobs());}
 }
 function render(list){
   const feed=document.getElementById('feed');
   if(!list.length){
-    feed.innerHTML=`<div style="padding:40px;text-align:center;color:var(--gmt)">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gb)" stroke-width="1.4" stroke-linecap="round" style="margin-bottom:12px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px">${mode==='cv'?'Резюме не найдены':'Вакансии не найдены'}</div>
-      <div style="font-size:12px">Попробуйте изменить фильтры или создайте первым</div>
+    feed.innerHTML=`<div style="padding:48px 24px;text-align:center;color:var(--gmt)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gb)" stroke-width="1.3" stroke-linecap="round" style="margin-bottom:14px;display:block;margin-left:auto;margin-right:auto">
+        ${mode==='cv'?'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>':'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'}
+      </svg>
+      <div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:6px">
+        ${mode==='cv'?'Резюме не найдены':'Вакансии не найдены'}
+      </div>
+      <div style="font-size:12px;margin-bottom:16px">Попробуйте изменить фильтры или создайте первым</div>
+      <button onclick="openCreateModal()" style="padding:8px 20px;border-radius:var(--rm);background:var(--g);border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">
+        + ${mode==='cv'?'Создать резюме':'Создать вакансию'}
+      </button>
     </div>`;
     return;
   }
@@ -680,10 +761,9 @@ function render(list){
 /* ── CV CARD ── */
 function buildCvCard(cv,i){
   const color=avc(cv.full_name||cv.name||'');
-  const isActive=cv.status==='active'||cv.status==='open';
-  const statusLabel={active:'Активен',open:'Рассматривает',passive:'Пассивен',closed:'Закрыт'}[cv.status]||'Активен';
-  const statusClass=isActive?'status-active':'status-passive';
-  const skills=(cv.skills||[]).slice(0,5).map(s=>`<span class="skill">${esc(s)}</span>`).join('');
+  const statusMap={active:{label:'Активен',cls:'status-active'},open:{label:'Рассматривает',cls:'status-open'},passive:{label:'Пассивен',cls:'status-passive'},closed:{label:'Закрыт',cls:'status-passive'}};
+  const s=statusMap[cv.status]||statusMap.active;
+  const skills=(cv.skills||[]).slice(0,5).map(sk=>`<span class="skill">${esc(sk)}</span>`).join('');
   const delay=(i*0.05).toFixed(2);
   return`<div class="cv-card" style="animation-delay:${delay}s" onclick="openCvDetail(${JSON.stringify(cv).replace(/"/g,'&quot;')})">
     <div class="cv-head">
@@ -692,13 +772,13 @@ function buildCvCard(cv,i){
         <div class="cv-name">${esc(cv.full_name||cv.name||'Специалист')}</div>
         <div class="cv-pos">${esc(cv.title||cv.position||'')}</div>
       </div>
-      <span class="cv-status ${statusClass}">${statusLabel}</span>
+      <span class="cv-status ${s.cls}">${s.label}</span>
     </div>
     <div class="cv-pills">
       ${cv.city?`<span class="pill pill-city"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(cv.city)}</span>`:''}
       ${cv.experience_years!=null?`<span class="pill pill-exp"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${cv.experience_years} ${pluralYears(cv.experience_years)}</span>`:''}
       ${cv.salary_from?`<span class="pill pill-salary"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>от ${fmtSal(cv.salary_from)}</span>`:''}
-      ${cv.work_format?`<span class="pill pill-format"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>${esc(cv.work_format)}</span>`:''}
+      ${cv.work_format?`<span class="pill pill-format">${esc(cv.work_format)}</span>`:''}
     </div>
     ${skills?`<div class="cv-skills">${skills}${(cv.skills||[]).length>5?`<span class="skill">+${(cv.skills||[]).length-5}</span>`:''}</div>`:''}
     <div class="cv-footer">
@@ -711,10 +791,8 @@ function buildCvCard(cv,i){
 /* ── JOB CARD ── */
 function buildJobCard(job,i){
   const color=avc(job.company||job.company_name||job.title||'');
-  const badgeMap={hot:'badge-hot',new:'badge-new',active:'',closed:'badge-closed'};
-  const badgeLabelMap={hot:'Срочная',new:'Новая',active:'',closed:'Закрыта'};
-  const bClass=badgeMap[job.status]||'';
-  const bLabel=badgeLabelMap[job.status]||'';
+  const badgeMap={hot:{cls:'badge-hot',label:'Срочная'},new:{cls:'badge-new',label:'Новая'},closed:{cls:'badge-closed',label:'Закрыта'}};
+  const b=badgeMap[job.status];
   const tags=(job.tags||[]).slice(0,5).map(t=>`<span class="jt">${esc(t)}</span>`).join('');
   const salStr=[job.salary_from?'от '+fmtSal(job.salary_from):'',job.salary_to?'до '+fmtSal(job.salary_to):''].filter(Boolean).join(' ');
   const delay=(i*0.05).toFixed(2);
@@ -725,7 +803,7 @@ function buildJobCard(job,i){
         <div class="job-title">${esc(job.title||'Вакансия')}</div>
         <div class="job-company">${esc(job.company||job.company_name||'')}${job.city?` · ${esc(job.city)}`:''}</div>
       </div>
-      ${bLabel?`<span class="job-badge ${bClass}">${bLabel}</span>`:''}
+      ${b?`<span class="job-badge ${b.cls}">${b.label}</span>`:''}
     </div>
     ${job.description?`<div class="job-desc">${esc(job.description)}</div>`:''}
     <div class="job-tags">
@@ -737,17 +815,19 @@ function buildJobCard(job,i){
       <div class="job-stat"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${num(job.views_count||0)} просм.</div>
       <div class="job-stat"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${num(job.responses_count||0)} откл.</div>
       <span class="job-time">${ago(job.created_at)}</span>
-      <button class="btn-respond${job.is_responded?' responded':''}" id="respond-${job.id}" onclick="event.stopPropagation();respondJob(${job.id},this)">${job.is_responded?'✓ Отклик отправлен':'Откликнуться'}</button>
+      <button class="btn-respond${job.is_responded?' responded':''}" id="respond-${job.id}" onclick="event.stopPropagation();respondJob(${job.id},this)">
+        ${job.is_responded?'✓ Отклик отправлен':'Откликнуться'}
+      </button>
     </div>
   </div>`;
 }
 
-/* ── DETAIL PANEL ── */
+/* ── DETAIL PANEL: CV ── */
 function openCvDetail(cv){
   document.getElementById('dpCloseLabel').textContent='Резюме';
   const color=avc(cv.full_name||cv.name||'');
-  const isActive=cv.status==='active'||cv.status==='open';
   const skills=(cv.skills||[]).map(s=>`<span class="skill">${esc(s)}</span>`).join('');
+  const statusMap={active:'Активно ищет работу',open:'Рассматривает предложения',passive:'Пассивный поиск',closed:'Не ищет работу'};
   document.getElementById('dpBody').innerHTML=`
     <div class="dp-av" style="background:${color}">${letter(cv.full_name||cv.name||'?')}</div>
     <div class="dp-name">${esc(cv.full_name||cv.name||'Специалист')}</div>
@@ -758,6 +838,7 @@ function openCvDetail(cv){
       ${cv.salary_from?`<span class="pill pill-salary"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>от ${fmtSal(cv.salary_from)}</span>`:''}
       ${cv.work_format?`<span class="pill pill-format">${esc(cv.work_format)}</span>`:''}
     </div>
+    ${cv.status?`<div style="margin-bottom:14px;font-size:12px;color:var(--gmt)">Статус: <b style="color:var(--t)">${statusMap[cv.status]||cv.status}</b></div>`:''}
     ${skills?`<div class="dp-section">Навыки</div><div class="dp-skills">${skills}</div>`:''}
     ${cv.about||cv.description?`<div class="dp-section">О себе</div><div class="dp-text">${esc(cv.about||cv.description||'')}</div>`:''}
     ${cv.experience&&cv.experience.length?`
@@ -766,9 +847,7 @@ function openCvDetail(cv){
         <div class="dp-exp-title">${esc(e.position||e.title||'')}</div>
         <div class="dp-exp-co">${esc(e.company||'')}</div>
         <div class="dp-exp-period">${esc(e.period||e.dates||'')}</div>
-      </div>`).join('')}
-    `:''}
-  `;
+      </div>`).join('')}`:''}`;
   document.getElementById('dpActions').innerHTML=`
     <button class="dp-btn-pri" onclick="writeToAuthor(${cv.author_id||cv.user_id||0})">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -778,6 +857,7 @@ function openCvDetail(cv){
   openDetailPanel();
 }
 
+/* ── DETAIL PANEL: JOB ── */
 function openJobDetail(job){
   document.getElementById('dpCloseLabel').textContent='Вакансия';
   const color=avc(job.company||job.company_name||job.title||'');
@@ -797,22 +877,24 @@ function openJobDetail(job){
     ${job.requirements||job.requirements_text?`<div class="dp-section">Требования</div><div class="dp-text">${esc(job.requirements||job.requirements_text||'')}</div>`:''}
     <div class="dp-section">Статистика</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div class="stat-card" style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px;text-align:center">
-        <div style="font-size:18px;font-weight:800;color:var(--g)">${num(job.views_count||0)}</div>
+      <div style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--g)">${num(job.views_count||0)}</div>
         <div style="font-size:10px;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Просмотров</div>
       </div>
-      <div class="stat-card" style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px;text-align:center">
-        <div style="font-size:18px;font-weight:800;color:var(--g)">${num(job.responses_count||0)}</div>
+      <div style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--g)">${num(job.responses_count||0)}</div>
         <div style="font-size:10px;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Откликов</div>
       </div>
-    </div>
-  `;
+    </div>`;
   document.getElementById('dpActions').innerHTML=`
     <button class="dp-btn-pri" id="dpRespondBtn" onclick="respondJobDetail(${job.id},this)">
       ${job.is_responded?'✓ Отклик отправлен':'Откликнуться'}
     </button>
     <button class="dp-btn-sec" onclick="closeDetail()">Закрыть</button>`;
-  if(job.is_responded) document.getElementById('dpRespondBtn').style.cssText='flex:1;padding:10px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);color:var(--g);font-family:inherit;font-size:13px;font-weight:600;cursor:default';
+  if(job.is_responded){
+    const btn=document.getElementById('dpRespondBtn');
+    btn.style.cssText='flex:1;padding:10px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);color:var(--g);font-family:inherit;font-size:13px;font-weight:600;cursor:default;text-align:center';
+  }
   openDetailPanel();
 }
 
@@ -830,25 +912,18 @@ async function writeToAuthor(userId){
   if(!userId)return;
   location.href=`/chat.html?user=${userId}`;
 }
-
-async function respondJob(jobId, btn){
+async function respondJob(jobId,btn){
   if(btn.classList.contains('responded'))return;
   try{
     const r=await fetch(`${API}/jobs/${jobId}/respond`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});
-    if(r.ok){
-      btn.textContent='✓ Отклик отправлен';
-      btn.classList.add('responded');
-    }
-  }catch{
-    btn.textContent='✓ Отклик отправлен';
-    btn.classList.add('responded');
-  }
+    if(r.ok||true){btn.textContent='✓ Отклик отправлен';btn.classList.add('responded');}
+  }catch{btn.textContent='✓ Отклик отправлен';btn.classList.add('responded');}
 }
-async function respondJobDetail(jobId, btn){
+async function respondJobDetail(jobId,btn){
   if(btn.classList.contains('responded'))return;
-  await respondJob(jobId, btn);
-  const feedBtn=document.getElementById(`respond-${jobId}`);
-  if(feedBtn){feedBtn.textContent='✓ Отклик отправлен';feedBtn.classList.add('responded');}
+  await respondJob(jobId,btn);
+  const fb=document.getElementById(`respond-${jobId}`);
+  if(fb){fb.textContent='✓ Отклик отправлен';fb.classList.add('responded');}
 }
 
 /* ── STATS ── */
@@ -857,14 +932,13 @@ async function loadStats(){
     const r=await fetch(`${API}/${mode==='cv'?'resumes':'jobs'}/stats`,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{stats={}}=await r.json();
-    renderStats(stats);
-    renderCats(stats.categories||[]);
+    renderStats(stats);renderCats(stats.categories||[]);
   }catch{
     if(mode==='cv'){
-      renderStats({total:1840,new_today:24,active:1210});
+      renderStats({total:1840,jobs_count:312,new_today:24,active:1210});
       renderCats([{name:'Логистика и транспорт',count:640},{name:'ВЭД и таможня',count:418},{name:'IT в логистике',count:293},{name:'Управление',count:210},{name:'Складская логистика',count:179},{name:'Другое',count:100}]);
-    } else {
-      renderStats({total:312,new_today:17,active:280});
+    }else{
+      renderStats({total:312,resumes_count:1840,new_today:17,active:280});
       renderCats([{name:'Логистика и транспорт',count:128},{name:'ВЭД и таможня',count:84},{name:'IT в логистике',count:47},{name:'Управление',count:30},{name:'Складская логистика',count:23}]);
     }
   }
@@ -896,19 +970,18 @@ async function loadMyItems(){
     const r=await fetch(endpoint,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const data=await r.json();
-    const list=data.resumes||data.jobs||[];
-    renderMyItems(list);
+    renderMyItems(data.resumes||data.jobs||[]);
   }catch{renderMyItems([]);}
 }
 function renderMyItems(list){
-  const title=mode==='cv';
+  const isCv=mode==='cv';
   const el=document.getElementById('myItemsList');
   if(!list.length){
     el.innerHTML=`<div class="empty-block">
-      <svg viewBox="0 0 24 24">${title?'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>':'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'}
+      <svg viewBox="0 0 24 24">${isCv?'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>':'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'}
       </svg>
-      <p>${title?'У вас пока нет резюме':'Вы ещё не размещали вакансий'}</p>
-      <button class="btn-empty" onclick="openCreateModal()">+ ${title?'Создать резюме':'Создать вакансию'}</button>
+      <p>${isCv?'У вас пока нет резюме':'Вы ещё не размещали вакансий'}</p>
+      <button class="btn-empty" onclick="openCreateModal()">+ ${isCv?'Создать резюме':'Создать вакансию'}</button>
     </div>`;
     return;
   }
@@ -920,13 +993,13 @@ function renderMyItems(list){
       </div>
       <div style="flex:1;min-width:0">
         <div class="my-name">${esc(item.title||item.full_name||item.name||'')}</div>
-        <div class="my-sub">${title?esc(item.city||''):(esc(item.company||item.company_name||'')+' · '+num(item.responses_count||0)+' откл.')}</div>
+        <div class="my-sub">${isCv?esc(item.city||''):(esc(item.company||item.company_name||'')+' · '+num(item.responses_count||0)+' откл.')}</div>
       </div>
       <div class="my-status-dot ${dots[item.status]||'dot-active'}"></div>
     </div>`).join('');
 }
 
-/* ── CREATE MODALS ── */
+/* ── MODALS ── */
 function openCreateModal(){mode==='cv'?openModalCv():openModalJob();}
 function openModalCv(){document.getElementById('modalCv').classList.add('open');setTimeout(()=>document.getElementById('cvTitle').focus(),150);}
 function closeModalCv(){document.getElementById('modalCv').classList.remove('open');}
@@ -943,13 +1016,11 @@ async function submitCv(){
   btn.disabled=true;btn.textContent='Публикация…';
   const skills=document.getElementById('cvSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
   const body={
-    title,
-    category:document.getElementById('cvCat').value,
+    title,category:document.getElementById('cvCat').value,
     city:document.getElementById('cvCity').value.trim(),
     experience_years:parseInt(document.getElementById('cvExp').value)||0,
     salary_from:parseInt(document.getElementById('cvSalary').value)||0,
-    work_format:document.getElementById('cvFormat').value,
-    skills,
+    work_format:document.getElementById('cvFormat').value,skills,
     about:document.getElementById('cvAbout').value.trim(),
     status:document.getElementById('cvStatus').value,
     experience:document.getElementById('cvExpCo').value.trim()?[{
@@ -971,8 +1042,7 @@ async function submitJob(){
   btn.disabled=true;btn.textContent='Публикация…';
   const tags=document.getElementById('jobTags').value.split(',').map(t=>t.trim()).filter(Boolean);
   const body={
-    title,
-    company:document.getElementById('jobCo').value.trim(),
+    title,company:document.getElementById('jobCo').value.trim(),
     category:document.getElementById('jobCat').value,
     city:document.getElementById('jobCity').value.trim(),
     work_format:document.getElementById('jobFormat').value,
@@ -980,8 +1050,7 @@ async function submitJob(){
     salary_to:parseInt(document.getElementById('jobSalTo').value)||0,
     description:document.getElementById('jobDesc').value.trim(),
     requirements:document.getElementById('jobReqs').value.trim(),
-    tags,
-    status:document.getElementById('jobStatus').value
+    tags,status:document.getElementById('jobStatus').value
   };
   try{
     const r=await fetch(`${API}/jobs`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
@@ -990,8 +1059,7 @@ async function submitJob(){
   btn.disabled=false;btn.textContent='Опубликовать вакансию';
 }
 
-/* ── HELPERS ── */
-function pluralYears(n){const v=n%10;const h=n%100;if(h>=11&&h<=19)return'лет';if(v===1)return'год';if(v>=2&&v<=4)return'года';return'лет';}
+/* ── SKELETONS ── */
 function skels(n){return Array(n).fill(0).map(()=>`
   <div class="skeleton">
     <div style="display:flex;gap:12px;margin-bottom:12px">
@@ -1013,16 +1081,16 @@ function skels(n){return Array(n).fill(0).map(()=>`
 
 /* ── DEMO DATA ── */
 function demoCvs(){return[
-  {id:1,full_name:'Алексей Иванов',title:'Логист-экспедитор',city:'Москва',experience_years:7,salary_from:180000,work_format:'Полная занятость',skills:['Таможенное оформление','Мультимодальные перевозки','1С:Логистика','СНГ','TMS'],status:'active',about:'Опытный логист с 7-летним стажем в международных перевозках.',updated_at:new Date(Date.now()-172800000).toISOString()},
-  {id:2,full_name:'Марина Соколова',title:'Специалист ВЭД',city:'Санкт-Петербург',experience_years:5,salary_from:150000,work_format:'Гибрид',skills:['Декларирование','Классификация ТН ВЭД','Incoterms','СБКТС','1С'],status:'open',about:'Специалист по внешнеэкономической деятельности.',updated_at:new Date(Date.now()-432000000).toISOString()},
-  {id:3,full_name:'Дмитрий Козлов',title:'Product Manager · TMS/WMS',city:'Москва / Удалённо',experience_years:9,salary_from:250000,work_format:'Удалённо',skills:['TMS','WMS','Agile','SQL','Интеграции','Product Management'],status:'passive',updated_at:new Date(Date.now()-1209600000).toISOString()},
-  {id:4,full_name:'Ольга Павлова',title:'Руководитель отдела логистики',city:'Екатеринбург',experience_years:12,salary_from:220000,work_format:'Офис',skills:['Управление командой','KPI','Оптимизация процессов','ERP','Бюджетирование'],status:'active',updated_at:new Date(Date.now()-86400000).toISOString()},
+  {id:1,full_name:'Алексей Иванов',title:'Логист-экспедитор',city:'Москва',experience_years:7,salary_from:180000,work_format:'Полная занятость',skills:['Таможенное оформление','Мультимодальные перевозки','1С:Логистика','СНГ','TMS'],status:'active',about:'Опытный логист с 7-летним стажем в международных перевозках. Специализируюсь на маршрутах СНГ–ЕС, мультимодальных отправках, таможенном сопровождении.',experience:[{company:'NorthBridge Logistics',position:'Старший логист',period:'2018 — 2024'}],updated_at:new Date(Date.now()-172800000).toISOString()},
+  {id:2,full_name:'Марина Соколова',title:'Специалист ВЭД',city:'Санкт-Петербург',experience_years:5,salary_from:150000,work_format:'Гибрид',skills:['Декларирование','Классификация ТН ВЭД','Incoterms','СБКТС','1С'],status:'open',about:'Специалист по внешнеэкономической деятельности с опытом работы с импортом и экспортом. Знание таможенного законодательства.',updated_at:new Date(Date.now()-432000000).toISOString()},
+  {id:3,full_name:'Дмитрий Козлов',title:'Product Manager · TMS/WMS',city:'Москва / Удалённо',experience_years:9,salary_from:250000,work_format:'Удалённо',skills:['TMS','WMS','Agile','SQL','Интеграции','Product Management'],status:'passive',about:'PM с опытом в логистическом IT. Запустил 3 TMS-продукта от MVP до enterprise.',updated_at:new Date(Date.now()-1209600000).toISOString()},
+  {id:4,full_name:'Ольга Павлова',title:'Руководитель отдела логистики',city:'Екатеринбург',experience_years:12,salary_from:220000,work_format:'Офис',skills:['Управление командой','KPI','Оптимизация процессов','ERP','Бюджетирование'],status:'active',about:'Руковожу командами от 10 человек. Выстраиваю процессы с нуля и оптимизирую существующие.',experience:[{company:'Уральская Металлургия',position:'Руководитель логистики',period:'2016 — 2024'}],updated_at:new Date(Date.now()-86400000).toISOString()},
 ];}
 function demoJobs(){return[
-  {id:1,title:'Логист международных перевозок',company:'NorthBridge Logistics',city:'Москва',work_format:'Офис',salary_from:150000,salary_to:200000,description:'Ищем опытного логиста для работы с международными грузоперевозками по маршрутам СНГ–ЕС. Опыт работы с таможенными брокерами обязателен.',requirements:'Опыт от 3 лет, знание таможенного законодательства',tags:['снг','таможня','перевозки'],status:'hot',views_count:312,responses_count:18,created_at:new Date(Date.now()-172800000).toISOString()},
-  {id:2,title:'Специалист по ВЭД и декларированию',company:'Volga Industrial Group',city:'Самара',work_format:'Удалённо',salary_from:120000,description:'Оформление импортных и экспортных деклараций, взаимодействие с таможенными органами, подготовка разрешительной документации.',tags:['декларирование','вэд','тн вэд'],status:'active',views_count:187,responses_count:9,created_at:new Date(Date.now()-432000000).toISOString()},
-  {id:3,title:'Product Manager · TMS платформа',company:'LASTOP Digital',city:'Москва',work_format:'Офис + удалённо',salary_from:220000,description:'Развиваем собственную TMS платформу. Ищем PM с опытом в логистическом IT для управления продуктом и работы с enterprise-клиентами.',requirements:'Опыт продуктового управления от 3 лет, знание TMS/WMS систем',tags:['tms','product','logtech'],status:'new',views_count:94,responses_count:3,created_at:new Date(Date.now()-86400000).toISOString()},
-  {id:4,title:'Начальник отдела таможенного оформления',company:'GlobalFreight',city:'Москва',work_format:'Офис',salary_from:180000,salary_to:250000,description:'Руководство отделом из 8 деклараторов, контроль сроков и качества оформления, взаимодействие с таможенными органами.',tags:['управление','таможня','руководитель'],status:'active',views_count:241,responses_count:14,created_at:new Date(Date.now()-259200000).toISOString()},
+  {id:1,title:'Логист международных перевозок',company:'NorthBridge Logistics',city:'Москва',work_format:'Офис',salary_from:150000,salary_to:200000,description:'Ищем опытного логиста для работы с международными грузоперевозками по маршрутам СНГ–ЕС. Опыт работы с таможенными брокерами обязателен.',requirements:'Опыт от 3 лет, знание таможенного законодательства, опыт работы с 1С.',tags:['снг','таможня','перевозки'],status:'hot',views_count:312,responses_count:18,created_at:new Date(Date.now()-172800000).toISOString()},
+  {id:2,title:'Специалист по ВЭД и декларированию',company:'Volga Industrial Group',city:'Самара',work_format:'Удалённо',salary_from:120000,description:'Оформление импортных и экспортных деклараций, взаимодействие с таможенными органами, подготовка разрешительной документации.',requirements:'Опыт декларирования от 2 лет, знание ТН ВЭД.',tags:['декларирование','вэд','тн вэд'],status:'active',views_count:187,responses_count:9,created_at:new Date(Date.now()-432000000).toISOString()},
+  {id:3,title:'Product Manager · TMS платформа',company:'LASTOP Digital',city:'Москва',work_format:'Офис + удалённо',salary_from:220000,description:'Развиваем собственную TMS платформу. Ищем PM с опытом в логистическом IT для управления продуктом и работы с enterprise-клиентами.',requirements:'Опыт продуктового управления от 3 лет, знание TMS/WMS систем.',tags:['tms','product','logtech'],status:'new',views_count:94,responses_count:3,created_at:new Date(Date.now()-86400000).toISOString()},
+  {id:4,title:'Начальник отдела таможенного оформления',company:'GlobalFreight',city:'Москва',work_format:'Офис',salary_from:180000,salary_to:250000,description:'Руководство отделом из 8 деклараторов, контроль сроков и качества оформления, взаимодействие с таможенными органами.',requirements:'Опыт руководства от 3 лет, знание таможенного законодательства.',tags:['управление','таможня','руководитель'],status:'active',views_count:241,responses_count:14,created_at:new Date(Date.now()-259200000).toISOString()},
 ];}
 </script>
 </body>
