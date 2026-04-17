@@ -487,44 +487,72 @@ func CreateTables() error {
         )`,
 		`CREATE TABLE IF NOT EXISTS forum_sections (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            title VARCHAR(180) NOT NULL UNIQUE,
+            name VARCHAR(120) NOT NULL,
             description TEXT NOT NULL DEFAULT '',
-            creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            color_idx SMALLINT NOT NULL DEFAULT 0,
+            sort_order INT NOT NULL DEFAULT 0,
             topics_count INT NOT NULL DEFAULT 0,
-            posts_count INT NOT NULL DEFAULT 0,
+            messages_count INT NOT NULL DEFAULT 0,
+            last_author VARCHAR(200),
+            last_at TIMESTAMP,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TIMESTAMP
         )`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS name VARCHAR(120)`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS color_idx SMALLINT NOT NULL DEFAULT 0`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS sort_order INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS messages_count INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS last_author VARCHAR(200)`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS last_at TIMESTAMP`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP`,
 		`CREATE TABLE IF NOT EXISTS forum_topics (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            section_id UUID REFERENCES forum_sections(id) ON DELETE CASCADE,
-            title VARCHAR(200) NOT NULL,
-            content TEXT,
-            category VARCHAR(50) NOT NULL DEFAULT '',
+            section_id UUID NOT NULL REFERENCES forum_sections(id) ON DELETE CASCADE,
             author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            title VARCHAR(300) NOT NULL,
+            tags TEXT[] NOT NULL DEFAULT '{}',
             replies_count INT NOT NULL DEFAULT 0,
-            posts_count INT NOT NULL DEFAULT 0,
             views_count INT NOT NULL DEFAULT 0,
+            is_hot BOOLEAN NOT NULL DEFAULT false,
+            is_pinned BOOLEAN NOT NULL DEFAULT false,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TIMESTAMP
         )`,
-		`CREATE TABLE IF NOT EXISTS forum_posts (
+		`ALTER TABLE forum_topics ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`,
+		`ALTER TABLE forum_topics ADD COLUMN IF NOT EXISTS is_hot BOOLEAN NOT NULL DEFAULT false`,
+		`ALTER TABLE forum_topics ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT false`,
+		`ALTER TABLE forum_topics ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP`,
+		`CREATE TABLE IF NOT EXISTS forum_messages (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+            discussion_id UUID,
+            parent_id UUID,
             author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            content TEXT NOT NULL,
+            text TEXT NOT NULL,
+            likes_count INT NOT NULL DEFAULT 0,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TIMESTAMP
         )`,
-		`CREATE TABLE IF NOT EXISTS forum_replies (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
-            author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            content TEXT NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		`ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS discussion_id UUID`,
+		`ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS parent_id UUID`,
+		`ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS likes_count INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP`,
+		`CREATE TABLE IF NOT EXISTS forum_message_likes (
+            message_id UUID NOT NULL REFERENCES forum_messages(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (message_id, user_id)
         )`,
-		`CREATE INDEX IF NOT EXISTS idx_forum_topics_section_updated ON forum_topics(section_id, updated_at DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_forum_posts_topic_created ON forum_posts(topic_id, created_at ASC)`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_sections_sort ON forum_sections(sort_order, id) WHERE deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_topics_section ON forum_topics(section_id, is_pinned DESC, created_at DESC) WHERE deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_topics_author ON forum_topics(author_id) WHERE deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_messages_topic ON forum_messages(topic_id, created_at) WHERE deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_messages_parent ON forum_messages(parent_id) WHERE parent_id IS NOT NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_messages_author ON forum_messages(author_id) WHERE deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_forum_likes_user ON forum_message_likes(user_id)`,
 		`CREATE TABLE IF NOT EXISTS chats (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(100),
@@ -604,12 +632,9 @@ func CreateTables() error {
 	`)
 
 	_, _ = DB.Exec(`
-		INSERT INTO forum_sections (title, description, creator_id)
-		SELECT 'Общий раздел', 'Раздел по умолчанию', id
-		FROM users
-		ORDER BY created_at ASC
-		LIMIT 1
-		ON CONFLICT (title) DO NOTHING
+		INSERT INTO forum_sections (name, description, sort_order)
+		SELECT 'Общий раздел', 'Раздел по умолчанию', 0
+		WHERE NOT EXISTS (SELECT 1 FROM forum_sections WHERE deleted_at IS NULL)
 	`)
 
 	_, _ = DB.Exec(`
@@ -617,52 +642,53 @@ func CreateTables() error {
 		SET section_id = (SELECT id FROM forum_sections ORDER BY created_at ASC LIMIT 1)
 		WHERE section_id IS NULL
 	`)
-
-	_, _ = DB.Exec(`
-		INSERT INTO forum_posts (id, topic_id, author_id, content, created_at, updated_at)
-		SELECT gen_random_uuid(), t.id, t.author_id, t.content, t.created_at, COALESCE(t.updated_at, t.created_at)
-		FROM forum_topics t
-		WHERE t.content IS NOT NULL
-		  AND NOT EXISTS (SELECT 1 FROM forum_posts p WHERE p.topic_id = t.id)
-	`)
-
-	_, _ = DB.Exec(`
-		INSERT INTO forum_posts (id, topic_id, author_id, content, created_at, updated_at)
-		SELECT fr.id, fr.topic_id, fr.author_id, fr.content, fr.created_at, fr.created_at
-		FROM forum_replies fr
-		WHERE NOT EXISTS (SELECT 1 FROM forum_posts fp WHERE fp.id = fr.id)
-	`)
-
-	_, _ = DB.Exec(`
-		UPDATE forum_topics t
-		SET posts_count = sub.cnt,
-		    updated_at = COALESCE(sub.last_at, t.updated_at)
-		FROM (
-			SELECT topic_id, COUNT(*)::int AS cnt, MAX(created_at) AS last_at
-			FROM forum_posts
-			GROUP BY topic_id
-		) sub
-		WHERE t.id = sub.topic_id
-	`)
-
-	_, _ = DB.Exec(`
-		UPDATE forum_sections s
-		SET topics_count = sub.topics_count,
-		    posts_count = sub.posts_count,
-		    updated_at = COALESCE(sub.last_at, s.updated_at)
-		FROM (
-			SELECT t.section_id,
-			       COUNT(DISTINCT t.id)::int AS topics_count,
-			       COUNT(p.id)::int AS posts_count,
-			       MAX(COALESCE(p.created_at, t.updated_at)) AS last_at
-			FROM forum_topics t
-			LEFT JOIN forum_posts p ON p.topic_id = t.id
-			GROUP BY t.section_id
-		) sub
-		WHERE s.id = sub.section_id
-	`)
-
 	_, _ = DB.Exec(`ALTER TABLE forum_topics ALTER COLUMN section_id SET NOT NULL`)
+	_, _ = DB.Exec(`
+		CREATE TABLE IF NOT EXISTS forum_discussions (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+			author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			title VARCHAR(240) NOT NULL,
+			messages_count INT NOT NULL DEFAULT 0,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			deleted_at TIMESTAMP
+		)
+	`)
+	_, _ = DB.Exec(`CREATE INDEX IF NOT EXISTS idx_forum_discussions_topic ON forum_discussions(topic_id, created_at ASC)`)
+	_, _ = DB.Exec(`ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS discussion_id UUID REFERENCES forum_discussions(id) ON DELETE CASCADE`)
+	_, _ = DB.Exec(`CREATE INDEX IF NOT EXISTS idx_forum_messages_discussion ON forum_messages(discussion_id, created_at)`)
+	_, _ = DB.Exec(`
+		INSERT INTO forum_discussions (topic_id, author_id, title, created_at, updated_at)
+		SELECT t.id, t.author_id, 'Общее обсуждение', t.created_at, t.updated_at
+		FROM forum_topics t
+		WHERE NOT EXISTS (SELECT 1 FROM forum_discussions d WHERE d.topic_id = t.id)
+	`)
+	_, _ = DB.Exec(`
+		UPDATE forum_messages m
+		SET discussion_id = sub.id
+		FROM (
+			SELECT DISTINCT ON (d.topic_id) d.topic_id, d.id
+			FROM forum_discussions d
+			WHERE d.deleted_at IS NULL
+			ORDER BY d.topic_id, d.created_at ASC
+		) sub
+		WHERE m.topic_id = sub.topic_id
+		  AND m.discussion_id IS NULL
+	`)
+	_, _ = DB.Exec(`ALTER TABLE forum_messages ALTER COLUMN discussion_id SET NOT NULL`)
+	_, _ = DB.Exec(`
+		UPDATE forum_discussions d
+		SET messages_count = sub.cnt,
+		    updated_at = CURRENT_TIMESTAMP
+		FROM (
+			SELECT discussion_id, COUNT(*)::int AS cnt
+			FROM forum_messages
+			WHERE deleted_at IS NULL
+			GROUP BY discussion_id
+		) sub
+		WHERE d.id = sub.discussion_id
+	`)
 
 	companyRows, err := DB.Query(`SELECT id, owner_id FROM companies`)
 	if err != nil {

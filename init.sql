@@ -213,9 +213,22 @@ CREATE TABLE IF NOT EXISTS forum_topics (
 CREATE INDEX IF NOT EXISTS idx_forum_topics_section ON forum_topics(section_id, is_pinned DESC, created_at DESC) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_forum_topics_author ON forum_topics(author_id) WHERE deleted_at IS NULL;
 
+CREATE TABLE IF NOT EXISTS forum_discussions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES users(id),
+    title VARCHAR(240) NOT NULL,
+    messages_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_forum_discussions_topic ON forum_discussions(topic_id, created_at ASC) WHERE deleted_at IS NULL;
+
 CREATE TABLE IF NOT EXISTS forum_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+    discussion_id UUID REFERENCES forum_discussions(id) ON DELETE CASCADE,
     parent_id UUID REFERENCES forum_messages(id),
     author_id UUID NOT NULL REFERENCES users(id),
     text TEXT NOT NULL,
@@ -224,9 +237,40 @@ CREATE TABLE IF NOT EXISTS forum_messages (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
+ALTER TABLE forum_messages ADD COLUMN IF NOT EXISTS discussion_id UUID REFERENCES forum_discussions(id) ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS idx_forum_messages_topic ON forum_messages(topic_id, created_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_forum_messages_discussion ON forum_messages(discussion_id, created_at) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_forum_messages_parent ON forum_messages(parent_id) WHERE parent_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_forum_messages_author ON forum_messages(author_id) WHERE deleted_at IS NULL;
+
+INSERT INTO forum_discussions (topic_id, author_id, title, created_at, updated_at)
+SELECT t.id, t.author_id, 'Общее обсуждение', t.created_at, t.updated_at
+FROM forum_topics t
+WHERE NOT EXISTS (SELECT 1 FROM forum_discussions d WHERE d.topic_id = t.id);
+
+UPDATE forum_messages m
+SET discussion_id = sub.id
+FROM (
+    SELECT DISTINCT ON (d.topic_id) d.topic_id, d.id
+    FROM forum_discussions d
+    WHERE d.deleted_at IS NULL
+    ORDER BY d.topic_id, d.created_at ASC
+) sub
+WHERE m.topic_id = sub.topic_id
+  AND m.discussion_id IS NULL;
+
+ALTER TABLE forum_messages ALTER COLUMN discussion_id SET NOT NULL;
+
+UPDATE forum_discussions d
+SET messages_count = sub.cnt,
+    updated_at = NOW()
+FROM (
+    SELECT discussion_id, COUNT(*)::int AS cnt
+    FROM forum_messages
+    WHERE deleted_at IS NULL
+    GROUP BY discussion_id
+) sub
+WHERE d.id = sub.discussion_id;
 
 CREATE TABLE IF NOT EXISTS forum_message_likes (
     message_id UUID NOT NULL REFERENCES forum_messages(id) ON DELETE CASCADE,

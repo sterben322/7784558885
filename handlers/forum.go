@@ -42,10 +42,23 @@ type ForumTopic struct {
 	CreatedAt    time.Time      `json:"created_at"`
 }
 
+// ForumDiscussion represents a discussion inside a topic.
+type ForumDiscussion struct {
+	ID            string    `json:"id"`
+	TopicID       string    `json:"topic_id"`
+	AuthorID      string    `json:"author_id"`
+	AuthorName    string    `json:"author_name"`
+	Title         string    `json:"title"`
+	MessagesCount int       `json:"messages_count"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 // ForumMessage represents a single post inside a topic.
 type ForumMessage struct {
 	ID           string    `json:"id"`
 	TopicID      string    `json:"topic_id"`
+	DiscussionID string    `json:"discussion_id"`
+	Discussion   string    `json:"discussion"`
 	ParentID     *string   `json:"parent_id"`
 	ParentAuthor string    `json:"parent_author,omitempty"`
 	ParentText   string    `json:"parent_text,omitempty"`
@@ -99,12 +112,6 @@ func GetForumSections(c *gin.Context) {
 
 // CreateForumSection POST /api/forum/sections
 func CreateForumSection(c *gin.Context) {
-	userID := currentUserID(c)
-	if !isForumAdmin(c, userID.String()) {
-		jsonError(c, http.StatusForbidden, "only admins can create sections")
-		return
-	}
-
 	var body struct {
 		Name        string `json:"name" binding:"required,min=2,max=120"`
 		Description string `json:"description"`
@@ -215,13 +222,27 @@ func CreateSectionTopic(c *gin.Context) {
 		SET topics_count = topics_count + 1, updated_at = NOW()
 		WHERE id = $1::uuid`, sectionID)
 
+	var discussionID string
+	err = tx.QueryRowContext(c, `
+		INSERT INTO forum_discussions (topic_id, author_id, title)
+		VALUES ($1::uuid, $2::uuid, 'Общее обсуждение')
+		RETURNING id::text`,
+		topicID, userID.String(),
+	).Scan(&discussionID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if body.Text != "" {
 		_, _ = tx.ExecContext(c, `
-			INSERT INTO forum_messages (topic_id, author_id, text)
-			VALUES ($1::uuid, $2::uuid, $3)`,
-			topicID, userID.String(), body.Text)
+			INSERT INTO forum_messages (topic_id, discussion_id, author_id, text)
+			VALUES ($1::uuid, $2::uuid, $3::uuid, $4)`,
+			topicID, discussionID, userID.String(), body.Text)
 		_, _ = tx.ExecContext(c, `
 			UPDATE forum_topics SET replies_count = replies_count + 1 WHERE id = $1::uuid`, topicID)
+		_, _ = tx.ExecContext(c, `
+			UPDATE forum_discussions SET messages_count = messages_count + 1 WHERE id = $1::uuid`, discussionID)
 		_, _ = tx.ExecContext(c, `
 			UPDATE forum_sections SET messages_count = messages_count + 1 WHERE id = $1::uuid`, sectionID)
 	}
@@ -250,7 +271,8 @@ func GetTopicMessages(c *gin.Context) {
 
 	rows, err := database.DB.QueryContext(c, `
 		SELECT
-			m.id::text, m.topic_id::text, m.parent_id::text,
+			m.id::text, m.topic_id::text, m.discussion_id::text, COALESCE(d.title, ''),
+			m.parent_id::text,
 			COALESCE(p.full_name, p.name, split_part(p.email, '@', 1), '') AS parent_author,
 			COALESCE(pm.text, '') AS parent_text,
 			m.author_id::text,
@@ -263,6 +285,7 @@ func GetTopicMessages(c *gin.Context) {
 			) AS is_liked,
 			m.created_at
 		FROM forum_messages m
+		INNER JOIN forum_discussions d ON d.id = m.discussion_id
 		INNER JOIN users u ON u.id = m.author_id
 		LEFT JOIN forum_messages pm ON pm.id = m.parent_id
 		LEFT JOIN users p ON p.id = pm.author_id
@@ -281,7 +304,169 @@ func GetTopicMessages(c *gin.Context) {
 		var m ForumMessage
 		var parentID sql.NullString
 		if err := rows.Scan(
-			&m.ID, &m.TopicID, &parentID,
+			&m.ID, &m.TopicID, &m.DiscussionID, &m.Discussion, &parentID,
+			&m.ParentAuthor, &m.ParentText,
+			&m.AuthorID, &m.Author,
+			&m.IsModerator, &m.Text, &m.LikesCount, &m.IsLiked, &m.CreatedAt,
+		); err != nil {
+			continue
+		}
+		if parentID.Valid {
+			m.ParentID = &parentID.String
+			if len(m.ParentText) > 80 {
+				m.ParentText = m.ParentText[:80] + "…"
+			}
+		}
+		messages = append(messages, m)
+	}
+	c.JSON(http.StatusOK, gin.H{"messages": messages})
+}
+
+// GetTopicDiscussions GET /api/forum/topics/:id/discussions
+func GetTopicDiscussions(c *gin.Context) {
+	topicID := c.Param("id")
+	limit := queryIntForum(c, "limit", 100)
+	offset := queryIntForum(c, "offset", 0)
+
+	rows, err := database.DB.QueryContext(c, `
+		SELECT
+			d.id::text, d.topic_id::text, d.author_id::text,
+			COALESCE(u.full_name, u.name, split_part(u.email, '@', 1), 'Участник') AS author_name,
+			d.title, d.messages_count, d.created_at
+		FROM forum_discussions d
+		INNER JOIN users u ON u.id = d.author_id
+		WHERE d.topic_id = $1::uuid AND d.deleted_at IS NULL
+		ORDER BY d.created_at ASC
+		LIMIT $2 OFFSET $3`,
+		topicID, limit, offset,
+	)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	discussions := make([]ForumDiscussion, 0)
+	for rows.Next() {
+		var d ForumDiscussion
+		if err := rows.Scan(&d.ID, &d.TopicID, &d.AuthorID, &d.AuthorName, &d.Title, &d.MessagesCount, &d.CreatedAt); err != nil {
+			continue
+		}
+		discussions = append(discussions, d)
+	}
+	c.JSON(http.StatusOK, gin.H{"discussions": discussions})
+}
+
+// CreateTopicDiscussion POST /api/forum/topics/:id/discussions
+func CreateTopicDiscussion(c *gin.Context) {
+	userID := currentUserID(c)
+	topicID := c.Param("id")
+
+	var body struct {
+		Title string `json:"title" binding:"required,min=3,max=240"`
+		Text  string `json:"text"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tx, err := database.DB.BeginTx(c, nil)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer tx.Rollback()
+
+	var sectionID string
+	err = tx.QueryRowContext(c, `SELECT section_id::text FROM forum_topics WHERE id = $1::uuid AND deleted_at IS NULL`, topicID).Scan(&sectionID)
+	if err == sql.ErrNoRows {
+		jsonError(c, http.StatusNotFound, "topic not found")
+		return
+	}
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var discussionID string
+	err = tx.QueryRowContext(c, `
+		INSERT INTO forum_discussions (topic_id, author_id, title)
+		VALUES ($1::uuid, $2::uuid, $3)
+		RETURNING id::text`,
+		topicID, userID.String(), body.Title,
+	).Scan(&discussionID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if body.Text != "" {
+		_, _ = tx.ExecContext(c, `
+			INSERT INTO forum_messages (topic_id, discussion_id, author_id, text)
+			VALUES ($1::uuid, $2::uuid, $3::uuid, $4)`,
+			topicID, discussionID, userID.String(), body.Text)
+		_, _ = tx.ExecContext(c, `UPDATE forum_discussions SET messages_count = messages_count + 1 WHERE id = $1::uuid`, discussionID)
+		_, _ = tx.ExecContext(c, `UPDATE forum_topics SET replies_count = replies_count + 1 WHERE id = $1::uuid`, topicID)
+		_, _ = tx.ExecContext(c, `UPDATE forum_sections SET messages_count = messages_count + 1 WHERE id = $1::uuid`, sectionID)
+	}
+
+	_, _ = tx.ExecContext(c, `
+		UPDATE forum_sections
+		SET last_author = (SELECT COALESCE(full_name, name, split_part(email, '@', 1)) FROM users WHERE id = $2::uuid),
+		    last_at = NOW()
+		WHERE id = $1::uuid`, sectionID, userID.String())
+
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": discussionID})
+}
+
+// GetDiscussionMessages GET /api/forum/discussions/:id/messages
+func GetDiscussionMessages(c *gin.Context) {
+	userID := currentUserID(c)
+	discussionID := c.Param("id")
+	limit := queryIntForum(c, "limit", 50)
+	offset := queryIntForum(c, "offset", 0)
+
+	rows, err := database.DB.QueryContext(c, `
+		SELECT
+			m.id::text, m.topic_id::text, m.discussion_id::text, COALESCE(d.title, ''),
+			m.parent_id::text,
+			COALESCE(p.full_name, p.name, split_part(p.email, '@', 1), '') AS parent_author,
+			COALESCE(pm.text, '') AS parent_text,
+			m.author_id::text,
+			COALESCE(u.full_name, u.name, split_part(u.email, '@', 1), 'Участник') AS author_name,
+			COALESCE(u.is_moderator, false) AS is_moderator,
+			m.text, m.likes_count,
+			EXISTS(
+				SELECT 1 FROM forum_message_likes l
+				WHERE l.message_id = m.id AND l.user_id = $2::uuid
+			) AS is_liked,
+			m.created_at
+		FROM forum_messages m
+		INNER JOIN forum_discussions d ON d.id = m.discussion_id
+		INNER JOIN users u ON u.id = m.author_id
+		LEFT JOIN forum_messages pm ON pm.id = m.parent_id
+		LEFT JOIN users p ON p.id = pm.author_id
+		WHERE m.discussion_id = $1::uuid AND m.deleted_at IS NULL
+		ORDER BY m.created_at ASC
+		LIMIT $3 OFFSET $4`,
+		discussionID, userID.String(), limit, offset)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	messages := make([]ForumMessage, 0)
+	for rows.Next() {
+		var m ForumMessage
+		var parentID sql.NullString
+		if err := rows.Scan(
+			&m.ID, &m.TopicID, &m.DiscussionID, &m.Discussion, &parentID,
 			&m.ParentAuthor, &m.ParentText,
 			&m.AuthorID, &m.Author,
 			&m.IsModerator, &m.Text, &m.LikesCount, &m.IsLiked, &m.CreatedAt,
@@ -333,12 +518,32 @@ func AddTopicPost(c *gin.Context) {
 		return
 	}
 
+	var discussionID string
+	err = tx.QueryRowContext(c, `
+		SELECT id::text
+		FROM forum_discussions
+		WHERE topic_id = $1::uuid AND deleted_at IS NULL
+		ORDER BY created_at ASC
+		LIMIT 1`, topicID).Scan(&discussionID)
+	if err == sql.ErrNoRows {
+		err = tx.QueryRowContext(c, `
+			INSERT INTO forum_discussions (topic_id, author_id, title)
+			VALUES ($1::uuid, $2::uuid, 'Общее обсуждение')
+			RETURNING id::text`,
+			topicID, userID.String(),
+		).Scan(&discussionID)
+	}
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	var msgID string
 	err = tx.QueryRowContext(c, `
-		INSERT INTO forum_messages (topic_id, author_id, parent_id, text)
-		VALUES ($1::uuid, $2::uuid, $3::uuid, $4)
+		INSERT INTO forum_messages (topic_id, discussion_id, author_id, parent_id, text)
+		VALUES ($1::uuid, $2::uuid, $3::uuid, $4::uuid, $5)
 		RETURNING id::text`,
-		topicID, userID.String(), body.ParentID, body.Text,
+		topicID, discussionID, userID.String(), body.ParentID, body.Text,
 	).Scan(&msgID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
@@ -346,6 +551,73 @@ func AddTopicPost(c *gin.Context) {
 	}
 
 	_, _ = tx.ExecContext(c, `UPDATE forum_topics SET replies_count = replies_count + 1 WHERE id = $1::uuid`, topicID)
+	_, _ = tx.ExecContext(c, `UPDATE forum_discussions SET messages_count = messages_count + 1 WHERE id = $1::uuid`, discussionID)
+	_, _ = tx.ExecContext(c, `UPDATE forum_sections SET messages_count = messages_count + 1, last_at = NOW() WHERE id = $1::uuid`, sectionID)
+	_, _ = tx.ExecContext(c, `
+		UPDATE forum_sections
+		SET last_author = (SELECT COALESCE(full_name, name, split_part(email, '@', 1)) FROM users WHERE id = $2::uuid),
+		    last_at = NOW()
+		WHERE id = $1::uuid`, sectionID, userID.String())
+
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": msgID})
+}
+
+// AddDiscussionPost POST /api/forum/discussions/:id/messages
+func AddDiscussionPost(c *gin.Context) {
+	userID := currentUserID(c)
+	discussionID := c.Param("id")
+
+	var body struct {
+		Text     string  `json:"text" binding:"required,min=1"`
+		ParentID *string `json:"parent_id"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tx, err := database.DB.BeginTx(c, nil)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer tx.Rollback()
+
+	var topicID, sectionID string
+	err = tx.QueryRowContext(c, `
+		SELECT d.topic_id::text, t.section_id::text
+		FROM forum_discussions d
+		INNER JOIN forum_topics t ON t.id = d.topic_id
+		WHERE d.id = $1::uuid AND d.deleted_at IS NULL AND t.deleted_at IS NULL`,
+		discussionID,
+	).Scan(&topicID, &sectionID)
+	if err == sql.ErrNoRows {
+		jsonError(c, http.StatusNotFound, "discussion not found")
+		return
+	}
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var msgID string
+	err = tx.QueryRowContext(c, `
+		INSERT INTO forum_messages (topic_id, discussion_id, author_id, parent_id, text)
+		VALUES ($1::uuid, $2::uuid, $3::uuid, $4::uuid, $5)
+		RETURNING id::text`,
+		topicID, discussionID, userID.String(), body.ParentID, body.Text,
+	).Scan(&msgID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, _ = tx.ExecContext(c, `UPDATE forum_topics SET replies_count = replies_count + 1 WHERE id = $1::uuid`, topicID)
+	_, _ = tx.ExecContext(c, `UPDATE forum_discussions SET messages_count = messages_count + 1 WHERE id = $1::uuid`, discussionID)
 	_, _ = tx.ExecContext(c, `UPDATE forum_sections SET messages_count = messages_count + 1, last_at = NOW() WHERE id = $1::uuid`, sectionID)
 	_, _ = tx.ExecContext(c, `
 		UPDATE forum_sections
@@ -415,12 +687,6 @@ func UnlikeForumMessage(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true})
-}
-
-func isForumAdmin(c *gin.Context, userID string) bool {
-	var isAdmin bool
-	_ = database.DB.QueryRowContext(c, `SELECT COALESCE(is_admin, false) FROM users WHERE id = $1::uuid`, userID).Scan(&isAdmin)
-	return isAdmin
 }
 
 func queryIntForum(c *gin.Context, key string, def int) int {

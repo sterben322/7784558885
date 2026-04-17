@@ -311,7 +311,7 @@ function avc(n){return AVC[(n||'').charCodeAt(0)%AVC.length]||AVC[0];}
 function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':m<10080?Math.floor(m/1440)+' д назад':new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});}
 
 /* ── STATE ── */
-let state={view:'sections', sectionId:null, sectionName:'', topicId:null, topicName:''};
+let state={view:'sections', sectionId:null, sectionName:'', topicId:null, topicName:'', discussionId:null, discussionName:''};
 let allSections=[], replyTo=null, myName='', myUserId=null;
 
 const SEC_ICONS=[
@@ -363,21 +363,10 @@ async function loadSections(){
     const r=await fetch(API+'/forum/sections',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{sections=[]}=await r.json();
-    allSections=sections.length?sections:getDemoSections();
-  }catch{allSections=getDemoSections();}
+    allSections=sections;
+  }catch{allSections=[];}
   renderSections(allSections);
   updateStats();
-}
-
-function getDemoSections(){
-  return[
-    {id:'s1',name:'Логистика и транспорт',description:'Обсуждение маршрутов, перевозчиков, тарифов',topics_count:18,messages_count:234,color_idx:0,last_author:'Алексей Иванов',last_at:new Date(Date.now()-3600000).toISOString()},
-    {id:'s2',name:'ВЭД и Таможня',description:'Таможенное оформление, документы, пошлины',topics_count:12,messages_count:187,color_idx:1,last_author:'Марина Соколова',last_at:new Date(Date.now()-7200000).toISOString()},
-    {id:'s3',name:'IT в логистике',description:'Системы TMS, WMS, автоматизация процессов',topics_count:9,messages_count:145,color_idx:2,last_author:'Дмитрий Козлов',last_at:new Date(Date.now()-86400000).toISOString()},
-    {id:'s4',name:'Партнёрство и сотрудничество',description:'Поиск партнёров, совместные проекты',topics_count:24,messages_count:310,color_idx:3,last_author:'Ольга Павлова',last_at:new Date(Date.now()-172800000).toISOString()},
-    {id:'s5',name:'Выставки и мероприятия',description:'Анонсы, отчёты, нетворкинг',topics_count:7,messages_count:98,color_idx:4,last_author:'Сергей Новиков',last_at:new Date(Date.now()-259200000).toISOString()},
-    {id:'s6',name:'Аналитика и рынок',description:'Тренды, исследования, прогнозы',topics_count:11,messages_count:173,color_idx:5,last_author:'Елена Морозова',last_at:new Date(Date.now()-432000000).toISOString()},
-  ];
 }
 
 function renderSections(list){
@@ -406,7 +395,7 @@ function renderSections(list){
 }
 
 function openSection(id, name){
-  state={view:'topics', sectionId:id, sectionName:name, topicId:null, topicName:''};
+  state={view:'topics', sectionId:id, sectionName:name, topicId:null, topicName:'', discussionId:null, discussionName:''};
   loadTopics(id);
 }
 
@@ -417,19 +406,8 @@ async function loadTopics(sectionId){
     const r=await fetch(API+'/forum/sections/'+sectionId+'/topics',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{topics=[]}=await r.json();
-    renderTopics(topics.length?topics:getDemoTopics(sectionId));
-  }catch{renderTopics(getDemoTopics(sectionId));}
-}
-
-function getDemoTopics(sectionId){
-  const base=[
-    {id:'t1',title:'Как правильно выбрать мультимодальный маршрут СНГ→ЕС?',author:'Алексей Иванов',replies_count:24,views_count:312,is_hot:true,is_pinned:true,created_at:new Date(Date.now()-7200000).toISOString()},
-    {id:'t2',title:'Документация и страхование при мультимодальных перевозках',author:'Марина Соколова',replies_count:8,views_count:89,is_new:true,created_at:new Date(Date.now()-86400000).toISOString()},
-    {id:'t3',title:'Проблемы с таможней при транзите через Казахстан — кто сталкивался?',author:'Дмитрий Козлов',replies_count:17,views_count:241,is_hot:true,created_at:new Date(Date.now()-172800000).toISOString()},
-    {id:'t4',title:'Рейтинг перевозчиков на направлении Москва — Алматы',author:'Ольга Павлова',replies_count:31,views_count:408,is_pinned:true,created_at:new Date(Date.now()-259200000).toISOString()},
-    {id:'t5',title:'Новые требования к сопроводительным документам с 2026 года',author:'Сергей Новиков',replies_count:5,views_count:67,is_new:true,created_at:new Date(Date.now()-432000000).toISOString()},
-  ];
-  return base;
+    renderTopics(topics);
+  }catch{renderTopics([]);}
 }
 
 function renderTopics(list){
@@ -460,29 +438,60 @@ function renderTopics(list){
 }
 
 function openTopic(id, name){
-  state.view='messages';state.topicId=id;state.topicName=name;
+  state.view='discussions';state.topicId=id;state.topicName=name;state.discussionId=null;state.discussionName='';
   replyTo=null;
+  loadDiscussions(id);
+}
+
+/* ── DISCUSSIONS ── */
+async function loadDiscussions(topicId){
+  document.getElementById('content').innerHTML=skeletonRows(3);
+  try{
+    const r=await fetch(API+'/forum/topics/'+topicId+'/discussions',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{discussions=[]}=await r.json();
+    renderDiscussions(discussions);
+  }catch{renderDiscussions([]);}
+}
+
+function renderDiscussions(list){
+  updateBreadcrumb();updateViewTabs();updateNewBtn();
+  const c=document.getElementById('content');
+  if(!list.length){
+    c.innerHTML=emptyState('Обсуждений пока нет','Создайте первое обсуждение внутри темы');
+    return;
+  }
+  c.innerHTML=list.map(d=>{
+    const active=state.discussionId===d.id;
+    return`<div class="topic-row${active?' active':''}" onclick="openDiscussion('${d.id}','${esc(d.title)}')">
+      <div class="t-av" style="background:${avc(d.author_name||'У')}">${(d.author_name||'У')[0].toUpperCase()}</div>
+      <div class="t-body">
+        <div class="t-name">${esc(d.title)}</div>
+        <div class="t-meta">${esc(d.author_name||'')} · ${ago(d.created_at)}</div>
+      </div>
+      <div class="t-counts">
+        <div class="tc"><div class="tc-num">${d.messages_count||0}</div><div class="tc-lbl">Сообщений</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDiscussion(id, name){
+  state.view='messages';
+  state.discussionId=id;
+  state.discussionName=name;
   loadMessages(id);
 }
 
 /* ── MESSAGES ── */
-async function loadMessages(topicId){
+async function loadMessages(discussionId){
   document.getElementById('content').innerHTML=skeletonRows(3,'tall');
   try{
-    const r=await fetch(API+'/forum/topics/'+topicId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
+    const r=await fetch(API+'/forum/discussions/'+discussionId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{messages=[]}=await r.json();
-    renderMessages(messages.length?messages:getDemoMessages(topicId));
-  }catch{renderMessages(getDemoMessages(topicId));}
-}
-
-function getDemoMessages(topicId){
-  return[
-    {id:'m1',author:'Марина Соколова',author_id:'u2',is_moderator:true,text:'Добрый день! Создала эту тему для обсуждения документации при мультимодальных перевозках. Особенно интересует опыт коллег с коносаментами при смешанных схемах авто + ж/д + море.',likes_count:12,created_at:new Date(Date.now()-86400000-3600000*3).toISOString(),parent_id:null},
-    {id:'m2',author:'Алексей Иванов',author_id:'u1',text:'Работаем с этим давно. Главное — FBL (FIATA Bill of Lading). Он признаётся всеми сторонами и покрывает весь маршрут. Страховку берём сквозную у одного провайдера.',likes_count:8,created_at:new Date(Date.now()-86400000-3600000*2).toISOString(),parent_id:'m1',parent_author:'Марина Соколова',parent_text:'...с коносаментами при смешанных схемах'},
-    {id:'m3',author:'Дмитрий Козлов',author_id:'u3',text:'Согласен с Алексеем. Добавлю: при транзите через Казахстан важно оформлять T2 в дополнение к FBL. Казахстанские таможенники всё строже проверяют.',likes_count:5,created_at:new Date(Date.now()-86400000-3600000).toISOString(),parent_id:null},
-    {id:'m4',author:'Ольга Павлова',author_id:'u4',text:'А кто-нибудь работал с электронными коносаментами? Слышала, что ЮЭД уже поддерживают несколько крупных линий.',likes_count:3,created_at:new Date(Date.now()-3600000*2).toISOString(),parent_id:null},
-  ];
+    renderMessages(messages);
+  }catch{renderMessages([]);}
 }
 
 function renderMessages(list){
@@ -579,10 +588,10 @@ async function sendMessage(){
   const body={text,parent_id:replyTo?.id||null};
   ta.value='';document.getElementById('sendBtn').disabled=true;clearReply();
   try{
-    const r=await fetch(API+'/forum/topics/'+state.topicId+'/messages',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    const r=await fetch(API+'/forum/discussions/'+state.discussionId+'/messages',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
     if(!r.ok)throw 0;
   }catch{}
-  loadMessages(state.topicId);
+  loadMessages(state.discussionId);
 }
 
 /* ── LIKE MSG ── */
@@ -595,7 +604,8 @@ async function likeMsg(id,btn){
 function renderCurrent(){
   if(state.view==='sections')renderSections(allSections);
   else if(state.view==='topics')loadTopics(state.sectionId);
-  else if(state.view==='messages')loadMessages(state.topicId);
+  else if(state.view==='discussions')loadDiscussions(state.topicId);
+  else if(state.view==='messages')loadMessages(state.discussionId);
 }
 
 /* ── BREADCRUMB ── */
@@ -606,22 +616,26 @@ function updateBreadcrumb(){
     html='<span class="bc-cur">Форум</span>';
   } else if(state.view==='topics'){
     html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.sectionName)}</span>`;
-  } else if(state.view==='messages'){
+  } else if(state.view==='discussions'){
     html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-link" onclick="goSection()">${esc(state.sectionName)}</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.topicName)}</span>`;
+  } else if(state.view==='messages'){
+    html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-link" onclick="goSection()">${esc(state.sectionName)}</span><span class="bc-sep">›</span><span class="bc-link" onclick="goTopic()">${esc(state.topicName)}</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.discussionName)}</span>`;
   }
   bc.innerHTML=html;
 }
-function goHome(){state={view:'sections',sectionId:null,sectionName:'',topicId:null,topicName:''};renderSections(allSections);}
-function goSection(){state.view='topics';state.topicId=null;state.topicName='';loadTopics(state.sectionId);}
+function goHome(){state={view:'sections',sectionId:null,sectionName:'',topicId:null,topicName:'',discussionId:null,discussionName:''};renderSections(allSections);}
+function goSection(){state.view='topics';state.topicId=null;state.topicName='';state.discussionId=null;state.discussionName='';loadTopics(state.sectionId);}
+function goTopic(){state.view='discussions';state.discussionId=null;state.discussionName='';loadDiscussions(state.topicId);}
 
 /* ── VIEW TABS ── */
 function updateViewTabs(){
   const TABS=[
     {v:'sections',l:'Разделы'},
     {v:'topics',l:'Темы'},
-    {v:'messages',l:'Обсуждение'},
+    {v:'discussions',l:'Обсуждения'},
+    {v:'messages',l:'Сообщения'},
   ];
-  const enabled={sections:true,topics:!!state.sectionId,messages:!!state.topicId};
+  const enabled={sections:true,topics:!!state.sectionId,discussions:!!state.topicId,messages:!!state.discussionId};
   document.getElementById('viewTabs').innerHTML=TABS.map(t=>`
     <button class="vtab${state.view===t.v?' active':''}" ${!enabled[t.v]?'disabled style="opacity:.4;cursor:not-allowed"':''} onclick="clickTab('${t.v}')">${t.l}</button>
   `).join('');
@@ -629,12 +643,13 @@ function updateViewTabs(){
 function clickTab(v){
   if(v==='sections'){goHome();}
   else if(v==='topics'&&state.sectionId){goSection();}
-  else if(v==='messages'&&state.topicId){loadMessages(state.topicId);}
+  else if(v==='discussions'&&state.topicId){goTopic();}
+  else if(v==='messages'&&state.discussionId){loadMessages(state.discussionId);}
 }
 
 /* ── NEW BUTTON ── */
 function updateNewBtn(){
-  const labels={sections:'Новый раздел',topics:'Новая тема',messages:'Новое сообщение'};
+  const labels={sections:'Новый раздел',topics:'Новая тема',discussions:'Новое обсуждение',messages:'Новое сообщение'};
   document.getElementById('btnNewLabel').textContent=labels[state.view];
 }
 
@@ -659,6 +674,13 @@ function openCreateModal(){
       <textarea class="form-textarea" id="ci-desc" placeholder="Опишите суть вопроса подробнее…" style="height:110px"></textarea>
       <label class="form-label">Теги (через запятую)</label>
       <input class="form-input" id="ci-tags" placeholder="логистика, таможня, документы">`;
+  } else if(state.view==='discussions'){
+    title.textContent='Создать обсуждение';
+    body.innerHTML=`
+      <label class="form-label">Название обсуждения</label>
+      <input class="form-input" id="ci-name" placeholder="Например: Кейс по транзиту через Казахстан">
+      <label class="form-label">Первое сообщение</label>
+      <textarea class="form-textarea" id="ci-desc" placeholder="Опишите, что хотите обсудить…" style="height:110px"></textarea>`;
   } else {
     document.getElementById('msgTextarea')?.focus();return;
   }
@@ -678,6 +700,9 @@ async function submitCreate(){
     const tags=document.getElementById('ci-tags')?.value.split(',').map(t=>t.trim()).filter(Boolean);
     try{await fetch(API+'/forum/sections/'+state.sectionId+'/topics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc,tags})});}catch{}
     loadTopics(state.sectionId);
+  } else if(state.view==='discussions'){
+    try{await fetch(API+'/forum/topics/'+state.topicId+'/discussions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc})});}catch{}
+    loadDiscussions(state.topicId);
   }
 }
 document.getElementById('createModal').addEventListener('click',e=>{if(e.target===document.getElementById('createModal'))closeModal();});
