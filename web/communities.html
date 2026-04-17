@@ -1,223 +1,523 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Сообщества</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Сообщества</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
+
+/* ── LOGO ── */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);transition:box-shadow .2s}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+
+/* ── TOPBAR ── */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+
+/* ── NAV ── */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── MAIN ── */
+.main{grid-area:main;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;box-shadow:var(--sh);flex-wrap:wrap}
+.toolbar h1{font-size:16px;font-weight:800;color:var(--t);flex:1}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s}
+.ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
+.ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.btn-create{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:12px;font-weight:600;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.btn-create:hover{background:var(--gm)}
+.btn-create svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+
+/* ── GRID ── */
+.co-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow-y:auto;padding-right:2px}
+.co-grid::-webkit-scrollbar{width:4px}
+.co-grid::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+
+/* ── COMMUNITY CARD ── */
+.co-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;cursor:pointer;box-shadow:var(--sh);transition:all .2s;display:flex;flex-direction:column}
+.co-card:hover{box-shadow:var(--shm);transform:translateY(-2px)}
+.co-banner{height:52px;position:relative;overflow:hidden;flex-shrink:0}
+.co-banner::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1)}
+.co-banner::after{content:'';position:absolute;bottom:-10px;left:20%;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.06)}
+.co-av-wrap{padding:0 14px;margin-top:-18px;flex-shrink:0}
+.co-av{width:36px;height:36px;border-radius:10px;border:3px solid var(--w);display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;background:#5AB080}
+.co-body{padding:4px 14px 14px;flex:1;display:flex;flex-direction:column}
+.co-name{font-size:13px;font-weight:700;color:var(--t);line-height:1.35}
+.co-cat{font-size:11px;color:var(--gmt);margin-top:2px;display:flex;align-items:center;gap:4px}
+.co-cat svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
+.co-desc{font-size:12px;color:var(--tm);margin-top:6px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.co-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.co-tag{padding:2px 8px;border-radius:99px;background:var(--gl);color:var(--g);font-size:10px;font-weight:600;border:1px solid var(--gb)}
+.co-footer{display:flex;align-items:center;gap:0;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.co-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt);flex:1}
+.co-stat svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.co-join{padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.co-join.out{border:1.5px solid var(--gb);background:var(--gl);color:var(--g)}
+.co-join.out:hover{background:var(--g);color:#fff;border-color:var(--g)}
+.co-join.in{border:1.5px solid var(--g);background:var(--g);color:#fff}
+.co-join.in:hover{background:var(--red);border-color:var(--red)}
+
+/* ── SKELETON ── */
+.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.co-card{animation:fadeUp .3s ease both}
+
+/* ── RIGHT SIDEBAR ── */
+.my-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s;text-decoration:none}
+.my-item:hover{background:var(--gp)}
+.my-av{width:30px;height:30px;border-radius:var(--r);font-size:12px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.my-name{font-size:12px;font-weight:600;color:var(--t)}
+.my-count{font-size:10px;color:var(--gmt);margin-top:1px}
+.rec-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)}
+.rec-item:last-child{border-bottom:none;padding-bottom:0}
+.rec-join{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;border:1.5px solid var(--gb);background:var(--gl);color:var(--g);cursor:pointer;font-family:inherit;transition:all .15s}
+.rec-join:hover{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* ── CREATE MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:520px;transform:translateY(14px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
+.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.form-row{margin-bottom:12px}
+.form-label{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px}
+.form-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp)}
+.form-input:focus{border-color:var(--gm)}
+.form-input::placeholder{color:var(--gmt)}
+textarea.form-input{resize:none;height:90px;line-height:1.55}
+select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 22px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+.btn-pri:disabled{background:var(--gb);cursor:not-allowed}
+
+/* ── AD ── */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ad-btn:hover{opacity:.88}
+
+@media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:1000px){.shell{grid-template-columns:220px 1fr;grid-template-areas:"logo topbar""nav main"}.right{display:none}}
+@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}.co-grid{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body class="bg-white text-[#273244]">
-<div class="min-h-screen p-6 font-sans">
-    <div class="mx-auto max-w-6xl overflow-hidden rounded-[30px] border border-white/70 bg-white shadow-[0_18px_60px_rgba(162,175,186,0.24)]">
-        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#e8ecef] bg-[linear-gradient(180deg,#fbfcfc_0%,#f7f9f9_100%)] px-6 py-5">
-            <div>
-                <a href="/dashboard.html" class="text-sm text-[#7f8b98] hover:text-[#2c394b]"><i class="fa-solid fa-arrow-left mr-2"></i>Назад в ленту</a>
-                <h1 class="mt-2 text-[30px] font-semibold tracking-[-0.02em] text-[#2c394b]">Сообщества LASTOP</h1>
-                <p class="text-[#7e8a97]">Каталог сообществ с удобной фильтрацией и сортировкой.</p>
-            </div>
-            <div class="flex gap-3">
-                <a href="/create-community.html" class="rounded-2xl border border-[#dbe4e9] bg-white px-4 py-2.5 text-sm font-medium text-[#3f5163] hover:bg-[#f4f8fa]">
-                    <i class="fa-solid fa-plus mr-2"></i>Создать сообщество
-                </a>
-                <a href="/dashboard.html#communities" class="rounded-2xl bg-[#4c8d78] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3f7866]">
-                    <i class="fa-solid fa-users mr-2"></i>Мои сообщества
-                </a>
-            </div>
-        </header>
+<body>
+<div class="shell">
 
-        <section class="border-b border-[#e8ecef] bg-[#fbfcfc] px-6 py-5">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <select id="communityPrivacyFilter" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
-                    <option value="all">Все сообщества</option>
-                    <option value="public">Только открытые</option>
-                    <option value="private">Только приватные</option>
-                </select>
-                <select id="communitySort" class="rounded-2xl border border-[#e1e8ec] bg-white px-4 py-3 text-[15px] outline-none">
-                    <option value="members">Сначала популярные</option>
-                    <option value="posts">По числу публикаций</option>
-                    <option value="name">По алфавиту</option>
-                </select>
-            </div>
-        </section>
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" onerror="this.style.display='none'">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
 
-        <main class="bg-[linear-gradient(180deg,rgba(246,249,250,0.98)_0%,rgba(250,252,252,0.96)_100%)] px-6 py-6">
-            <div id="communityList" class="grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
-            <div id="communityListEmpty" class="hidden rounded-2xl border border-dashed border-[#d4dde3] bg-white p-8 text-center text-[#7f8b98]">
-                По вашему фильтру сообщества не найдены.
-            </div>
-        </main>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск сообществ…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br" id="bellCount">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg" id="chatCount">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item" href="/companies.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item active" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="toolbar">
+    <h1>Сообщества</h1>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="ftab active" data-cat="">Все</button>
+      <button class="ftab" data-cat="my">Мои</button>
+      <button class="ftab" data-cat="Логистика и транспорт">Логистика</button>
+      <button class="ftab" data-cat="ВЭД и таможня">ВЭД</button>
+      <button class="ftab" data-cat="IT в логистике">IT</button>
+      <button class="ftab" data-cat="Деловой нетворкинг">Нетворкинг</button>
     </div>
+    <button class="btn-create" onclick="openCreate()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Создать
+    </button>
+  </div>
+  <div class="co-grid" id="coGrid"></div>
+</div>
+
+<!-- RIGHT -->
+<aside class="right">
+  <div class="card" id="myCommBlock">
+    <div class="block-title">Мои сообщества</div>
+    <div id="myCommList"><div style="font-size:12px;color:var(--gmt)">Загрузка…</div></div>
+  </div>
+  <div class="card">
+    <div class="block-title">Рекомендации</div>
+    <div id="recList"></div>
+  </div>
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">LogisticsPro 2026</div>
+      <div class="ad-sub">Выставка · Москва · май</div>
+      <button class="ad-btn">Узнать подробнее</button>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- CREATE MODAL -->
+<div class="modal-bg" id="createModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Создать сообщество</h3>
+      <button class="modal-x" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Название *</label>
+      <input class="form-input" id="cName" placeholder="Название сообщества" maxlength="100">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Описание</label>
+      <textarea class="form-input" id="cDesc" placeholder="Чем занимается ваше сообщество?"></textarea>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row">
+        <label class="form-label">Категория</label>
+        <select class="form-input" id="cCat">
+          <option value="">Выбрать…</option>
+          <option>Логистика и транспорт</option>
+          <option>ВЭД и таможня</option>
+          <option>IT в логистике</option>
+          <option>Деловой нетворкинг</option>
+          <option>Фармацевтика</option>
+          <option>Сельское хозяйство</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Приватность</label>
+        <select class="form-input" id="cPriv">
+          <option value="open">Открытое</option>
+          <option value="closed">Закрытое</option>
+          <option value="invite">По приглашению</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Теги (через запятую)</label>
+      <input class="form-input" id="cTags" placeholder="логистика, снг, экспорт">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Сайт</label>
+      <input class="form-input" id="cSite" placeholder="https://example.com">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeModal()">Отмена</button>
+      <button class="btn-pri" id="createBtn" onclick="submitCreate()">Создать</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const DEMO_COMMUNITIES = [
-    {
-        id: 'demo-community-1',
-        name: 'Экспорт и логистика',
-        owner_name: 'Команда LASTOP',
-        description: 'Обсуждаем маршруты поставок, страхование грузов и новые логистические коридоры.',
-        members_count: 1840,
-        posts_count: 462,
-        is_private: false,
-        search_tags: ['логистика', 'экспорт', 'b2b']
-    },
-    {
-        id: 'demo-community-2',
-        name: 'AI в промышленности',
-        owner_name: 'LASTOP Insights',
-        description: 'Практические кейсы внедрения AI и автоматизации в производственных компаниях.',
-        members_count: 980,
-        posts_count: 217,
-        is_private: false,
-        search_tags: ['ai', 'промышленность', 'автоматизация']
-    },
-    {
-        id: 'demo-community-3',
-        name: 'Закрытый клуб поставщиков',
-        owner_name: 'Совет партнеров',
-        description: 'Приватное сообщество для верифицированных поставщиков и закупщиков.',
-        members_count: 320,
-        posts_count: 94,
-        is_private: true,
-        search_tags: ['закупки', 'поставщики', 'private']
-    }
-];
+const API = '/api', tk = () => localStorage.getItem('token');
+const COLORS = ['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
+const CATICONS = {
+  'Логистика и транспорт': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/></svg>`,
+  'ВЭД и таможня': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  'IT в логистике': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>`,
+  'Деловой нетворкинг': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+};
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function avc(name){return COLORS[(name||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
+function letter(name){return((name||'?')[0]).toUpperCase();}
+function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
 
-let communities = [...DEMO_COMMUNITIES];
-
-function getCommunityTags(community) {
-    const tags = community.search_tags || [];
-    return Array.isArray(tags) ? tags : [];
-}
-
-function communityCard(community) {
-    const tags = getCommunityTags(community);
-    return `
-        <article class="rounded-[22px] border border-[#e8ecee] bg-white px-5 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${community.name}</h3>
-                    <p class="mt-1 text-sm text-[#7f8b98]">Владелец: ${community.owner_name || 'Не указан'}</p>
-                    <p class="mt-3 text-[15px] leading-6 text-[#697685]">${community.description || 'Описание отсутствует'}</p>
-                </div>
-                <span class="rounded-full ${community.is_private ? 'bg-[#fff2ee] text-[#b0553d]' : 'bg-[#eef7f2] text-[#5f8f7b]'} px-3 py-1 text-xs font-semibold">${community.is_private ? 'Приватное' : 'Открытое'}</span>
-            </div>
-
-            <div class="mt-4 flex flex-wrap gap-2.5">
-                ${tags.length ? tags.map((tag) => `<span class="rounded-full bg-[#eef2f6] px-3 py-1.5 text-[12px] font-medium text-[#5f7081]">#${tag}</span>`).join('') : '<span class="text-xs text-[#97a3af]">Теги не указаны</span>'}
-            </div>
-
-            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Участники</dt><dd class="text-lg font-semibold text-[#344153]">${community.members_count || 0}</dd></div>
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Публикации</dt><dd class="text-lg font-semibold text-[#344153]">${community.posts_count || 0}</dd></div>
-            </dl>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-                <a href="/community.html?id=${encodeURIComponent(community.id)}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть сообщество</a>
-                <button data-join-community="${community.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Присоединиться</button>
-            </div>
-        </article>
-    `;
-}
-
-function filteredCommunities() {
-    const privacy = document.getElementById('communityPrivacyFilter').value;
-    const sort = document.getElementById('communitySort').value;
-
-    const filtered = communities.filter((community) => {
-        if (privacy === 'public') return !community.is_private;
-        if (privacy === 'private') return community.is_private;
-        return true;
-    });
-
-    filtered.sort((a, b) => {
-        if (sort === 'posts') return (b.posts_count || 0) - (a.posts_count || 0);
-        if (sort === 'name') return (a.name || '').localeCompare(b.name || '', 'ru');
-        return (b.members_count || 0) - (a.members_count || 0);
-    });
-
-    return filtered;
-}
-
-function renderCommunities() {
-    const list = document.getElementById('communityList');
-    const empty = document.getElementById('communityListEmpty');
-    const data = filteredCommunities();
-
-    if (!data.length) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-
-    empty.classList.add('hidden');
-    list.innerHTML = data.map(communityCard).join('');
-}
-
-async function tryLoadFromAPI() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    try {
-        const response = await fetch('/api/communities', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) return;
-
-        const data = await response.json();
-        if (Array.isArray(data.communities) && data.communities.length) {
-            communities = [...DEMO_COMMUNITIES, ...data.communities];
-        }
-    } catch (error) {
-        console.warn('Не удалось получить список сообществ из API:', error);
-    }
-}
-
-function wireActions() {
-    ['communityPrivacyFilter', 'communitySort'].forEach((id) => {
-        document.getElementById(id).addEventListener('input', renderCommunities);
-        document.getElementById(id).addEventListener('change', renderCommunities);
-    });
-
-    document.getElementById('communityList').addEventListener('click', async (event) => {
-        const joinBtn = event.target.closest('[data-join-community]');
-        if (!joinBtn) return;
-
-        const communityId = joinBtn.dataset.joinCommunity;
-        if (communityId.startsWith('demo-community-')) {
-            joinBtn.textContent = 'Демо: вы участник';
-            joinBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
-            joinBtn.classList.add('bg-[#4c8d78]', 'text-white');
-            return;
-        }
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Требуется авторизация для вступления.');
-            return;
-        }
-
-        const response = await fetch(`/api/communities/${communityId}/join`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-            joinBtn.textContent = 'Вы участник';
-            joinBtn.classList.remove('bg-[#eff7f3]', 'text-[#4c8d78]');
-            joinBtn.classList.add('bg-[#4c8d78]', 'text-white');
-        }
-    });
-}
-
-(async function init() {
-    wireActions();
-    await tryLoadFromAPI();
-    renderCommunities();
+/* ── AUTH ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    const{user={}}=await r.json();
+    localStorage.setItem('user',JSON.stringify(user));
+  }catch{const u=JSON.parse(localStorage.getItem('user')||'{}');if(!u.id){location.href='/login.html';}}
 })();
+
+/* ── SEARCH ── */
+let sT; document.getElementById('searchInput').addEventListener('input',e=>{
+  clearTimeout(sT); const q=e.target.value.trim();
+  sT=setTimeout(()=>loadCommunities(currentCat,q),350);
+});
+
+/* ── FILTER TABS ── */
+let currentCat='';
+document.getElementById('filterTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.ftab'); if(!btn)return;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat=btn.dataset.cat;
+  loadCommunities(currentCat);
+});
+
+/* ── LOAD ── */
+async function loadCommunities(cat='',q=''){
+  const grid=document.getElementById('coGrid');
+  grid.innerHTML=skeletons(6);
+  let url=API+'/communities?limit=30';
+  if(cat==='my') url=API+'/communities/my';
+  else if(cat) url+=`&category=${encodeURIComponent(cat)}`;
+  if(q) url+=`&q=${encodeURIComponent(q)}`;
+  try{
+    const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{communities=[]}=await r.json();
+    renderGrid(communities);
+  }catch{
+    renderGrid(getDemoCommunities());
+  }
+}
+
+/* ── RENDER GRID ── */
+function renderGrid(list){
+  const grid=document.getElementById('coGrid');
+  if(!list.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--gmt)">
+      <div style="font-size:28px;margin-bottom:12px">🌐</div>
+      <div style="font-size:14px;font-weight:600">Сообществ не найдено</div>
+      <div style="font-size:12px;margin-top:6px">Создайте первое или измените фильтр</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML=list.map((co,i)=>buildCard(co,i)).join('');
+}
+function buildCard(co,i){
+  const bg=avc(co.name); const ltr=letter(co.name);
+  const tags=(co.tags||[]).slice(0,3).map(t=>`<span class="co-tag">#${esc(t)}</span>`).join('');
+  const catIcon=CATICONS[co.category]||'';
+  const bannerStyle=co.banner_url?`background:url('${esc(co.banner_url)}') center/cover no-repeat`:`background:linear-gradient(135deg,${bg},${bg}cc)`;
+  const avStyle=co.avatar_url?`background:url('${esc(co.avatar_url)}') center/cover no-repeat;background-color:${bg}`:`background:${bg}`;
+  const avContent=co.avatar_url?'':`${ltr}`;
+  const joinClass=co.is_member?'in':'out';
+  const joinText=co.is_member?'✓ В сообществе':'+ Вступить';
+  return`<div class="co-card" style="animation-delay:${(i%9*0.04).toFixed(2)}s" onclick="goProfile(${co.id})">
+    <div class="co-banner" style="${bannerStyle}"></div>
+    <div class="co-av-wrap"><div class="co-av" style="${avStyle}">${avContent}</div></div>
+    <div class="co-body">
+      <div class="co-name">${esc(co.name)}</div>
+      <div class="co-cat">${catIcon}${esc(co.category||'Сообщество')}</div>
+      <div class="co-desc">${esc(co.description||co.short_description||'')}</div>
+      ${tags?`<div class="co-tags">${tags}</div>`:''}
+      <div class="co-footer">
+        <div class="co-stat"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${num(co.members_count||0)} участников</div>
+        <button class="co-join ${joinClass}" onclick="event.stopPropagation();toggleJoin(${co.id},this)" data-id="${co.id}" data-member="${co.is_member?1:0}">${joinText}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── JOIN / LEAVE ── */
+async function toggleJoin(id, btn){
+  const isMember=btn.dataset.member==='1';
+  const method=isMember?'DELETE':'POST';
+  try{
+    const r=await fetch(`${API}/communities/${id}/join`,{method,headers:{Authorization:'Bearer '+tk()}});
+    if(r.ok){
+      const now=!isMember;
+      btn.dataset.member=now?'1':'0';
+      btn.className=`co-join ${now?'in':'out'}`;
+      btn.textContent=now?'✓ В сообществе':'+ Вступить';
+      loadMyCommunities();
+    }
+  }catch{}
+}
+
+/* ── NAVIGATION ── */
+function goProfile(id){location.href=`/community-profile.html?id=${id}`;}
+
+/* ── MY COMMUNITIES SIDEBAR ── */
+async function loadMyCommunities(){
+  try{
+    const r=await fetch(API+'/communities/my',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{communities=[]}=await r.json();
+    const list=document.getElementById('myCommList');
+    if(!communities.length){list.innerHTML='<div style="font-size:12px;color:var(--gmt)">Вы пока не вступили ни в одно сообщество</div>';return;}
+    list.innerHTML=communities.slice(0,5).map(co=>`
+      <a class="my-item" href="/community-profile.html?id=${co.id}">
+        <div class="my-av" style="background:${avc(co.name)}">${letter(co.name)}</div>
+        <div>
+          <div class="my-name">${esc(co.name)}</div>
+          <div class="my-count">${num(co.members_count||0)} участников</div>
+        </div>
+      </a>`).join('');
+  }catch{
+    document.getElementById('myCommList').innerHTML='<div style="font-size:12px;color:var(--gmt)">Не удалось загрузить</div>';
+  }
+}
+
+/* ── RECOMMENDATIONS ── */
+async function loadRecs(){
+  try{
+    const r=await fetch(API+'/communities?limit=5',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{communities=[]}=await r.json();
+    const recs=communities.filter(c=>!c.is_member).slice(0,3);
+    renderRecs(recs);
+  }catch{renderRecs(getDemoCommunities().filter(c=>!c.is_member).slice(0,3));}
+}
+function renderRecs(list){
+  document.getElementById('recList').innerHTML=list.map(co=>`
+    <div class="rec-item">
+      <div class="my-av" style="background:${avc(co.name)};flex-shrink:0">${letter(co.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="my-name" style="cursor:pointer" onclick="goProfile(${co.id})">${esc(co.name)}</div>
+        <div class="my-count">${num(co.members_count||0)} участников</div>
+      </div>
+      <button class="rec-join" onclick="toggleJoinRec(${co.id},this)">Вступить</button>
+    </div>`).join('');
+}
+async function toggleJoinRec(id,btn){
+  try{
+    const r=await fetch(`${API}/communities/${id}/join`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});
+    if(r.ok){btn.textContent='✓';btn.style.background='var(--gl)';loadMyCommunities();}
+  }catch{}
+}
+
+/* ── CREATE MODAL ── */
+function openCreate(){document.getElementById('createModal').classList.add('open');setTimeout(()=>document.getElementById('cName').focus(),150);}
+function closeModal(){document.getElementById('createModal').classList.remove('open');}
+document.getElementById('createModal').addEventListener('click',e=>{if(e.target===document.getElementById('createModal'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+async function submitCreate(){
+  const name=document.getElementById('cName').value.trim();
+  if(!name)return;
+  const btn=document.getElementById('createBtn');
+  btn.disabled=true;btn.textContent='Создаём…';
+  const tags=document.getElementById('cTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  try{
+    const r=await fetch(API+'/communities',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({
+        name,
+        description:document.getElementById('cDesc').value.trim(),
+        category:document.getElementById('cCat').value,
+        privacy:document.getElementById('cPriv').value,
+        website:document.getElementById('cSite').value.trim(),
+        tags,
+      })
+    });
+    if(r.ok){
+      const{id}=await r.json();
+      closeModal();
+      location.href=`/community-profile.html?id=${id}`;
+    }
+  }catch{}
+  btn.disabled=false;btn.textContent='Создать';
+}
+
+/* ── SKELETONS ── */
+function skeletons(n){
+  return Array(n).fill(0).map(()=>`<div class="skeleton">
+    <div style="height:52px;background:var(--gp);animation:pulse 1.4s ease-in-out infinite"></div>
+    <div style="padding:0 14px 14px">
+      <div style="margin-top:-14px;margin-bottom:10px"><div class="sl" style="width:36px;height:36px;border-radius:10px"></div></div>
+      <div class="sl" style="height:13px;width:65%;margin-bottom:7px;border-radius:6px"></div>
+      <div class="sl" style="height:10px;width:45%;margin-bottom:10px;border-radius:6px"></div>
+      <div class="sl" style="height:10px;width:100%;margin-bottom:5px;border-radius:6px"></div>
+      <div class="sl" style="height:10px;width:80%;border-radius:6px"></div>
+    </div>
+  </div>`).join('');
+}
+
+/* ── DEMO DATA (fallback) ── */
+function getDemoCommunities(){
+  return[
+    {id:1,name:'Логистика СНГ',description:'Обсуждаем маршруты, перевозчиков и тарифы по СНГ и за его пределами',category:'Логистика и транспорт',tags:['снг','маршруты','экспорт'],members_count:2400,is_member:true},
+    {id:2,name:'Экспортёры РФ',description:'Помогаем разобраться с экспортом из России: документация, пошлины, разрешения',category:'ВЭД и таможня',tags:['вэд','таможня'],members_count:1100,is_member:false},
+    {id:3,name:'TMS & WMS клуб',description:'Делимся опытом внедрения и эксплуатации систем управления транспортом и складом',category:'IT в логистике',tags:['tms','wms','saas'],members_count:870,is_member:false},
+    {id:4,name:'Партнёрства 2026',description:'Ищем партнёров, инвесторов и клиентов. Делимся контактами и возможностями',category:'Деловой нетворкинг',tags:['нетворкинг','b2b'],members_count:3200,is_member:true},
+    {id:5,name:'Фармлогистика',description:'Специфика перевозки лекарств и медизделий: GDP, холодная цепь, документация',category:'Фармацевтика',tags:['gdp','фарма'],members_count:430,is_member:false},
+    {id:6,name:'АПК и экспорт',description:'Зерно, масличные, сахар — логистика и экспорт агропродукции из России и СНГ',category:'Сельское хозяйство',tags:['зерно','апк'],members_count:680,is_member:false},
+  ];
+}
+
+/* ── INIT ── */
+loadCommunities();
+loadMyCommunities();
+loadRecs();
 </script>
 </body>
 </html>
