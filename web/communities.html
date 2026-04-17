@@ -12,505 +12,497 @@
   --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
   --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
   --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --mint:#E8F2EC;--mint-t:#2E6E4A;
   --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
 }
 html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
-.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;
+  grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
 
-/* ── LOGO ── */
-.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);transition:box-shadow .2s}
+/* LOGO */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);
+  display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;
+  box-shadow:var(--sh);transition:box-shadow .2s;overflow:hidden}
 .logo-cell:hover{box-shadow:var(--shm)}
-.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
-.logo-text{display:flex;flex-direction:column;line-height:1.15}
-.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
-.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+.logo-cell svg.logo-svg{height:32px;width:auto;flex-shrink:0}
 
-/* ── TOPBAR ── */
-.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
-.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+/* TOPBAR — internal grid mirrors outer columns */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);
+  display:grid;grid-template-columns:1fr 10px 264px;align-items:center;padding:0 14px;
+  box-shadow:var(--sh);gap:0}
+.search-col{padding-right:10px;display:flex;align-items:center}
+.search-wrap{position:relative;display:flex;align-items:center;width:100%}
 .search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
-.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
-.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);
+  border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);
+  outline:none;transition:border-color .2s,background .2s}
+.search-wrap input:focus{border-color:var(--gm);background:var(--w)}
 .search-wrap input::placeholder{color:var(--gmt)}
-.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s;flex-shrink:0}
-.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
-.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
-.br{background:var(--red)}.bgg{background:var(--g)}
+.topbar-gap{}
+.profile-col{width:264px;display:flex;align-items:center;justify-content:flex-end}
 
-/* ── NAV ── */
-.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
-.nav::-webkit-scrollbar{display:none}
-.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+/* Profile block */
+.profile-block{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 7px;
+  border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);
+  cursor:pointer;flex-shrink:0;position:relative;transition:background .15s,border-color .15s;width:100%}
+.profile-block:hover,.profile-block.open{background:var(--mint);border-color:var(--gb)}
+.pb-av{width:28px;height:28px;border-radius:50%;background:var(--g);color:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
+.pb-info{flex:1;min-width:0}
+.pb-info .pb-name{font-size:12px;font-weight:700;color:var(--t);line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-info .pb-role{font-size:10px;color:var(--gmt)}
+.pb-chevron{width:14px;height:14px;flex-shrink:0;fill:none;stroke:var(--gmt);
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.profile-block.open .pb-chevron{transform:rotate(180deg)}
+.profile-dropdown{position:absolute;top:calc(100% + 8px);right:0;left:0;background:var(--w);
+  border:1px solid var(--bdr);border-radius:var(--rm);z-index:300;
+  box-shadow:0 8px 28px rgba(30,138,76,.13);padding:6px 0;min-width:100%;
+  opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .18s,transform .18s}
+.profile-block.open .profile-dropdown{opacity:1;pointer-events:all;transform:translateY(0)}
+.pd-item{padding:9px 14px;font-size:13px;color:var(--tm);display:flex;align-items:center;
+  gap:10px;cursor:pointer;transition:background .12s;white-space:nowrap}
+.pd-item:hover{background:var(--mint)}
+.pd-item svg{width:16px;height:16px;fill:none;stroke:var(--gmt);stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pd-item.danger{color:var(--red)}
+.pd-item.danger svg{stroke:var(--red)}
+.pd-divider{height:1px;background:var(--bdr);margin:4px 0}
+
+/* NAV */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);
+  box-shadow:var(--sh);overflow:hidden;display:flex;flex-direction:column;padding:10px 8px 0}
+.nav-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
+  gap:1px;padding-bottom:6px}
+.nav-scroll::-webkit-scrollbar{display:none}
+.nav-sec{font-size:9px;font-weight:700;color:var(--gmt);letter-spacing:.1em;
+  text-transform:uppercase;padding:8px 10px 3px;opacity:.7}
+.nav-div{height:1px;background:var(--bdr);margin:5px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);
+  cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;
+  transition:background .15s,color .15s;white-space:nowrap}
 .nav-item:hover{background:var(--gp);color:var(--g)}
-.nav-item.active{background:var(--g);color:#fff;font-weight:600}
-.nav-item.active svg *{stroke:#fff}
-.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.active{background:var(--mint);color:var(--mint-t);font-weight:600}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nav-footer{border-top:1px solid var(--bdr);padding:8px}
+.nav-settings{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);
+  cursor:pointer;text-decoration:none;color:var(--gmt);font-size:13px;font-weight:500;
+  transition:background .15s,color .15s;white-space:nowrap}
+.nav-settings:hover{background:var(--gp);color:var(--g)}
+.nav-settings svg{width:17px;height:17px;flex-shrink:0;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-/* ── MAIN ── */
+/* LAYOUT AREAS */
 .main{grid-area:main;overflow:hidden;display:flex;flex-direction:column;gap:10px}
 .right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .right::-webkit-scrollbar{display:none}
-.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
-.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
 
-/* ── TOOLBAR ── */
-.toolbar{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;box-shadow:var(--sh);flex-wrap:wrap}
-.toolbar h1{font-size:16px;font-weight:800;color:var(--t);flex:1}
+/* CARD */
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);
+  padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:10px}
+
+/* TOOLBAR */
+.toolbar{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);
+  display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;
+  box-shadow:var(--sh);flex-wrap:wrap}
+.section-toggle{display:flex;background:var(--gp);border-radius:var(--rm);
+  padding:3px;gap:2px;border:1px solid var(--bdr)}
+.st{padding:6px 16px;border-radius:var(--r);font-size:13px;font-weight:600;
+  color:var(--gmt);cursor:pointer;border:none;background:transparent;font-family:inherit;
+  transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.st.active{background:var(--w);color:var(--g);box-shadow:0 1px 6px rgba(30,138,76,.10)}
 .filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
-.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s}
+.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;
+  transition:all .15s}
 .ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
 .ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
-.btn-create{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:12px;font-weight:600;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.btn-create{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);
+  background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:12px;
+  font-weight:600;transition:background .15s;white-space:nowrap;flex-shrink:0;margin-left:auto}
 .btn-create:hover{background:var(--gm)}
 .btn-create svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
 
-/* ── GRID ── */
-.co-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow-y:auto;padding-right:2px}
-.co-grid::-webkit-scrollbar{width:4px}
-.co-grid::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+/* FEED */
+.feed{overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
+.feed::-webkit-scrollbar{width:4px}
+.feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── COMMUNITY CARD ── */
-.co-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;cursor:pointer;box-shadow:var(--sh);transition:all .2s;display:flex;flex-direction:column}
-.co-card:hover{box-shadow:var(--shm);transform:translateY(-2px)}
-.co-banner{height:52px;position:relative;overflow:hidden;flex-shrink:0}
-.co-banner::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1)}
-.co-banner::after{content:'';position:absolute;bottom:-10px;left:20%;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.06)}
-.co-av-wrap{padding:0 14px;margin-top:-18px;flex-shrink:0}
-.co-av{width:36px;height:36px;border-radius:10px;border:3px solid var(--w);display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;background:#5AB080}
-.co-body{padding:4px 14px 14px;flex:1;display:flex;flex-direction:column}
-.co-name{font-size:13px;font-weight:700;color:var(--t);line-height:1.35}
-.co-cat{font-size:11px;color:var(--gmt);margin-top:2px;display:flex;align-items:center;gap:4px}
-.co-cat svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;flex-shrink:0}
-.co-desc{font-size:12px;color:var(--tm);margin-top:6px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
-.co-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
-.co-tag{padding:2px 8px;border-radius:99px;background:var(--gl);color:var(--g);font-size:10px;font-weight:600;border:1px solid var(--gb)}
-.co-footer{display:flex;align-items:center;gap:0;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
-.co-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt);flex:1}
-.co-stat svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
-.co-join{padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.co-join.out{border:1.5px solid var(--gb);background:var(--gl);color:var(--g)}
-.co-join.out:hover{background:var(--g);color:#fff;border-color:var(--g)}
-.co-join.in{border:1.5px solid var(--g);background:var(--g);color:#fff}
-.co-join.in:hover{background:var(--red);border-color:var(--red)}
-
-/* ── SKELETON ── */
-.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden}
+/* SKELETON */
+.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
+  animation:fadeUp .3s ease both}
 .sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.co-card{animation:fadeUp .3s ease both}
 
-/* ── RIGHT SIDEBAR ── */
-.my-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s;text-decoration:none}
-.my-item:hover{background:var(--gp)}
-.my-av{width:30px;height:30px;border-radius:var(--r);font-size:12px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
-.my-name{font-size:12px;font-weight:600;color:var(--t)}
-.my-count{font-size:10px;color:var(--gmt);margin-top:1px}
-.rec-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)}
-.rec-item:last-child{border-bottom:none;padding-bottom:0}
-.rec-join{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;border:1.5px solid var(--gb);background:var(--gl);color:var(--g);cursor:pointer;font-family:inherit;transition:all .15s}
-.rec-join:hover{background:var(--g);color:#fff;border-color:var(--g)}
+/* GENERIC CARDS */
+.item-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
+  cursor:pointer;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;
+  animation:fadeUp .3s ease both}
+.item-card:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.item-av{width:44px;height:44px;border-radius:var(--rm);font-size:16px;font-weight:800;
+  color:#fff;display:grid;place-items:center;flex-shrink:0}
+.item-title{font-size:14px;font-weight:700;color:var(--t);margin-bottom:2px}
+.item-sub{font-size:12px;color:var(--gmt)}
+.item-body{font-size:12px;color:var(--tm);line-height:1.6;margin:8px 0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--bdr)}
+.item-badge{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700}
+.badge-green{background:var(--gl);border:1px solid var(--gb);color:var(--g)}
+.badge-warm{background:#FAEEDA;border:1px solid #FAC775;color:#633806}
+.badge-gray{background:#F1EFE8;border:1px solid #D3D1C7;color:#5F5E5A}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;
+  font-size:11px;font-weight:600}
+.pill-city{background:#E6F1FB;color:#185FA5}
+.pill-exp{background:#FAEEDA;color:#633806}
+.pill-green{background:var(--gl);color:var(--g)}
+.pill-gray{background:#F1EFE8;color:#444441}
+.tag{padding:3px 10px;border-radius:99px;background:var(--gp);color:var(--tm);
+  font-size:11px;font-weight:600;border:1px solid var(--bdr)}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;
+  border-bottom:1px solid var(--bdr)}
+.stat-row:last-child{border-bottom:none;padding-bottom:0}
+.stat-lbl{font-size:12px;color:var(--gmt)}
+.stat-val{font-size:13px;font-weight:700;color:var(--t)}
+.btn-pri{padding:7px 18px;border-radius:var(--rm);background:var(--g);border:none;
+  cursor:pointer;color:#fff;font-family:inherit;font-size:12px;font-weight:600;
+  transition:background .15s}
+.btn-pri:hover{background:var(--gm)}
+.btn-sec{padding:7px 14px;border-radius:var(--rm);border:1.5px solid var(--bdr);
+  background:var(--w);font-family:inherit;font-size:12px;font-weight:600;color:var(--tm);
+  cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
 
-/* ── CREATE MODAL ── */
-.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-bg.open{opacity:1;pointer-events:all}
-.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:520px;transform:translateY(14px);transition:transform .22s}
-.modal-bg.open .modal{transform:translateY(0)}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
-.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s}
-.modal-x:hover{background:var(--gl);color:var(--g)}
-.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.form-row{margin-bottom:12px}
-.form-label{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px}
-.form-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp)}
+/* FORM */
+.form-label{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.05em;
+  text-transform:uppercase;display:block;margin-bottom:5px}
+.form-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);
+  padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;
+  transition:border-color .2s;background:var(--gp)}
 .form-input:focus{border-color:var(--gm)}
 .form-input::placeholder{color:var(--gmt)}
 textarea.form-input{resize:none;height:90px;line-height:1.55}
-select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none}
-.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
-.btn-sec:hover{background:var(--gp)}
-.btn-pri{padding:8px 22px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
-.btn-pri:hover{opacity:.88}
-.btn-pri:disabled{background:var(--gb);cursor:not-allowed}
 
-/* ── AD ── */
-.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
-.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+/* AD */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);
+  padding:14px;position:relative;overflow:hidden}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 8px;border-radius:6px}
 .ad-content{margin-top:20px;text-align:center}
 .ad-title{font-size:13px;font-weight:700;color:#5040A0}
 .ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
-.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.ad-btn:hover{opacity:.88}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);
+  background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;
+  font-family:inherit}
 
+/* DETAIL PANEL */
+.detail-panel{position:fixed;top:0;right:-440px;width:440px;height:100vh;background:var(--w);
+  border-left:1px solid var(--bdr);box-shadow:-4px 0 30px rgba(30,138,76,.08);z-index:150;
+  transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
+.detail-panel.open{right:0}
+.detail-panel::-webkit-scrollbar{width:4px}
+.detail-panel::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.dp-close{position:sticky;top:0;background:var(--w);padding:12px 16px 10px;
+  border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;z-index:1}
+.dp-close-btn{width:30px;height:30px;border-radius:var(--r);background:var(--gp);
+  border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);flex-shrink:0}
+.dp-close-btn:hover{background:var(--gl);color:var(--g)}
+.dp-close-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.dp-close span{font-size:13px;font-weight:700;color:var(--t)}
+.dp-body{padding:16px;flex:1}
+.dp-actions{display:flex;gap:8px;padding:14px 16px;border-top:1px solid var(--bdr);
+  position:sticky;bottom:0;background:var(--w)}
+.panel-overlay{position:fixed;inset:0;z-index:140;display:none}
+.panel-overlay.show{display:block}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);
+  z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);
+  box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
+.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;
+  cursor:pointer;display:grid;place-items:center;color:var(--gmt)}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;
+  padding-top:14px;border-top:1px solid var(--bdr)}
+.form-row{margin-bottom:14px}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* RESPONSIVE */
 @media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
-@media(max-width:1000px){.shell{grid-template-columns:220px 1fr;grid-template-areas:"logo topbar""nav main"}.right{display:none}}
-@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}.co-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:1000px){.shell{grid-template-columns:220px 1fr;
+  grid-template-areas:"logo topbar""nav main"}.right{display:none}}
+@media(max-width:740px){.shell{grid-template-columns:52px 1fr}
+  .nav-item span,.nav-settings span,.nav-sec{display:none}
+  .nav-item,.nav-settings{justify-content:center;padding:10px}
+  .filter-tabs{display:none}.pb-info,.pb-chevron{display:none}}
+
 </style>
 </head>
 <body>
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/">
-  <img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" onerror="this.style.display='none'">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
-</a>
+<a class="logo-cell" href="/"><svg class="logo-svg" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(0,4)">
+      <path d="M16 1L29 8.5V23.5L16 31L3 23.5V8.5L16 1Z" fill="#1E8A4C" stroke="#145e30" stroke-width="0.8"/>
+      <path d="M16 6.5L25 11.5V21.5L16 26.5L7 21.5V11.5L16 6.5Z" fill="#27B060"/>
+      <rect x="11.5" y="11.5" width="9" height="9" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"/>
+      <line x1="11.5" y1="16" x2="20.5" y2="16" stroke="#fff" stroke-width="1.4"/>
+      <line x1="16" y1="11.5" x2="16" y2="20.5" stroke="#fff" stroke-width="1.4"/>
+    </g>
+    <text x="38" y="21" font-family="Manrope,sans-serif" font-weight="800" font-size="13.5" fill="#1E8A4C" letter-spacing="0.6">LASTOP</text>
+    <text x="38" y="31" font-family="Manrope,sans-serif" font-weight="600" font-size="8" fill="#5A8A6A" letter-spacing="1.8">GROUP</text>
+  </svg></a>
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <div class="search-wrap">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" id="searchInput" placeholder="Поиск сообществ…" autocomplete="off">
+  <div class="search-col">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" placeholder="Поиск пользователей, компаний, форума..." autocomplete="off">
+    </div>
   </div>
-  <button class="icon-btn" title="Уведомления">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span class="badge br" id="bellCount">3</span>
-  </button>
-  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
-    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-    <span class="badge bgg" id="chatCount">7</span>
-  </button>
-  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </button>
+  <div class="topbar-gap"></div>
+  <div class="profile-col">
+    <div class="profile-block" id="profileBlock" onclick="toggleProfile()">
+      <div class="pb-av" id="pbAv">НК</div>
+      <div class="pb-info">
+        <div class="pb-name" id="pbName">Никита Клишин</div>
+        <div class="pb-role" id="pbRole">Участник LASTOP</div>
+      </div>
+      <svg class="pb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="pd-item" onclick="location.href='/friends.html'">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Друзья
+        </div>
+        <div class="pd-item" onclick="location.href='/my-company.html'">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Моя компания
+        </div>
+        <div class="pd-item" onclick="location.href='/analytics.html'">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Аналитика
+        </div>
+        <div class="pd-item" onclick="location.href='/communities.html'">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Сообщества
+        </div>
+        <div class="pd-divider"></div>
+        <div class="pd-item danger" onclick="logout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Выход
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <!-- NAV -->
 <nav class="nav">
-  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
-  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
-  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
-  <a class="nav-item" href="/company.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
-  <a class="nav-item active" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
-  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
-  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
-  <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Выставки</span></a>
-  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Резюме</span></a>
-  <div class="nav-div"></div>
-  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
-  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+  <div class="nav-scroll">
+    <div class="nav-sec">Навигация</div>
+    <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+    <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6z"/></svg><span>Новости</span></a>
+    <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+    <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+    <a class="nav-item" href="/exhibitions.html"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Выставки</span></a>
+    <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg><span>Резюме</span></a>
+    <a class="nav-item" href="/catalog.html"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Товары и услуги</span></a>
+    <div class="nav-div"></div>
+    <div class="nav-sec">Общение</div>
+    <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M2 8l10 6 10-6"/><path d="M2 12l10 6 10-6"/><path d="M2 4l10 6 10-6"/></svg><span>Форум</span></a>
+    <a class="nav-item" href="/companies.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+    <a class="nav-item active" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+    <div class="nav-div"></div>
+    <div class="nav-sec">Профиль</div>
+    <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Чат</span></a>
+    <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+  </div>
+  <div class="nav-footer">
+    <a class="nav-settings" href="/settings.html">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Настройки</span>
+    </a>
+  </div>
 </nav>
 
 <!-- MAIN -->
 <div class="main">
-  <div class="toolbar">
-    <h1>Сообщества</h1>
-    <div class="filter-tabs" id="filterTabs">
-      <button class="ftab active" data-cat="">Все</button>
-      <button class="ftab" data-cat="my">Мои</button>
-      <button class="ftab" data-cat="Логистика и транспорт">Логистика</button>
-      <button class="ftab" data-cat="ВЭД и таможня">ВЭД</button>
-      <button class="ftab" data-cat="IT в логистике">IT</button>
-      <button class="ftab" data-cat="Деловой нетворкинг">Нетворкинг</button>
-    </div>
-    <button class="btn-create" onclick="openCreate()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Создать
-    </button>
+
+<div class="toolbar">
+  <div class="section-toggle">
+    <button class="st active">Все сообщества</button>
+    <button class="st">Мои</button>
   </div>
-  <div class="co-grid" id="coGrid"></div>
+  <div class="filter-tabs">
+    <button class="ftab active">Все</button>
+    <button class="ftab">Профессиональные</button>
+    <button class="ftab">Региональные</button>
+    <button class="ftab">По интересам</button>
+  </div>
+  <button class="btn-create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Создать
+  </button>
+</div>
+<div class="feed" id="feed"></div>
 </div>
 
 <!-- RIGHT -->
 <aside class="right">
-  <div class="card" id="myCommBlock">
-    <div class="block-title">Мои сообщества</div>
-    <div id="myCommList"><div style="font-size:12px;color:var(--gmt)">Загрузка…</div></div>
-  </div>
-  <div class="card">
-    <div class="block-title">Рекомендации</div>
-    <div id="recList"></div>
-  </div>
-  <div class="ad-block">
-    <div class="ad-label">реклама</div>
-    <div class="ad-content">
-      <div class="ad-title">LogisticsPro 2026</div>
-      <div class="ad-sub">Выставка · Москва · май</div>
-      <button class="ad-btn">Узнать подробнее</button>
-    </div>
-  </div>
+
+<div class="card">
+  <div class="block-title">Мои сообщества</div>
+  <div id="myCommunities"></div>
+</div>
+<div class="card">
+  <div class="block-title">Рекомендуемые</div>
+  <div id="suggestComm"></div>
+</div>
+<div class="ad-block">
+  <div class="ad-label">реклама</div>
+  <div class="ad-content"><div class="ad-title">LogisticsPro 2026</div><div class="ad-sub">Выставка · Москва · май</div><button class="ad-btn">Узнать подробнее</button></div>
+</div>
 </aside>
+
 </div>
 
-<!-- CREATE MODAL -->
-<div class="modal-bg" id="createModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Создать сообщество</h3>
-      <button class="modal-x" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="form-row">
-      <label class="form-label">Название *</label>
-      <input class="form-input" id="cName" placeholder="Название сообщества" maxlength="100">
-    </div>
-    <div class="form-row">
-      <label class="form-label">Описание</label>
-      <textarea class="form-input" id="cDesc" placeholder="Чем занимается ваше сообщество?"></textarea>
-    </div>
-    <div class="form-grid2">
-      <div class="form-row">
-        <label class="form-label">Категория</label>
-        <select class="form-input" id="cCat">
-          <option value="">Выбрать…</option>
-          <option>Логистика и транспорт</option>
-          <option>ВЭД и таможня</option>
-          <option>IT в логистике</option>
-          <option>Деловой нетворкинг</option>
-          <option>Фармацевтика</option>
-          <option>Сельское хозяйство</option>
-          <option>Другое</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label class="form-label">Приватность</label>
-        <select class="form-input" id="cPriv">
-          <option value="open">Открытое</option>
-          <option value="closed">Закрытое</option>
-          <option value="invite">По приглашению</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <label class="form-label">Теги (через запятую)</label>
-      <input class="form-input" id="cTags" placeholder="логистика, снг, экспорт">
-    </div>
-    <div class="form-row">
-      <label class="form-label">Сайт</label>
-      <input class="form-input" id="cSite" placeholder="https://example.com">
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sec" onclick="closeModal()">Отмена</button>
-      <button class="btn-pri" id="createBtn" onclick="submitCreate()">Создать</button>
-    </div>
+<!-- PANEL OVERLAY -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-close">
+    <button class="dp-close-btn" onclick="closePanel()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span id="dpLabel">Детали</span>
   </div>
+  <div class="dp-body" id="dpBody"></div>
+  <div class="dp-actions" id="dpActions"></div>
 </div>
 
 <script>
-const API = '/api', tk = () => localStorage.getItem('token');
-const COLORS = ['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
-const CATICONS = {
-  'Логистика и транспорт': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/></svg>`,
-  'ВЭД и таможня': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
-  'IT в логистике': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>`,
-  'Деловой нетворкинг': `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
-};
+
+const API='/api', tk=()=>localStorage.getItem('token');
+const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function avc(name){return COLORS[(name||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
-function letter(name){return((name||'?')[0]).toUpperCase();}
+function avc(s){return COLORS[(s||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
+function letter(s){return((s||'?')[0]).toUpperCase();}
+function fmtSal(n){if(!n)return'';return n>=1000?Math.round(n/1000)+'к ₽':n+' ₽';}
+function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));
+  if(m<60)return m+' мин назад';if(m<1440)return Math.floor(m/60)+' ч назад';
+  if(m<10080)return Math.floor(m/1440)+' д назад';
+  return new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});}
 function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
 
-/* ── AUTH ── */
+/* Profile dropdown */
+function toggleProfile(){document.getElementById('profileBlock').classList.toggle('open');}
+document.addEventListener('click',e=>{
+  const pb=document.getElementById('profileBlock');
+  if(pb&&!pb.contains(e.target))pb.classList.remove('open');
+});
+function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
+function populateProfile(user){
+  if(!user)return;
+  const name=user.full_name||user.name||'Пользователь';
+  const role=user.role||user.position||'Участник LASTOP';
+  const av=document.getElementById('pbAv');
+  const nm=document.getElementById('pbName');
+  const rl=document.getElementById('pbRole');
+  if(av)av.textContent=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  if(nm)nm.textContent=name;
+  if(rl)rl.textContent=role;
+}
+
+/* Auth */
 (async()=>{
   if(!tk()){location.href='/login.html';return;}
   try{
     const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    if(!r.ok)throw 0;
     const{user={}}=await r.json();
     localStorage.setItem('user',JSON.stringify(user));
-  }catch{const u=JSON.parse(localStorage.getItem('user')||'{}');if(!u.id){location.href='/login.html';}}
+    populateProfile(user);
+  }catch{
+    const u=JSON.parse(localStorage.getItem('user')||'{}');
+    populateProfile(u);
+    if(!u.id){location.href='/login.html';}
+  }
 })();
 
-/* ── SEARCH ── */
-let sT; document.getElementById('searchInput').addEventListener('input',e=>{
-  clearTimeout(sT); const q=e.target.value.trim();
-  sT=setTimeout(()=>loadCommunities(currentCat,q),350);
+/* Search debounce */
+let _sT;
+document.getElementById('searchInput')?.addEventListener('input',e=>{
+  clearTimeout(_sT);
+  _sT=setTimeout(()=>onSearch(e.target.value.trim()),350);
 });
+function onSearch(q){/* override per-page */}
 
-/* ── FILTER TABS ── */
-let currentCat='';
-document.getElementById('filterTabs').addEventListener('click',e=>{
-  const btn=e.target.closest('.ftab'); if(!btn)return;
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  currentCat=btn.dataset.cat;
-  loadCommunities(currentCat);
-});
-
-/* ── LOAD ── */
-async function loadCommunities(cat='',q=''){
-  const grid=document.getElementById('coGrid');
-  grid.innerHTML=skeletons(6);
-  let url=API+'/communities?limit=30';
-  if(cat==='my') url=API+'/communities/my';
-  else if(cat) url+=`&category=${encodeURIComponent(cat)}`;
-  if(q) url+=`&q=${encodeURIComponent(q)}`;
-  try{
-    const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok)throw 0;
-    const{communities=[]}=await r.json();
-    renderGrid(communities);
-  }catch{
-    renderGrid(getDemoCommunities());
-  }
-}
-
-function communityCard(community) {
-    const tags = getCommunityTags(community);
-    return `
-        <article class="rounded-[22px] border border-[#e8ecee] bg-white px-5 py-5 shadow-[0_8px_18px_rgba(178,190,198,0.10)]">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h3 class="text-[22px] font-semibold leading-[1.25] text-[#2f3c4e]">${community.name}</h3>
-                    <p class="mt-1 text-sm text-[#7f8b98]">Владелец: ${community.owner_name || 'Не указан'}</p>
-                    <p class="mt-3 text-[15px] leading-6 text-[#697685]">${community.description || 'Описание отсутствует'}</p>
-                </div>
-                <span class="rounded-full ${community.is_private ? 'bg-[#fff2ee] text-[#b0553d]' : 'bg-[#eef7f2] text-[#5f8f7b]'} px-3 py-1 text-xs font-semibold">${community.is_private ? 'Приватное' : 'Открытое'}</span>
-            </div>
-
-            <div class="mt-4 flex flex-wrap gap-2.5">
-                ${tags.length ? tags.map((tag) => `<span class="rounded-full bg-[#eef2f6] px-3 py-1.5 text-[12px] font-medium text-[#5f7081]">#${tag}</span>`).join('') : '<span class="text-xs text-[#97a3af]">Теги не указаны</span>'}
-            </div>
-
-            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Участники</dt><dd class="text-lg font-semibold text-[#344153]">${community.members_count || 0}</dd></div>
-                <div class="rounded-xl bg-[#f7f9fa] px-3 py-2"><dt class="text-[#8a97a5]">Публикации</dt><dd class="text-lg font-semibold text-[#344153]">${community.posts_count || 0}</dd></div>
-            </dl>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-                <a href="/community-profile.html?id=${encodeURIComponent(community.id)}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть сообщество</a>
-                <button data-join-community="${community.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Присоединиться</button>
-            </div>
-        </article>
-    `;
-}
-
-/* ── JOIN / LEAVE ── */
-async function toggleJoin(id, btn){
-  const isMember=btn.dataset.member==='1';
-  const method=isMember?'DELETE':'POST';
-  try{
-    const r=await fetch(`${API}/communities/${id}/join`,{method,headers:{Authorization:'Bearer '+tk()}});
-    if(r.ok){
-      const now=!isMember;
-      btn.dataset.member=now?'1':'0';
-      btn.className=`co-join ${now?'in':'out'}`;
-      btn.textContent=now?'✓ В сообществе':'+ Вступить';
-      loadMyCommunities();
-    }
-  }catch{}
-}
-
-/* ── NAVIGATION ── */
-function goProfile(id){location.href=`/community-profile.html?id=${id}`;}
-
-/* ── MY COMMUNITIES SIDEBAR ── */
-async function loadMyCommunities(){
-  try{
-    const r=await fetch(API+'/communities/my',{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok)throw 0;
-    const{communities=[]}=await r.json();
-    const list=document.getElementById('myCommList');
-    if(!communities.length){list.innerHTML='<div style="font-size:12px;color:var(--gmt)">Вы пока не вступили ни в одно сообщество</div>';return;}
-    list.innerHTML=communities.slice(0,5).map(co=>`
-      <a class="my-item" href="/community-profile.html?id=${co.id}">
-        <div class="my-av" style="background:${avc(co.name)}">${letter(co.name)}</div>
-        <div>
-          <div class="my-name">${esc(co.name)}</div>
-          <div class="my-count">${num(co.members_count||0)} участников</div>
-        </div>
-      </a>`).join('');
-  }catch{
-    document.getElementById('myCommList').innerHTML='<div style="font-size:12px;color:var(--gmt)">Не удалось загрузить</div>';
-  }
-}
-
-/* ── RECOMMENDATIONS ── */
-async function loadRecs(){
-  try{
-    const r=await fetch(API+'/communities?limit=5',{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok)throw 0;
-    const{communities=[]}=await r.json();
-    const recs=communities.filter(c=>!c.is_member).slice(0,3);
-    renderRecs(recs);
-  }catch{renderRecs(getDemoCommunities().filter(c=>!c.is_member).slice(0,3));}
-}
-function renderRecs(list){
-  document.getElementById('recList').innerHTML=list.map(co=>`
-    <div class="rec-item">
-      <div class="my-av" style="background:${avc(co.name)};flex-shrink:0">${letter(co.name)}</div>
-      <div style="flex:1;min-width:0">
-        <div class="my-name" style="cursor:pointer" onclick="goProfile(${co.id})">${esc(co.name)}</div>
-        <div class="my-count">${num(co.members_count||0)} участников</div>
+/* Skeleton builder */
+function skels(n,h=120){return Array(n).fill(0).map(()=>`
+  <div class="skeleton" style="height:${h}px">
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <div class="sl" style="width:44px;height:44px;border-radius:12px;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div class="sl" style="height:13px;width:55%;margin-bottom:7px;border-radius:6px"></div>
+        <div class="sl" style="height:11px;width:35%;border-radius:6px"></div>
       </div>
-      <button class="rec-join" onclick="toggleJoinRec(${co.id},this)">Вступить</button>
-    </div>`).join('');
-}
-async function toggleJoinRec(id,btn){
-  try{
-    const r=await fetch(`${API}/communities/${id}/join`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});
-    if(r.ok){btn.textContent='✓';btn.style.background='var(--gl)';loadMyCommunities();}
-  }catch{}
-}
+      <div class="sl" style="width:60px;height:22px;border-radius:99px;flex-shrink:0"></div>
+    </div>
+    <div class="sl" style="height:11px;width:100%;margin-bottom:5px;border-radius:6px"></div>
+    <div class="sl" style="height:11px;width:75%;border-radius:6px"></div>
+  </div>`).join('');}
 
-/* ── CREATE MODAL ── */
-function openCreate(){document.getElementById('createModal').classList.add('open');setTimeout(()=>document.getElementById('cName').focus(),150);}
-function closeModal(){document.getElementById('createModal').classList.remove('open');}
-document.getElementById('createModal').addEventListener('click',e=>{if(e.target===document.getElementById('createModal'))closeModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
+function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-async function submitCreate(){
-  const name=document.getElementById('cName').value.trim();
-  if(!name)return;
-  const btn=document.getElementById('createBtn');
-  btn.disabled=true;btn.textContent='Создаём…';
-  const tags=document.getElementById('cTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  try{
-    const r=await fetch(API+'/communities',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
-      body:JSON.stringify({
-        name,
-        description:document.getElementById('cDesc').value.trim(),
-        category:document.getElementById('cCat').value,
-        privacy:document.getElementById('cPriv').value,
-        website:document.getElementById('cSite').value.trim(),
-        tags,
-      })
-    });
-    if(r.ok){
-      const{id}=await r.json();
-      closeModal();
-      location.href=`/community-profile.html?id=${id}`;
-    }
-  }catch{}
-  btn.disabled=false;btn.textContent='Создать';
-}
-
-/* ── SKELETONS ── */
-function skeletons(n){
-  return Array(n).fill(0).map(()=>`<div class="skeleton">
-    <div style="height:52px;background:var(--gp);animation:pulse 1.4s ease-in-out infinite"></div>
-    <div style="padding:0 14px 14px">
-      <div style="margin-top:-14px;margin-bottom:10px"><div class="sl" style="width:36px;height:36px;border-radius:10px"></div></div>
-      <div class="sl" style="height:13px;width:65%;margin-bottom:7px;border-radius:6px"></div>
-      <div class="sl" style="height:10px;width:45%;margin-bottom:10px;border-radius:6px"></div>
-      <div class="sl" style="height:10px;width:100%;margin-bottom:5px;border-radius:6px"></div>
-      <div class="sl" style="height:10px;width:80%;border-radius:6px"></div>
+const COMMS=[
+  {name:'Логисты СНГ',cat:'Профессиональное',members:4820,desc:'Сообщество специалистов в области международной логистики стран СНГ. Обсуждение маршрутов, документооборота, партнёрств.',open:true},
+  {name:'Таможенные брокеры России',cat:'Профессиональное',members:2340,desc:'Площадка для брокеров и декларантов. Актуальная информация о изменениях законодательства, кейсы, нормативные документы.',open:true},
+  {name:'IT в логистике',cat:'По интересам',members:1640,desc:'Автоматизация, TMS/WMS, интеграции, маркетплейсы. Обсуждение технологических решений для логистического бизнеса.',open:true},
+];
+const COLORS_CM=['#5AB080','#C07030','#3A90C0'];
+document.getElementById('feed').innerHTML=COMMS.map((c,i)=>`
+  <div class="item-card" style="animation-delay:${i*.07}s">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:44px;height:44px;border-radius:50%;background:${COLORS_CM[i%COLORS_CM.length]};
+        color:#fff;display:grid;place-items:center;font-size:16px;font-weight:800;flex-shrink:0">
+        ${letter(c.name)}
+      </div>
+      <div style="flex:1">
+        <div class="item-title">${esc(c.name)}</div>
+        <div style="font-size:11px;color:var(--gmt)">${esc(c.cat)} · ${num(c.members)} участников</div>
+      </div>
+    </div>
+    <div class="item-body">${esc(c.desc)}</div>
+    <div class="item-footer">
+      <span class="item-badge ${c.open?'badge-green':'badge-gray'}">${c.open?'Открытое':'Закрытое'}</span>
+      <button class="btn-pri" style="margin-left:auto;padding:5px 14px;font-size:11px">Вступить</button>
     </div>
   </div>`).join('');
-}
+document.getElementById('myCommunities').innerHTML='<div style="font-size:12px;color:var(--gmt);padding:6px 0">Вы пока не состоите ни в одном сообществе</div>';
+document.getElementById('suggestComm').innerHTML=COMMS.slice(0,2).map(c=>`
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--t)">${esc(c.name)}</div>
+      <div style="font-size:10px;color:var(--gmt)">${num(c.members)} уч.</div>
+    </div>
+    <button class="btn-pri" style="padding:3px 10px;font-size:11px">Вступить</button>
+  </div>`).join('');
 
-/* ── DEMO DATA (fallback) ── */
-function getDemoCommunities(){
-  return[
-    {id:1,name:'Логистика СНГ',description:'Обсуждаем маршруты, перевозчиков и тарифы по СНГ и за его пределами',category:'Логистика и транспорт',tags:['снг','маршруты','экспорт'],members_count:2400,is_member:true},
-    {id:2,name:'Экспортёры РФ',description:'Помогаем разобраться с экспортом из России: документация, пошлины, разрешения',category:'ВЭД и таможня',tags:['вэд','таможня'],members_count:1100,is_member:false},
-    {id:3,name:'TMS & WMS клуб',description:'Делимся опытом внедрения и эксплуатации систем управления транспортом и складом',category:'IT в логистике',tags:['tms','wms','saas'],members_count:870,is_member:false},
-    {id:4,name:'Партнёрства 2026',description:'Ищем партнёров, инвесторов и клиентов. Делимся контактами и возможностями',category:'Деловой нетворкинг',tags:['нетворкинг','b2b'],members_count:3200,is_member:true},
-    {id:5,name:'Фармлогистика',description:'Специфика перевозки лекарств и медизделий: GDP, холодная цепь, документация',category:'Фармацевтика',tags:['gdp','фарма'],members_count:430,is_member:false},
-    {id:6,name:'АПК и экспорт',description:'Зерно, масличные, сахар — логистика и экспорт агропродукции из России и СНГ',category:'Сельское хозяйство',tags:['зерно','апк'],members_count:680,is_member:false},
-  ];
-}
-
-/* ── INIT ── */
-loadCommunities();
-loadMyCommunities();
-loadRecs();
 </script>
 </body>
 </html>
