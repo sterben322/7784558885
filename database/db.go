@@ -488,6 +488,7 @@ func CreateTables() error {
 		`CREATE TABLE IF NOT EXISTS forum_sections (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(120) NOT NULL,
+            title VARCHAR(120) NOT NULL DEFAULT '',
             description TEXT NOT NULL DEFAULT '',
             color_idx SMALLINT NOT NULL DEFAULT 0,
             sort_order INT NOT NULL DEFAULT 0,
@@ -500,6 +501,7 @@ func CreateTables() error {
             deleted_at TIMESTAMP
         )`,
 		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS name VARCHAR(120)`,
+		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS title VARCHAR(120)`,
 		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS color_idx SMALLINT NOT NULL DEFAULT 0`,
 		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS sort_order INT NOT NULL DEFAULT 0`,
 		`ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS messages_count INT NOT NULL DEFAULT 0`,
@@ -623,6 +625,19 @@ func CreateTables() error {
 	}
 
 	_, _ = DB.Exec(`
+		UPDATE forum_sections
+		SET name = COALESCE(NULLIF(name, ''), title, 'Без названия')
+	`)
+	_, _ = DB.Exec(`
+		UPDATE forum_sections
+		SET title = COALESCE(NULLIF(title, ''), name, 'Без названия')
+	`)
+	_, _ = DB.Exec(`
+		ALTER TABLE forum_sections
+		ALTER COLUMN name SET NOT NULL,
+		ALTER COLUMN title SET NOT NULL
+	`)
+	_, _ = DB.Exec(`
 		UPDATE company_employees ce
 		SET role_id = cr.id
 		FROM company_roles cr
@@ -632,8 +647,8 @@ func CreateTables() error {
 	`)
 
 	_, _ = DB.Exec(`
-		INSERT INTO forum_sections (name, description, sort_order)
-		SELECT 'Общий раздел', 'Раздел по умолчанию', 0
+		INSERT INTO forum_sections (name, title, description, sort_order)
+		SELECT 'Общий раздел', 'Общий раздел', 'Раздел по умолчанию', 0
 		WHERE NOT EXISTS (SELECT 1 FROM forum_sections WHERE deleted_at IS NULL)
 	`)
 

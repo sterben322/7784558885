@@ -75,7 +75,7 @@ type ForumMessage struct {
 func GetForumSections(c *gin.Context) {
 	rows, err := database.DB.QueryContext(c, `
 		SELECT
-			s.id::text, s.name, s.description, s.color_idx, s.sort_order,
+			s.id::text, COALESCE(s.name, s.title, ''), s.description, s.color_idx, s.sort_order,
 			s.topics_count, s.messages_count,
 			s.last_author, s.last_at, s.created_at
 		FROM forum_sections s
@@ -127,8 +127,8 @@ func CreateForumSection(c *gin.Context) {
 
 	var id string
 	err := database.DB.QueryRowContext(c, `
-		INSERT INTO forum_sections (name, description, color_idx)
-		VALUES ($1, $2, $3)
+		INSERT INTO forum_sections (name, title, description, color_idx)
+		VALUES ($1, $1, $2, $3)
 		RETURNING id::text`,
 		body.Name, body.Description, body.ColorIdx,
 	).Scan(&id)

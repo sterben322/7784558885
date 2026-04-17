@@ -17,7 +17,6 @@ func RegisterAuthRoutes(r *gin.Engine) {
 
 	// Compatibility endpoint requested for external clients.
 	r.POST("/api/register", handlers.Register)
-	r.POST("/api/forum/sections", handlers.CreateForumSection)
 	r.GET("/api/public/companies/:id", handlers.GetPublicCompany)
 	r.GET("/api/public/companies/:id/news", handlers.GetPublicCompanyNews)
 }
@@ -104,6 +103,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.POST("/posts/:id/comments", handlers.AddComment)
 
 		api.GET("/forum/sections", handlers.GetForumSections)
+		api.POST("/forum/sections", handlers.CreateForumSection)
 		api.GET("/forum/sections/:id/topics", handlers.GetSectionTopics)
 		api.POST("/forum/sections/:id/topics", handlers.CreateSectionTopic)
 		api.GET("/forum/topics/:id/discussions", handlers.GetTopicDiscussions)

@@ -183,6 +183,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT fal
 CREATE TABLE IF NOT EXISTS forum_sections (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(120) NOT NULL,
+    title VARCHAR(120) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     color_idx SMALLINT NOT NULL DEFAULT 0 CHECK (color_idx BETWEEN 0 AND 5),
     sort_order INT NOT NULL DEFAULT 0,
@@ -194,6 +195,13 @@ CREATE TABLE IF NOT EXISTS forum_sections (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
+ALTER TABLE forum_sections ADD COLUMN IF NOT EXISTS title VARCHAR(120);
+UPDATE forum_sections
+SET name = COALESCE(NULLIF(name, ''), title, 'Без названия'),
+    title = COALESCE(NULLIF(title, ''), name, 'Без названия');
+ALTER TABLE forum_sections
+    ALTER COLUMN name SET NOT NULL,
+    ALTER COLUMN title SET NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_forum_sections_sort ON forum_sections(sort_order, id) WHERE deleted_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS forum_topics (
