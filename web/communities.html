@@ -116,7 +116,7 @@ function communityCard(community) {
             </dl>
 
             <div class="mt-5 flex flex-wrap gap-2">
-                <a href="/community.html?id=${encodeURIComponent(community.id)}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть сообщество</a>
+                <a href="/community-profile.html?id=${encodeURIComponent(community.id)}" class="rounded-xl border border-[#dce4e9] px-3 py-2 text-sm font-medium text-[#435467] hover:bg-[#f4f8fa]">Открыть сообщество</a>
                 <button data-join-community="${community.id}" class="rounded-xl bg-[#eff7f3] px-3 py-2 text-sm font-semibold text-[#4c8d78] hover:bg-[#e3f1eb]">Присоединиться</button>
             </div>
         </article>
