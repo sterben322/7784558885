@@ -9,6 +9,10 @@ import (
 )
 
 type UUID [16]byte
+type NullUUID struct {
+	UUID  UUID
+	Valid bool
+}
 
 var Nil UUID
 
@@ -58,4 +62,26 @@ func (u *UUID) Scan(src any) error {
 	default:
 		return errors.New("unsupported UUID scan type")
 	}
+}
+
+func (nu *NullUUID) Scan(src any) error {
+	if src == nil {
+		nu.UUID = Nil
+		nu.Valid = false
+		return nil
+	}
+	var u UUID
+	if err := (&u).Scan(src); err != nil {
+		return err
+	}
+	nu.UUID = u
+	nu.Valid = true
+	return nil
+}
+
+func (nu NullUUID) Value() (driver.Value, error) {
+	if !nu.Valid {
+		return nil, nil
+	}
+	return nu.UUID.Value()
 }
