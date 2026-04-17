@@ -529,12 +529,15 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 const API='/api',tk=()=>localStorage.getItem('token');
 const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function avc(name){return AVC[(name||'').charCodeAt(0)%AVC.length]||AVC[0];}
+function isUuid(value){return UUID_RE.test(String(value||'').trim());}
 
 let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
 const messagesCache=new Map();
 const MAX_ATTACHMENT_SIZE=50*1024*1024;
 let typingPollTimer=null,typingStopTimer=null,lastTypingSent=false,typingRequestAt=0;
+let latestConversations=[];
 
 const imgViewer=document.getElementById('imgViewer');
 const imgViewerImage=document.getElementById('imgViewerImage');
@@ -576,7 +579,9 @@ let activeMessagesRequestId=0;
       document.getElementById('profileCo').textContent=u.company_name||'Участник LASTOP';
     }
   }
-  loadConversations();
+  await loadConversations();
+  await handleConversationFromQuery();
+  autoSelectConversation();
 })();
 
 /* ── PROFILE DROPDOWN ── */
@@ -612,35 +617,37 @@ async function loadConversations(){
   try{
     const r=await fetch(API+'/chats',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
-    const{chats=[]}=await r.json();
-    renderConvList(chats);
+    const payload=await r.json();
+    const conversationsRaw=Array.isArray(payload?.chats)
+      ?payload.chats
+      :Array.isArray(payload?.conversations)
+        ?payload.conversations
+        :[];
+    latestConversations=conversationsRaw
+      .map(normalizeConversation)
+      .filter(c=>Boolean(c?.id));
+    renderConvList(latestConversations);
   }catch{
-    renderConvList(getDemoConvs());
+    latestConversations=[];
+    renderConvList([]);
   }
-}
-
-function getDemoConvs(){
-  return[
-    {id:'1',name:'Алексей Иванов',last_message:{text:'Отлично, договорились!',created_at:new Date(Date.now()-300000).toISOString(),is_mine:true},unread_count:0,is_online:true,type:'user'},
-    {id:'2',name:'NorthBridge Logistics',last_message:{text:'Прайс-лист во вложении',created_at:new Date(Date.now()-1800000).toISOString(),is_mine:false},unread_count:3,is_online:false,type:'company'},
-    {id:'3',name:'Логистика СНГ',last_message:{text:'Добро пожаловать в группу!',created_at:new Date(Date.now()-86400000).toISOString(),is_mine:false},unread_count:12,is_online:false,type:'group'},
-    {id:'4',name:'Марина Соколова',last_message:{text:'Спасибо за информацию',created_at:new Date(Date.now()-172800000).toISOString(),is_mine:false},unread_count:0,is_online:true,type:'user'},
-    {id:'5',name:'Volga Industrial',last_message:{text:'Пришлите реквизиты',created_at:new Date(Date.now()-259200000).toISOString(),is_mine:true},unread_count:0,is_online:false,type:'company'},
-    {id:'6',name:'Дмитрий Козлов',last_message:{text:'Можем встретиться в среду?',created_at:new Date(Date.now()-432000000).toISOString(),is_mine:false},unread_count:1,is_online:false,type:'user'},
-  ];
 }
 
 function renderConvList(chats){
   const normalized=chats.map(normalizeConversation);
   const list=document.getElementById('convList');
+  if(!normalized.length){
+    list.innerHTML='<div class="conv-section">Все чаты</div><div style="padding:14px 10px;color:var(--gmt);font-size:12px">Пока нет диалогов</div>';
+    document.getElementById('chatEmpty').style.display='flex';
+    document.getElementById('activeChat').style.display='none';
+    return;
+  }
   list.innerHTML='<div class="conv-section">Все чаты</div>'+normalized.map(c=>convItemHtml(c)).join('');
   list.querySelectorAll('.conv-item').forEach(el=>{
     el.addEventListener('click',()=>{
       const id=el.dataset.id;
       const chat=normalized.find(c=>c.id===id);
-      selectConv(chat||{id,name:el.querySelector('.conv-name').textContent});
-      list.querySelectorAll('.conv-item').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active');
+      activateConversation(chat||{id,name:el.querySelector('.conv-name').textContent});
     });
   });
 }
@@ -649,8 +656,10 @@ function normalizeConversation(c){
   const previewText=typeof c.last_message==='string'?c.last_message:(c.last_message?.text||'');
   const previewAt=c.last_time||c.last_message?.created_at||null;
   const isMine=c.last_message?.is_mine===true;
+  const id=typeof c?.id==='string'?c.id.trim():String(c?.id||'').trim();
   return{
     ...c,
+    id,
     name:c.name||'Диалог',
     type:c.type||'direct',
     last_message:{text:previewText,created_at:previewAt,is_mine:isMine}
@@ -684,6 +693,43 @@ function convItemHtml(c){
     </div>
     ${unread?`<span class="conv-unread">${unread>99?'99+':unread}</span>`:''}
   </div>`;
+}
+
+function activateConversation(conv){
+  if(!conv||!conv.id)return;
+  selectConv(conv);
+  const list=document.getElementById('convList');
+  list.querySelectorAll('.conv-item').forEach(x=>x.classList.remove('active'));
+  const active=list.querySelector(`.conv-item[data-id="${CSS.escape(conv.id)}"]`);
+  if(active)active.classList.add('active');
+}
+
+async function handleConversationFromQuery(){
+  const params=new URLSearchParams(location.search);
+  const userId=(params.get('userId')||params.get('user')||'').trim();
+  if(!userId)return;
+  try{
+    const r=await fetch(`${API}/chat/conversations/start/${encodeURIComponent(userId)}`,{
+      method:'POST',
+      headers:{Authorization:'Bearer '+tk()}
+    });
+    if(!r.ok)return;
+    const data=await r.json();
+    const started=normalizeConversation(data.conversation||{});
+    await loadConversations();
+    if(started.id){
+      const target=latestConversations.find(c=>c.id===started.id)||started;
+      activateConversation(target);
+    }
+  }catch{}
+}
+
+function autoSelectConversation(){
+  if(currentConv||!latestConversations.length)return;
+  const params=new URLSearchParams(location.search);
+  const wantedId=(params.get('chatId')||params.get('id')||'').trim();
+  const target=(wantedId&&latestConversations.find(c=>c.id===wantedId))||latestConversations[0];
+  if(target)activateConversation(target);
 }
 
 /* ── SELECT CONVERSATION ── */
@@ -1061,7 +1107,7 @@ async function sendMessage(){
     read:false,
     reply_to:replyTo?{sender_name:replyTo.is_mine?myName:replyTo.sender_name,text:replyTo.text}:null
   };
-  const replyToId=replyTo?.id||null;
+  const replyToId=isUuid(replyTo?.id)?String(replyTo.id).trim():null;
   const pendingFiles=[...attachFiles];
   const hasText=Boolean(text);
   const optimisticMessages=[];
@@ -1095,6 +1141,15 @@ async function sendMessage(){
   replyTo=null;document.getElementById('replyBar').classList.remove('show');
   attachFiles=[];renderAttachStrip();
   let sendFailed=false;
+  let sendErrorMessage='';
+  async function extractErrorMessage(response,fallback){
+    try{
+      const payload=await response.json();
+      return payload?.error||payload?.message||fallback;
+    }catch{
+      return fallback;
+    }
+  }
   try{
     if(hasText){
       const textResponse=await fetch(API+'/chats/'+currentConv.id+'/messages',{
@@ -1102,7 +1157,10 @@ async function sendMessage(){
         headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
         body:JSON.stringify({content:text,reply_to_id:replyToId})
       });
-      if(!textResponse.ok)sendFailed=true;
+      if(!textResponse.ok){
+        sendFailed=true;
+        sendErrorMessage=await extractErrorMessage(textResponse,'Не удалось отправить сообщение.');
+      }
     }
     for(const file of pendingFiles){
       const fd=new FormData();
@@ -1113,13 +1171,23 @@ async function sendMessage(){
         headers:{Authorization:'Bearer '+tk()},
         body:fd
       });
-      if(!fileResponse.ok)sendFailed=true;
+      if(!fileResponse.ok){
+        sendFailed=true;
+        if(!sendErrorMessage){
+          sendErrorMessage=await extractErrorMessage(fileResponse,`Не удалось отправить файл «${file.name}».`);
+        }
+      }
     }
-  }catch{sendFailed=true;}
+  }catch{
+    sendFailed=true;
+    if(!sendErrorMessage)sendErrorMessage='Ошибка соединения. Проверьте интернет и попробуйте снова.';
+  }
   if(sendFailed){
-    alert('Не удалось отправить часть сообщений. Проверьте соединение и попробуйте снова.');
+    alert(sendErrorMessage||'Не удалось отправить часть сообщений. Проверьте соединение и попробуйте снова.');
+    if(currentConv?.id)loadMessages(currentConv.id);
     return;
   }
+  loadConversations();
   setTimeout(()=>loadMessages(currentConv.id),350);
 }
 sendBtn.addEventListener('click',sendMessage);
