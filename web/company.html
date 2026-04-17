@@ -17,7 +17,7 @@
 html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
 
 /* ═══ SHELL ═══ */
-.shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar""nav main";height:100vh;gap:10px;padding:10px}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr) 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
 
 /* ═══ LOGO ═══ */
 .logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
@@ -66,7 +66,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .sort-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
 
 /* ─── GRID ─── */
-.companies-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px;overflow-y:auto;overflow-x:hidden;padding-right:2px;padding-bottom:10px}
+.companies-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;overflow-y:auto;overflow-x:hidden;padding-right:2px;padding-bottom:10px;align-content:start}
 .companies-grid::-webkit-scrollbar{width:4px}
 .companies-grid::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
 
@@ -141,8 +141,53 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .empty-state h3{font-size:16px;font-weight:700;color:var(--t)}
 .empty-state p{font-size:13px;color:var(--gmt);max-width:280px;line-height:1.55}
 
+/* ═══ RIGHT SIDEBAR ═══ */
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+.profile-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);box-shadow:var(--sh);position:relative}
+.profile-trigger{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-radius:var(--rxl);transition:background .15s}
+.profile-trigger:hover{background:var(--gp)}
+.pav{width:36px;height:36px;border-radius:var(--rm);background:var(--g);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pco{font-size:11px;color:var(--gmt);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{flex-shrink:0;color:var(--gmt);transition:transform .22s;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chev.open{transform:rotate(180deg)}
+.dropdown{overflow:hidden;max-height:0;transition:max-height .25s ease;border-top:1px solid transparent}
+.dropdown.open{max-height:280px;border-top-color:var(--bdr)}
+.dd-inner{padding:6px 8px 8px;display:flex;flex-direction:column;gap:2px}
+.dd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;color:var(--tm);transition:background .15s,color .15s;text-decoration:none}
+.dd-item:hover{background:var(--gp);color:var(--g)}
+.dd-item.danger{color:#C04040}
+.dd-item.danger:hover{background:#FFF0F0;color:#B03030}
+.dd-div{height:1px;background:var(--bdr);margin:3px 4px}
+.dd-item svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ctx-block{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.trend-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rm);transition:background .15s;margin-bottom:4px}
+.trend-item:last-child{margin-bottom:0}
+.trend-item:hover{background:var(--gp)}
+.trend-num{font-size:18px;font-weight:800;color:var(--gl);min-width:24px;line-height:1}
+.trend-label{font-size:12px;font-weight:700;color:var(--t)}
+.trend-sub{font-size:11px;color:var(--gmt);margin-top:2px}
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-block::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(120,80,200,.07)}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ad-btn:hover{opacity:.88}
+
 /* responsive */
-@media(max-width:1100px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}}
+@media(max-width:1400px){.shell{grid-template-columns:220px minmax(0,1fr) 240px}}
+@media(max-width:1200px){.companies-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:980px){
+  .shell{grid-template-columns:48px 1fr;grid-template-areas:"logo topbar""nav main"}
+  .right{display:none}
+  .nav-item span,.logo-text{display:none}
+  .nav-item{justify-content:center;padding:10px}
+}
 @media(max-width:800px){
   .companies-grid{grid-template-columns:1fr;padding-right:0}
   .co-body{padding:8px 14px 12px}
@@ -220,19 +265,92 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
   <!-- Grid -->
   <div class="companies-grid" id="companiesGrid"></div>
 </div>
+
+<!-- RIGHT -->
+<aside class="right">
+  <div class="profile-block">
+    <div class="profile-trigger" id="profileTrigger">
+      <div class="pav" id="profileAv">U</div>
+      <div class="pinfo">
+        <div class="pname" id="profileName">Загрузка…</div>
+        <div class="pco" id="profileCo">Участник LASTOP</div>
+      </div>
+      <svg class="chev" id="profileChev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="dropdown" id="profileDrop">
+      <div class="dd-inner">
+        <a class="dd-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</a>
+        <a class="dd-item" href="/company-profile.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Моя компания</a>
+        <a class="dd-item" href="/settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
+        <div class="dd-div"></div>
+        <a class="dd-item danger" href="#" id="logoutBtn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Выход</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctx-block">
+    <div class="block-title">Популярные направления</div>
+    <div class="trend-item"><div class="trend-num">1</div><div><div class="trend-label">Логистика и ВЭД</div><div class="trend-sub">Компании с активным наймом</div></div></div>
+    <div class="trend-item"><div class="trend-num">2</div><div><div class="trend-label">Промышленность</div><div class="trend-sub">Партнёрские предложения</div></div></div>
+    <div class="trend-item"><div class="trend-num">3</div><div><div class="trend-label">IT для бизнеса</div><div class="trend-sub">Автоматизация и AI</div></div></div>
+  </div>
+
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">Business Expo 2026</div>
+      <div class="ad-sub">Выставка · Санкт-Петербург</div>
+      <button class="ad-btn" onclick="location.href='/exhibitions.html'">Открыть</button>
+    </div>
+  </div>
+</aside>
 </div>
 
 <script>
 const API='/api', tk=()=>localStorage.getItem('token');
+const initials=(n='')=>String(n).trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'U';
 
+function fillSidebarUser(user){
+  document.getElementById('profileName').textContent=user?.full_name||user?.name||'Пользователь';
+  document.getElementById('profileCo').textContent=user?.company_name||user?.position||'Участник LASTOP';
+  document.getElementById('profileAv').textContent=initials(user?.full_name||user?.name||'User');
+}
+function initSidebarMenu(){
+  const trigger=document.getElementById('profileTrigger');
+  const drop=document.getElementById('profileDrop');
+  const chev=document.getElementById('profileChev');
+  if(trigger&&drop&&chev){
+    trigger.addEventListener('click',()=>{
+      drop.classList.toggle('open');
+      chev.classList.toggle('open');
+    });
+    document.addEventListener('click',e=>{
+      if(!e.target.closest('.profile-block')){
+        drop.classList.remove('open');
+        chev.classList.remove('open');
+      }
+    });
+  }
+  const logoutBtn=document.getElementById('logoutBtn');
+  if(logoutBtn){
+    logoutBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      localStorage.clear();
+      location.href='/login.html';
+    });
+  }
+}
 
 /* ── AUTH GUARD ── */
 (async()=>{
   if(!tk()){location.href='/login.html';return;}
   try{
     const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok){localStorage.clear();location.href='/login.html';}
+    if(!r.ok){localStorage.clear();location.href='/login.html';return;}
+    const user=await r.json();
+    fillSidebarUser(user);
   }catch{}
+  initSidebarMenu();
   loadCompanies();
 })();
 
