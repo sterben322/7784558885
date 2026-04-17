@@ -24,7 +24,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
   display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;
   box-shadow:var(--sh);transition:box-shadow .2s;overflow:hidden}
 .logo-cell:hover{box-shadow:var(--shm)}
-.logo-cell svg.logo-svg{height:32px;width:auto;flex-shrink:0}
+.logo-cell .logo-img{display:block;width:auto;height:auto;max-width:100%;max-height:34px;object-fit:contain;flex-shrink:1}
 
 /* TOPBAR — internal grid mirrors outer columns */
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);
@@ -267,17 +267,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 <div class="shell">
 
 <!-- LOGO -->
-<a class="logo-cell" href="/"><svg class="logo-svg" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g transform="translate(0,4)">
-      <path d="M16 1L29 8.5V23.5L16 31L3 23.5V8.5L16 1Z" fill="#1E8A4C" stroke="#145e30" stroke-width="0.8"/>
-      <path d="M16 6.5L25 11.5V21.5L16 26.5L7 21.5V11.5L16 6.5Z" fill="#27B060"/>
-      <rect x="11.5" y="11.5" width="9" height="9" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"/>
-      <line x1="11.5" y1="16" x2="20.5" y2="16" stroke="#fff" stroke-width="1.4"/>
-      <line x1="16" y1="11.5" x2="16" y2="20.5" stroke="#fff" stroke-width="1.4"/>
-    </g>
-    <text x="38" y="21" font-family="Manrope,sans-serif" font-weight="800" font-size="13.5" fill="#1E8A4C" letter-spacing="0.6">LASTOP</text>
-    <text x="38" y="31" font-family="Manrope,sans-serif" font-weight="600" font-size="8" fill="#5A8A6A" letter-spacing="1.8">GROUP</text>
-  </svg></a>
+<a class="logo-cell" href="/"><img class="logo-img" src="/assets/lastop-mark.svg" alt="Lastop logo"></a>
 
 <!-- TOPBAR -->
 <header class="topbar">
