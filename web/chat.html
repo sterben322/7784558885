@@ -615,8 +615,15 @@ async function loadConversations(){
   try{
     const r=await fetch(API+'/chats',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
-    const{chats=[]}=await r.json();
-    latestConversations=chats.map(normalizeConversation);
+    const payload=await r.json();
+    const conversationsRaw=Array.isArray(payload?.chats)
+      ?payload.chats
+      :Array.isArray(payload?.conversations)
+        ?payload.conversations
+        :[];
+    latestConversations=conversationsRaw
+      .map(normalizeConversation)
+      .filter(c=>Boolean(c?.id));
     renderConvList(latestConversations);
   }catch{
     latestConversations=[];
@@ -647,8 +654,10 @@ function normalizeConversation(c){
   const previewText=typeof c.last_message==='string'?c.last_message:(c.last_message?.text||'');
   const previewAt=c.last_time||c.last_message?.created_at||null;
   const isMine=c.last_message?.is_mine===true;
+  const id=typeof c?.id==='string'?c.id.trim():String(c?.id||'').trim();
   return{
     ...c,
+    id,
     name:c.name||'Диалог',
     type:c.type||'direct',
     last_message:{text:previewText,created_at:previewAt,is_mine:isMine}
