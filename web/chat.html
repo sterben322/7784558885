@@ -529,7 +529,9 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 const API='/api',tk=()=>localStorage.getItem('token');
 const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function avc(name){return AVC[(name||'').charCodeAt(0)%AVC.length]||AVC[0];}
+function isUuid(value){return UUID_RE.test(String(value||'').trim());}
 
 let currentConv=null,replyTo=null,attachFiles=[],myUserId=null,myName='';
 const messagesCache=new Map();
@@ -1105,7 +1107,7 @@ async function sendMessage(){
     read:false,
     reply_to:replyTo?{sender_name:replyTo.is_mine?myName:replyTo.sender_name,text:replyTo.text}:null
   };
-  const replyToId=replyTo?.id||null;
+  const replyToId=isUuid(replyTo?.id)?String(replyTo.id).trim():null;
   const pendingFiles=[...attachFiles];
   const hasText=Boolean(text);
   const optimisticMessages=[];
@@ -1139,6 +1141,15 @@ async function sendMessage(){
   replyTo=null;document.getElementById('replyBar').classList.remove('show');
   attachFiles=[];renderAttachStrip();
   let sendFailed=false;
+  let sendErrorMessage='';
+  async function extractErrorMessage(response,fallback){
+    try{
+      const payload=await response.json();
+      return payload?.error||payload?.message||fallback;
+    }catch{
+      return fallback;
+    }
+  }
   try{
     if(hasText){
       const textResponse=await fetch(API+'/chats/'+currentConv.id+'/messages',{
@@ -1146,7 +1157,10 @@ async function sendMessage(){
         headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
         body:JSON.stringify({content:text,reply_to_id:replyToId})
       });
-      if(!textResponse.ok)sendFailed=true;
+      if(!textResponse.ok){
+        sendFailed=true;
+        sendErrorMessage=await extractErrorMessage(textResponse,'Не удалось отправить сообщение.');
+      }
     }
     for(const file of pendingFiles){
       const fd=new FormData();
@@ -1157,11 +1171,20 @@ async function sendMessage(){
         headers:{Authorization:'Bearer '+tk()},
         body:fd
       });
-      if(!fileResponse.ok)sendFailed=true;
+      if(!fileResponse.ok){
+        sendFailed=true;
+        if(!sendErrorMessage){
+          sendErrorMessage=await extractErrorMessage(fileResponse,`Не удалось отправить файл «${file.name}».`);
+        }
+      }
     }
-  }catch{sendFailed=true;}
+  }catch{
+    sendFailed=true;
+    if(!sendErrorMessage)sendErrorMessage='Ошибка соединения. Проверьте интернет и попробуйте снова.';
+  }
   if(sendFailed){
-    alert('Не удалось отправить часть сообщений. Проверьте соединение и попробуйте снова.');
+    alert(sendErrorMessage||'Не удалось отправить часть сообщений. Проверьте соединение и попробуйте снова.');
+    if(currentConv?.id)loadMessages(currentConv.id);
     return;
   }
   loadConversations();
