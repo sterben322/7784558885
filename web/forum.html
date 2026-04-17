@@ -311,7 +311,7 @@ function avc(n){return AVC[(n||'').charCodeAt(0)%AVC.length]||AVC[0];}
 function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));return m<60?m+' мин назад':m<1440?Math.floor(m/60)+' ч назад':m<10080?Math.floor(m/1440)+' д назад':new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});}
 
 /* ── STATE ── */
-let state={view:'sections', sectionId:null, sectionName:'', topicId:null, topicName:''};
+let state={view:'sections', sectionId:null, sectionName:'', topicId:null, topicName:'', discussionId:null, discussionName:''};
 let allSections=[], replyTo=null, myName='', myUserId=null;
 
 const SEC_ICONS=[
@@ -406,7 +406,7 @@ function renderSections(list){
 }
 
 function openSection(id, name){
-  state={view:'topics', sectionId:id, sectionName:name, topicId:null, topicName:''};
+  state={view:'topics', sectionId:id, sectionName:name, topicId:null, topicName:'', discussionId:null, discussionName:''};
   loadTopics(id);
 }
 
@@ -460,20 +460,67 @@ function renderTopics(list){
 }
 
 function openTopic(id, name){
-  state.view='messages';state.topicId=id;state.topicName=name;
+  state.view='discussions';state.topicId=id;state.topicName=name;state.discussionId=null;state.discussionName='';
   replyTo=null;
+  loadDiscussions(id);
+}
+
+/* ── DISCUSSIONS ── */
+async function loadDiscussions(topicId){
+  document.getElementById('content').innerHTML=skeletonRows(3);
+  try{
+    const r=await fetch(API+'/forum/topics/'+topicId+'/discussions',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{discussions=[]}=await r.json();
+    renderDiscussions(discussions.length?discussions:getDemoDiscussions(topicId));
+  }catch{renderDiscussions(getDemoDiscussions(topicId));}
+}
+
+function getDemoDiscussions(topicId){
+  return[
+    {id:'d1',title:'Основное обсуждение темы',author_name:'Марина Соколова',messages_count:16,created_at:new Date(Date.now()-86400000).toISOString()},
+    {id:'d2',title:'Практические кейсы и документы',author_name:'Алексей Иванов',messages_count:8,created_at:new Date(Date.now()-43200000).toISOString()},
+  ];
+}
+
+function renderDiscussions(list){
+  updateBreadcrumb();updateViewTabs();updateNewBtn();
+  const c=document.getElementById('content');
+  if(!list.length){
+    c.innerHTML=emptyState('Обсуждений пока нет','Создайте первое обсуждение внутри темы');
+    return;
+  }
+  c.innerHTML=list.map(d=>{
+    const active=state.discussionId===d.id;
+    return`<div class="topic-row${active?' active':''}" onclick="openDiscussion('${d.id}','${esc(d.title)}')">
+      <div class="t-av" style="background:${avc(d.author_name||'У')}">${(d.author_name||'У')[0].toUpperCase()}</div>
+      <div class="t-body">
+        <div class="t-name">${esc(d.title)}</div>
+        <div class="t-meta">${esc(d.author_name||'')} · ${ago(d.created_at)}</div>
+      </div>
+      <div class="t-counts">
+        <div class="tc"><div class="tc-num">${d.messages_count||0}</div><div class="tc-lbl">Сообщений</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDiscussion(id, name){
+  state.view='messages';
+  state.discussionId=id;
+  state.discussionName=name;
   loadMessages(id);
 }
 
 /* ── MESSAGES ── */
-async function loadMessages(topicId){
+async function loadMessages(discussionId){
   document.getElementById('content').innerHTML=skeletonRows(3,'tall');
   try{
-    const r=await fetch(API+'/forum/topics/'+topicId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
+    const r=await fetch(API+'/forum/discussions/'+discussionId+'/messages',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{messages=[]}=await r.json();
-    renderMessages(messages.length?messages:getDemoMessages(topicId));
-  }catch{renderMessages(getDemoMessages(topicId));}
+    renderMessages(messages.length?messages:getDemoMessages(discussionId));
+  }catch{renderMessages(getDemoMessages(discussionId));}
 }
 
 function getDemoMessages(topicId){
@@ -579,10 +626,10 @@ async function sendMessage(){
   const body={text,parent_id:replyTo?.id||null};
   ta.value='';document.getElementById('sendBtn').disabled=true;clearReply();
   try{
-    const r=await fetch(API+'/forum/topics/'+state.topicId+'/messages',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    const r=await fetch(API+'/forum/discussions/'+state.discussionId+'/messages',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
     if(!r.ok)throw 0;
   }catch{}
-  loadMessages(state.topicId);
+  loadMessages(state.discussionId);
 }
 
 /* ── LIKE MSG ── */
@@ -595,7 +642,8 @@ async function likeMsg(id,btn){
 function renderCurrent(){
   if(state.view==='sections')renderSections(allSections);
   else if(state.view==='topics')loadTopics(state.sectionId);
-  else if(state.view==='messages')loadMessages(state.topicId);
+  else if(state.view==='discussions')loadDiscussions(state.topicId);
+  else if(state.view==='messages')loadMessages(state.discussionId);
 }
 
 /* ── BREADCRUMB ── */
@@ -606,22 +654,26 @@ function updateBreadcrumb(){
     html='<span class="bc-cur">Форум</span>';
   } else if(state.view==='topics'){
     html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.sectionName)}</span>`;
-  } else if(state.view==='messages'){
+  } else if(state.view==='discussions'){
     html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-link" onclick="goSection()">${esc(state.sectionName)}</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.topicName)}</span>`;
+  } else if(state.view==='messages'){
+    html=`<span class="bc-link" onclick="goHome()">Форум</span><span class="bc-sep">›</span><span class="bc-link" onclick="goSection()">${esc(state.sectionName)}</span><span class="bc-sep">›</span><span class="bc-link" onclick="goTopic()">${esc(state.topicName)}</span><span class="bc-sep">›</span><span class="bc-cur">${esc(state.discussionName)}</span>`;
   }
   bc.innerHTML=html;
 }
-function goHome(){state={view:'sections',sectionId:null,sectionName:'',topicId:null,topicName:''};renderSections(allSections);}
-function goSection(){state.view='topics';state.topicId=null;state.topicName='';loadTopics(state.sectionId);}
+function goHome(){state={view:'sections',sectionId:null,sectionName:'',topicId:null,topicName:'',discussionId:null,discussionName:''};renderSections(allSections);}
+function goSection(){state.view='topics';state.topicId=null;state.topicName='';state.discussionId=null;state.discussionName='';loadTopics(state.sectionId);}
+function goTopic(){state.view='discussions';state.discussionId=null;state.discussionName='';loadDiscussions(state.topicId);}
 
 /* ── VIEW TABS ── */
 function updateViewTabs(){
   const TABS=[
     {v:'sections',l:'Разделы'},
     {v:'topics',l:'Темы'},
-    {v:'messages',l:'Обсуждение'},
+    {v:'discussions',l:'Обсуждения'},
+    {v:'messages',l:'Сообщения'},
   ];
-  const enabled={sections:true,topics:!!state.sectionId,messages:!!state.topicId};
+  const enabled={sections:true,topics:!!state.sectionId,discussions:!!state.topicId,messages:!!state.discussionId};
   document.getElementById('viewTabs').innerHTML=TABS.map(t=>`
     <button class="vtab${state.view===t.v?' active':''}" ${!enabled[t.v]?'disabled style="opacity:.4;cursor:not-allowed"':''} onclick="clickTab('${t.v}')">${t.l}</button>
   `).join('');
@@ -629,12 +681,13 @@ function updateViewTabs(){
 function clickTab(v){
   if(v==='sections'){goHome();}
   else if(v==='topics'&&state.sectionId){goSection();}
-  else if(v==='messages'&&state.topicId){loadMessages(state.topicId);}
+  else if(v==='discussions'&&state.topicId){goTopic();}
+  else if(v==='messages'&&state.discussionId){loadMessages(state.discussionId);}
 }
 
 /* ── NEW BUTTON ── */
 function updateNewBtn(){
-  const labels={sections:'Новый раздел',topics:'Новая тема',messages:'Новое сообщение'};
+  const labels={sections:'Новый раздел',topics:'Новая тема',discussions:'Новое обсуждение',messages:'Новое сообщение'};
   document.getElementById('btnNewLabel').textContent=labels[state.view];
 }
 
@@ -659,6 +712,13 @@ function openCreateModal(){
       <textarea class="form-textarea" id="ci-desc" placeholder="Опишите суть вопроса подробнее…" style="height:110px"></textarea>
       <label class="form-label">Теги (через запятую)</label>
       <input class="form-input" id="ci-tags" placeholder="логистика, таможня, документы">`;
+  } else if(state.view==='discussions'){
+    title.textContent='Создать обсуждение';
+    body.innerHTML=`
+      <label class="form-label">Название обсуждения</label>
+      <input class="form-input" id="ci-name" placeholder="Например: Кейс по транзиту через Казахстан">
+      <label class="form-label">Первое сообщение</label>
+      <textarea class="form-textarea" id="ci-desc" placeholder="Опишите, что хотите обсудить…" style="height:110px"></textarea>`;
   } else {
     document.getElementById('msgTextarea')?.focus();return;
   }
@@ -678,6 +738,9 @@ async function submitCreate(){
     const tags=document.getElementById('ci-tags')?.value.split(',').map(t=>t.trim()).filter(Boolean);
     try{await fetch(API+'/forum/sections/'+state.sectionId+'/topics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc,tags})});}catch{}
     loadTopics(state.sectionId);
+  } else if(state.view==='discussions'){
+    try{await fetch(API+'/forum/topics/'+state.topicId+'/discussions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc})});}catch{}
+    loadDiscussions(state.topicId);
   }
 }
 document.getElementById('createModal').addEventListener('click',e=>{if(e.target===document.getElementById('createModal'))closeModal();});
