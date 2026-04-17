@@ -287,15 +287,15 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
       </div>
       <svg class="pb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       <div class="profile-dropdown" id="profileDropdown">
-        <div class="pd-item" onclick="location.href='/friends.html'">
+        <div class="pd-item" onclick="location.href='/chat.html'">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Друзья
         </div>
-        <div class="pd-item" onclick="location.href='/my-company.html'">
+        <div class="pd-item" onclick="location.href='/company-profile.html'">
           <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
           Моя компания
         </div>
-        <div class="pd-item" onclick="location.href='/analytics.html'">
+        <div class="pd-item" onclick="location.href='/dashboard.html'">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Аналитика
         </div>
@@ -389,15 +389,15 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
     </div>
     <div class="form-row">
       <label class="form-label">Заголовок</label>
-      <input class="form-input" placeholder="Заголовок публикации...">
+      <input class="form-input" id="postTitle" placeholder="Заголовок публикации...">
     </div>
     <div class="form-row">
       <label class="form-label">Текст</label>
-      <textarea class="form-input" placeholder="Расскажите подробнее..." style="height:120px"></textarea>
+      <textarea class="form-input" id="postContent" placeholder="Расскажите подробнее..." style="height:120px"></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn-sec" onclick="document.getElementById('modalCreate').classList.remove('open')">Отмена</button>
-      <button class="btn-pri">Опубликовать</button>
+      <button class="btn-pri" id="createPostBtn">Опубликовать</button>
     </div>
   </div>
 </div>
@@ -418,7 +418,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 </div>
 <div class="ad-block">
   <div class="ad-label">реклама</div>
-  <div class="ad-content"><div class="ad-title">LogisticsPro 2026</div><div class="ad-sub">Выставка · Москва · май</div><button class="ad-btn">Узнать подробнее</button></div>
+  <div class="ad-content"><div class="ad-title">LogisticsPro 2026</div><div class="ad-sub">Выставка · Москва · май</div><button class="ad-btn" onclick="location.href='/exhibitions.html'">Узнать подробнее</button></div>
 </div>
 </aside>
 
@@ -456,6 +456,9 @@ document.addEventListener('click',e=>{
   if(pb&&!pb.contains(e.target))pb.classList.remove('open');
 });
 function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
+function showToast(message){
+  window.alert(message);
+}
 function populateProfile(user){
   if(!user)return;
   const name=user.full_name||user.name||'Пользователь';
@@ -548,11 +551,49 @@ function renderFeed(posts){
     </div>`).join('');
 }
 document.getElementById('modalCreate')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
+  const title=(document.getElementById('postTitle')?.value||'').trim();
+  const content=(document.getElementById('postContent')?.value||'').trim();
+  if(!content){
+    showToast('Добавьте текст публикации.');
+    return;
+  }
+  const body={title:title||'Публикация',content};
+  try{
+    const response=await fetch(API+'/posts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify(body),
+    });
+    if(!response.ok){
+      throw new Error('post_create_failed');
+    }
+    document.getElementById('modalCreate').classList.remove('open');
+    document.getElementById('postTitle').value='';
+    document.getElementById('postContent').value='';
+    DEMO_POSTS.unshift({
+      id:Date.now(),
+      author:JSON.parse(localStorage.getItem('user')||'{}').full_name||'Вы',
+      role:'Участник LASTOP',
+      ago:'только что',
+      text:content,
+      likes:0,
+      comments:0,
+    });
+    renderFeed(DEMO_POSTS);
+    showToast('Публикация добавлена.');
+  }catch{
+    showToast('Не удалось опубликовать. Проверьте авторизацию и попробуйте снова.');
+  }
+});
 document.getElementById('suggestList').innerHTML=['Логисты СНГ','Таможенные брокеры','IT в логистике'].map(n=>`
   <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr)">
     <span style="font-size:12px;color:var(--t);font-weight:500">${n}</span>
-    <button class="btn-pri" style="padding:4px 12px;font-size:11px">Вступить</button>
+    <button class="btn-pri suggest-join-btn" style="padding:4px 12px;font-size:11px">Вступить</button>
   </div>`).join('');
+document.querySelectorAll('.suggest-join-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>location.href='/communities.html');
+});
 renderFeed(DEMO_POSTS);
 
 </script>
