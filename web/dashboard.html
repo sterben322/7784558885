@@ -363,6 +363,28 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
   </button>
 </div>
 <div class="feed" id="feed"></div>
+
+<!-- Create post modal -->
+<div class="modal-bg" id="modalCreate">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Новая публикация</h3>
+      <button class="modal-x" onclick="document.getElementById('modalCreate').classList.remove('open')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Заголовок</label>
+      <input class="form-input" id="postTitle" placeholder="Заголовок публикации...">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Текст</label>
+      <textarea class="form-input" id="postContent" placeholder="Расскажите подробнее..." style="height:120px"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="document.getElementById('modalCreate').classList.remove('open')">Отмена</button>
+      <button class="btn-pri" id="createPostBtn">Опубликовать</button>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- RIGHT -->
@@ -418,6 +440,9 @@ document.addEventListener('click',e=>{
   if(pb&&!pb.contains(e.target))pb.classList.remove('open');
 });
 function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
+function showToast(message){
+  window.alert(message);
+}
 function populateProfile(user){
   if(!user)return;
   const name=user.full_name||user.name||'Пользователь';
@@ -477,7 +502,18 @@ const NEWS=[
   {title:'ФТС обновила требования к таможенному декларированию импорта',cat:'Регуляторика',ago:'5 ч назад',text:'Федеральная таможенная служба внесла изменения в порядок декларирования ряда категорий товаров. Новые правила вступают в силу с 1 мая 2026 года.',views:1200,src:'Таможня.ру'},
   {title:'LASTOP Digital запустил новый модуль аналитики TMS',cat:'Технологии',ago:'вчера',text:'Цифровая платформа LASTOP обновила модуль управления транспортными заказами. Добавлены предиктивная аналитика и интеграция с 1С:Логистика.',views:940,src:'LASTOP'},
 ];
-document.getElementById('feed').innerHTML=NEWS.map((n,i)=>`
+const feedElement = document.getElementById('feed');
+const createModal = document.getElementById('modalCreate');
+const createButton = document.querySelector('.btn-create');
+if (createButton && createModal) {
+  createButton.addEventListener('click', () => createModal.classList.add('open'));
+}
+createModal?.addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+function renderNews(items){
+  feedElement.innerHTML = items.map((n,i)=>`
   <div class="item-card" style="animation-delay:${i*.07}s">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
       <span class="item-badge badge-green">${esc(n.cat)}</span>
@@ -490,6 +526,44 @@ document.getElementById('feed').innerHTML=NEWS.map((n,i)=>`
       <button class="btn-pri" style="margin-left:auto;padding:5px 14px;font-size:11px">Читать</button>
     </div>
   </div>`).join('');
+}
+
+document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
+  const title=(document.getElementById('postTitle')?.value||'').trim();
+  const content=(document.getElementById('postContent')?.value||'').trim();
+  if(!content){
+    showToast('Добавьте текст публикации.');
+    return;
+  }
+  const body={title:title||'Публикация',content};
+  try{
+    const response=await fetch(API+'/posts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify(body),
+    });
+    if(!response.ok){
+      throw new Error('post_create_failed');
+    }
+    createModal.classList.remove('open');
+    document.getElementById('postTitle').value='';
+    document.getElementById('postContent').value='';
+    NEWS.unshift({
+      title:title||'Публикация',
+      cat:'Публикации',
+      ago:'только что',
+      text:content,
+      views:0,
+      src:'Вы',
+    });
+    renderNews(NEWS);
+    showToast('Публикация добавлена.');
+  }catch{
+    showToast('Не удалось опубликовать. Проверьте авторизацию и попробуйте снова.');
+  }
+});
+
+renderNews(NEWS);
 document.getElementById('sourceList').innerHTML=['РБК Логистика','Таможня.ру','LASTOP Медиа','Транспорт России'].map(s=>`
   <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">
     <span style="font-size:12px;font-weight:600;color:var(--t)">${s}</span>
