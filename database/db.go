@@ -531,6 +531,11 @@ func CreateTables() error {
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
 		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_url TEXT`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_name TEXT`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_size BIGINT`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_type TEXT`,
+		`ALTER TABLE messages ADD COLUMN IF NOT EXISTS image_url TEXT`,
 		`CREATE INDEX IF NOT EXISTS idx_messages_chat_created_at ON messages(chat_id, created_at DESC)`,
 		`CREATE TABLE IF NOT EXISTS sessions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
