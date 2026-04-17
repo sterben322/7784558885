@@ -3,449 +3,525 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"lastop/database"
-	"lastop/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
-func scanCommunityRows(rows *sql.Rows, communities *[]models.Community) error {
-	for rows.Next() {
-		var comm models.Community
-		var logoURL sql.NullString
-		var tags pq.StringArray
-		if err := rows.Scan(&comm.ID, &comm.Name, &comm.Description, &logoURL, &comm.Icon, &comm.Color, &tags, &comm.IsPrivate, &comm.OwnerID, &comm.OwnerName, &comm.MembersCount, &comm.PostsCount, &comm.Joined, &comm.CreatedAt); err != nil {
-			return err
-		}
-		if logoURL.Valid {
-			comm.LogoURL = &logoURL.String
-		}
-		comm.SearchTags = tags
-		*communities = append(*communities, comm)
-	}
-	return nil
+type Community struct {
+	ID            uuid.UUID      `json:"id"`
+	Name          string         `json:"name"`
+	Description   string         `json:"description"`
+	ShortDesc     string         `json:"short_description"`
+	Category      string         `json:"category"`
+	AvatarURL     sql.NullString `json:"avatar_url"`
+	BannerURL     sql.NullString `json:"banner_url"`
+	Website       sql.NullString `json:"website"`
+	Region        sql.NullString `json:"region"`
+	Privacy       string         `json:"privacy"`
+	Status        sql.NullString `json:"status"`
+	Tags          pq.StringArray `json:"tags"`
+	MembersCount  int            `json:"members_count"`
+	PostsCount    int            `json:"posts_count"`
+	ActivityCount int            `json:"activity_count"`
+	OwnerID       uuid.UUID      `json:"owner_id"`
+	CreatedAt     time.Time      `json:"created_at"`
+	IsMember      bool           `json:"is_member"`
+	IsOwner       bool           `json:"is_owner"`
+}
+
+type CommunityMember struct {
+	UserID    uuid.UUID `json:"user_id"`
+	FullName  string    `json:"full_name"`
+	AvatarURL string    `json:"avatar_url"`
+	Role      string    `json:"role"`
+	IsOnline  bool      `json:"is_online"`
+	JoinedAt  time.Time `json:"joined_at"`
+}
+
+type CommunityPost struct {
+	ID            uuid.UUID      `json:"id"`
+	CommunityID   uuid.UUID      `json:"community_id"`
+	AuthorID      uuid.UUID      `json:"author_id"`
+	AuthorName    string         `json:"author_name"`
+	AuthorAvatar  sql.NullString `json:"author_avatar"`
+	Title         sql.NullString `json:"title"`
+	Content       string         `json:"content"`
+	ImageURL      sql.NullString `json:"image_url"`
+	Tags          pq.StringArray `json:"tags"`
+	LikesCount    int            `json:"likes_count"`
+	CommentsCount int            `json:"comments_count"`
+	IsLiked       bool           `json:"is_liked"`
+	CreatedAt     time.Time      `json:"created_at"`
 }
 
 func GetCommunities(c *gin.Context) {
 	userID := currentUserID(c)
+	category := c.Query("category")
+	search := c.Query("q")
+	limit := queryInt(c, "limit", 30)
+	offset := queryInt(c, "offset", 0)
+
 	rows, err := database.DB.Query(`
-        SELECT c.id, c.name, c.description, c.logo_url, c.icon, c.color, c.search_tags, c.is_private,
-               c.owner_id, u.full_name, c.members_count, c.posts_count,
-               EXISTS(SELECT 1 FROM community_members WHERE community_id = c.id AND user_id = $1) AS joined,
-               c.created_at
-        FROM communities c
-        JOIN users u ON c.owner_id = u.id
-        ORDER BY c.members_count DESC, c.created_at DESC
-    `, userID)
+		SELECT c.id, c.name, c.description,
+		       COALESCE(c.short_description,''), COALESCE(c.category,''),
+		       c.avatar_url, c.banner_url, c.website, c.region,
+		       COALESCE(c.privacy, CASE WHEN c.is_private THEN 'closed' ELSE 'open' END) AS privacy,
+		       c.status,
+		       COALESCE(c.tags, c.search_tags, '{}'::text[]) AS tags,
+		       COALESCE(c.members_count,0), COALESCE(c.posts_count,0), COALESCE(c.activity_count,0),
+		       c.owner_id, c.created_at,
+		       EXISTS(SELECT 1 FROM community_members m WHERE m.community_id=c.id AND m.user_id=$1) AS is_member,
+		       (c.owner_id = $1) AS is_owner
+		FROM communities c
+		WHERE c.deleted_at IS NULL
+		  AND ($2 = '' OR COALESCE(c.category,'') ILIKE $2)
+		  AND ($3 = '' OR c.name ILIKE '%' || $3 || '%' OR c.description ILIKE '%' || $3 || '%')
+		ORDER BY c.members_count DESC, c.created_at DESC
+		LIMIT $4 OFFSET $5`,
+		userID, category, search, limit, offset,
+	)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer rows.Close()
 
-	communities := make([]models.Community, 0)
-	if err := scanCommunityRows(rows, &communities); err != nil {
-		jsonError(c, http.StatusInternalServerError, err.Error())
-		return
+	communities := make([]Community, 0)
+	for rows.Next() {
+		var co Community
+		if err := rows.Scan(
+			&co.ID, &co.Name, &co.Description, &co.ShortDesc, &co.Category,
+			&co.AvatarURL, &co.BannerURL, &co.Website, &co.Region, &co.Privacy,
+			&co.Status, &co.Tags, &co.MembersCount, &co.PostsCount, &co.ActivityCount,
+			&co.OwnerID, &co.CreatedAt, &co.IsMember, &co.IsOwner,
+		); err != nil {
+			continue
+		}
+		communities = append(communities, co)
 	}
 	c.JSON(http.StatusOK, gin.H{"communities": communities})
-}
-
-func GetCommunity(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-
-	var comm models.Community
-	var logoURL sql.NullString
-	var tags pq.StringArray
-	err := database.DB.QueryRow(`
-        SELECT c.id, c.name, c.description, c.logo_url, c.icon, c.color, c.search_tags, c.is_private,
-               c.owner_id, u.full_name, c.members_count, c.posts_count,
-               EXISTS(SELECT 1 FROM community_members WHERE community_id = c.id AND user_id = $1) AS joined,
-               c.created_at
-        FROM communities c
-        JOIN users u ON c.owner_id = u.id
-        WHERE c.id = $2
-    `, userID, communityID).Scan(&comm.ID, &comm.Name, &comm.Description, &logoURL, &comm.Icon, &comm.Color, &tags, &comm.IsPrivate, &comm.OwnerID, &comm.OwnerName, &comm.MembersCount, &comm.PostsCount, &comm.Joined, &comm.CreatedAt)
-	if err == sql.ErrNoRows {
-		jsonError(c, http.StatusNotFound, "Community not found")
-		return
-	}
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	if logoURL.Valid {
-		comm.LogoURL = &logoURL.String
-	}
-	comm.SearchTags = tags
-	c.JSON(http.StatusOK, gin.H{"community": comm})
-}
-
-func CreateCommunity(c *gin.Context) {
-	userID := currentUserID(c)
-	var req models.CreateCommunityRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		jsonError(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	var exists bool
-	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM communities WHERE name = $1)`, req.Name).Scan(&exists)
-	if exists {
-		jsonError(c, http.StatusConflict, "Community with this name already exists")
-		return
-	}
-
-	communityID := uuid.New()
-	if req.Icon == "" {
-		req.Icon = "fa-users"
-	}
-	if req.Color == "" {
-		req.Color = "blue"
-	}
-
-	tx, err := database.DB.Begin()
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to start transaction")
-		return
-	}
-	defer tx.Rollback()
-
-	_, err = tx.Exec(`
-        INSERT INTO communities (id, name, description, logo_url, icon, color, search_tags, is_private, owner_id, members_count)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1)
-    `, communityID, req.Name, req.Description, req.LogoURL, req.Icon, req.Color, pq.Array(req.SearchTags), req.IsPrivate, userID)
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to create community")
-		return
-	}
-
-	if _, err = tx.Exec(`INSERT INTO community_members (community_id, user_id) VALUES ($1, $2)`, communityID, userID); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to add owner as member")
-		return
-	}
-
-	if _, err = tx.Exec(`INSERT INTO community_user_roles (community_id, user_id, role_name, assigned_by) VALUES ($1, $2, 'admin', $2)`, communityID, userID); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to assign admin role")
-		return
-	}
-
-	if err = tx.Commit(); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to commit transaction")
-		return
-	}
-
-	if err = database.EnsureDefaultCommunityRoles(communityID.String()); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to create default roles")
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "Community created successfully", "community_id": communityID})
-}
-
-func UpdateCommunity(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-	allowed, err := requireCommunityOwner(communityID, userID)
-	if err != nil {
-		jsonError(c, http.StatusNotFound, "Community not found")
-		return
-	}
-	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only community owner can update")
-		return
-	}
-
-	var req models.CreateCommunityRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		jsonError(c, http.StatusBadRequest, err.Error())
-		return
-	}
-	if req.Icon == "" {
-		req.Icon = "fa-users"
-	}
-	if req.Color == "" {
-		req.Color = "blue"
-	}
-
-	_, err = database.DB.Exec(`
-        UPDATE communities
-        SET name = $1, description = $2, logo_url = $3, icon = $4, color = $5, search_tags = $6, is_private = $7, updated_at = NOW()
-        WHERE id = $8
-    `, req.Name, req.Description, req.LogoURL, req.Icon, req.Color, pq.Array(req.SearchTags), req.IsPrivate, communityID)
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to update community")
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Community updated successfully"})
-}
-
-func DeleteCommunity(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-	allowed, err := requireCommunityOwner(communityID, userID)
-	if err != nil {
-		jsonError(c, http.StatusNotFound, "Community not found")
-		return
-	}
-	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only community owner can delete")
-		return
-	}
-	if _, err := database.DB.Exec(`DELETE FROM communities WHERE id = $1`, communityID); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to delete community")
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Community deleted successfully"})
-}
-
-func JoinCommunity(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-
-	var isPrivate bool
-	err := database.DB.QueryRow(`SELECT is_private FROM communities WHERE id = $1`, communityID).Scan(&isPrivate)
-	if err == sql.ErrNoRows {
-		jsonError(c, http.StatusNotFound, "Community not found")
-		return
-	}
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	if isPrivate {
-		jsonError(c, http.StatusBadRequest, "This is a private community. Send a join request instead.")
-		return
-	}
-
-	result, err := database.DB.Exec(`INSERT INTO community_members (community_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, communityID, userID)
-	rows, err := rowsAffectedOrError(result, err)
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to join community")
-		return
-	}
-	if rows > 0 {
-		_, _ = database.DB.Exec(`INSERT INTO community_user_roles (community_id, user_id, role_name) VALUES ($1, $2, 'member') ON CONFLICT DO NOTHING`, communityID, userID)
-		recalcCommunityMembersCount(communityID)
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Joined community successfully"})
-}
-
-func LeaveCommunity(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-
-	allowed, err := requireCommunityOwner(communityID, userID)
-	if err == nil && allowed {
-		jsonError(c, http.StatusBadRequest, "Community owner cannot leave")
-		return
-	}
-
-	_, err = database.DB.Exec(`DELETE FROM community_members WHERE community_id = $1 AND user_id = $2`, communityID, userID)
-	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to leave community")
-		return
-	}
-	_, _ = database.DB.Exec(`DELETE FROM community_user_roles WHERE community_id = $1 AND user_id = $2`, communityID, userID)
-	recalcCommunityMembersCount(communityID)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Left community successfully"})
 }
 
 func GetMyCommunities(c *gin.Context) {
 	userID := currentUserID(c)
 	rows, err := database.DB.Query(`
-        SELECT c.id, c.name, c.description, c.logo_url, c.icon, c.color, c.search_tags, c.is_private,
-               c.owner_id, u.full_name, c.members_count, c.posts_count, true AS joined, c.created_at
-        FROM communities c
-        JOIN users u ON c.owner_id = u.id
-        JOIN community_members cm ON c.id = cm.community_id
-        WHERE cm.user_id = $1
-        ORDER BY c.created_at DESC
-    `, userID)
+		SELECT c.id, c.name, c.description,
+		       COALESCE(c.short_description,''), COALESCE(c.category,''),
+		       c.avatar_url, c.banner_url, c.website, c.region,
+		       COALESCE(c.privacy, CASE WHEN c.is_private THEN 'closed' ELSE 'open' END) AS privacy,
+		       c.status,
+		       COALESCE(c.tags, c.search_tags, '{}'::text[]) AS tags,
+		       COALESCE(c.members_count,0), COALESCE(c.posts_count,0), COALESCE(c.activity_count,0),
+		       c.owner_id, c.created_at, true AS is_member, (c.owner_id = $1) AS is_owner
+		FROM communities c
+		INNER JOIN community_members m ON m.community_id = c.id AND m.user_id = $1
+		WHERE c.deleted_at IS NULL
+		ORDER BY m.joined_at DESC`, userID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer rows.Close()
 
-	communities := make([]models.Community, 0)
-	if err := scanCommunityRows(rows, &communities); err != nil {
-		jsonError(c, http.StatusInternalServerError, err.Error())
-		return
+	communities := make([]Community, 0)
+	for rows.Next() {
+		var co Community
+		if err := rows.Scan(
+			&co.ID, &co.Name, &co.Description, &co.ShortDesc, &co.Category,
+			&co.AvatarURL, &co.BannerURL, &co.Website, &co.Region, &co.Privacy,
+			&co.Status, &co.Tags, &co.MembersCount, &co.PostsCount, &co.ActivityCount,
+			&co.OwnerID, &co.CreatedAt, &co.IsMember, &co.IsOwner,
+		); err == nil {
+			communities = append(communities, co)
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"communities": communities})
 }
 
-func RequestJoinCommunity(c *gin.Context) {
-	communityID := c.Param("id")
+func GetCommunity(c *gin.Context) {
 	userID := currentUserID(c)
-	var req struct {
-		Message *string `json:"message"`
-	}
-	_ = c.ShouldBindJSON(&req)
-
-	var isMember bool
-	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM community_members WHERE community_id = $1 AND user_id = $2)`, communityID, userID).Scan(&isMember)
-	if isMember {
-		jsonError(c, http.StatusBadRequest, "Already a member")
+	id := c.Param("id")
+	var co Community
+	err := database.DB.QueryRow(`
+		SELECT c.id, c.name, c.description,
+		       COALESCE(c.short_description,''), COALESCE(c.category,''),
+		       c.avatar_url, c.banner_url, c.website, c.region,
+		       COALESCE(c.privacy, CASE WHEN c.is_private THEN 'closed' ELSE 'open' END) AS privacy,
+		       c.status,
+		       COALESCE(c.tags, c.search_tags, '{}'::text[]) AS tags,
+		       COALESCE(c.members_count,0), COALESCE(c.posts_count,0), COALESCE(c.activity_count,0),
+		       c.owner_id, c.created_at,
+		       EXISTS(SELECT 1 FROM community_members m WHERE m.community_id=c.id AND m.user_id=$2) AS is_member,
+		       (c.owner_id = $2) AS is_owner
+		FROM communities c
+		WHERE c.id=$1 AND c.deleted_at IS NULL`, id, userID).Scan(
+		&co.ID, &co.Name, &co.Description, &co.ShortDesc, &co.Category,
+		&co.AvatarURL, &co.BannerURL, &co.Website, &co.Region, &co.Privacy,
+		&co.Status, &co.Tags, &co.MembersCount, &co.PostsCount, &co.ActivityCount,
+		&co.OwnerID, &co.CreatedAt, &co.IsMember, &co.IsOwner,
+	)
+	if err == sql.ErrNoRows {
+		jsonError(c, http.StatusNotFound, "community not found")
 		return
 	}
-
-	var requestExists bool
-	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM community_join_requests WHERE community_id = $1 AND user_id = $2 AND status = 'pending')`, communityID, userID).Scan(&requestExists)
-	if requestExists {
-		jsonError(c, http.StatusBadRequest, "Request already sent")
-		return
-	}
-
-	requestID := uuid.New()
-	if _, err := database.DB.Exec(`INSERT INTO community_join_requests (id, community_id, user_id, message) VALUES ($1, $2, $3, $4) ON CONFLICT (community_id, user_id) DO UPDATE SET status = 'pending', message = EXCLUDED.message, created_at = NOW()`, requestID, communityID, userID, req.Message); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to create join request")
-		return
-	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Join request sent"})
-}
-
-func GetJoinRequests(c *gin.Context) {
-	communityID := c.Param("id")
-	userID := currentUserID(c)
-	allowed, err := requireCommunityOwner(communityID, userID)
-	if err != nil {
-		jsonError(c, http.StatusNotFound, "Community not found")
-		return
-	}
-	if !allowed {
-		jsonError(c, http.StatusForbidden, "Only community owner can view requests")
-		return
-	}
-
-	rows, err := database.DB.Query(`
-        SELECT r.id, r.community_id, cm.name, r.user_id, u.full_name, r.status, r.message, r.created_at
-        FROM community_join_requests r
-        JOIN communities cm ON r.community_id = cm.id
-        JOIN users u ON r.user_id = u.id
-        WHERE r.community_id = $1 AND r.status = 'pending'
-        ORDER BY r.created_at ASC
-    `, communityID)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	defer rows.Close()
-
-	requests := make([]map[string]interface{}, 0)
-	for rows.Next() {
-		var id, commID, requesterID uuid.UUID
-		var communityName, userName, status string
-		var message sql.NullString
-		var createdAt time.Time
-		if err := rows.Scan(&id, &commID, &communityName, &requesterID, &userName, &status, &message, &createdAt); err != nil {
-			jsonError(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-		item := map[string]interface{}{
-			"id": id, "community_id": commID, "community_name": communityName,
-			"user_id": requesterID, "user_name": userName, "status": status, "created_at": createdAt,
-		}
-		if message.Valid {
-			item["message"] = message.String
-		}
-		requests = append(requests, item)
-	}
-	c.JSON(http.StatusOK, gin.H{"requests": requests})
+	c.JSON(http.StatusOK, gin.H{"community": co})
 }
 
-func ApproveJoinRequest(c *gin.Context) {
-	requestID := c.Param("request_id")
+func CreateCommunity(c *gin.Context) {
 	userID := currentUserID(c)
-
-	var communityID, requestUserID uuid.UUID
-	err := database.DB.QueryRow(`SELECT community_id, user_id FROM community_join_requests WHERE id = $1`, requestID).Scan(&communityID, &requestUserID)
-	if err != nil {
-		jsonError(c, http.StatusNotFound, "Join request not found")
+	var body struct {
+		Name        string   `json:"name" binding:"required,min=2,max=100"`
+		Description string   `json:"description"`
+		ShortDesc   string   `json:"short_description"`
+		Category    string   `json:"category"`
+		Privacy     string   `json:"privacy"`
+		Website     string   `json:"website"`
+		Region      string   `json:"region"`
+		Tags        []string `json:"tags"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	allowed, err := requireCommunityOwner(communityID.String(), userID)
-	if err != nil || !allowed {
-		jsonError(c, http.StatusForbidden, "Only community owner can approve requests")
-		return
+	if body.Privacy == "" {
+		body.Privacy = "open"
 	}
+	tags := pq.StringArray(body.Tags)
 
 	tx, err := database.DB.Begin()
 	if err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to start transaction")
+		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer tx.Rollback()
 
-	_, _ = tx.Exec(`INSERT INTO community_members (community_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, communityID, requestUserID)
-	_, _ = tx.Exec(`INSERT INTO community_user_roles (community_id, user_id, role_name) VALUES ($1, $2, 'member') ON CONFLICT DO NOTHING`, communityID, requestUserID)
-	if _, err = tx.Exec(`UPDATE community_join_requests SET status = 'approved' WHERE id = $1`, requestID); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to approve request")
+	var coID uuid.UUID
+	err = tx.QueryRow(`
+		INSERT INTO communities (name, description, short_description, category, privacy, website, region, tags, owner_id, members_count)
+		VALUES ($1,$2,$3,$4,$5,NULLIF($6,''),NULLIF($7,''),$8,$9,1)
+		RETURNING id`,
+		body.Name, body.Description, body.ShortDesc, body.Category, body.Privacy,
+		body.Website, body.Region, tags, userID,
+	).Scan(&coID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	_, err = tx.Exec(`
+		INSERT INTO community_members (community_id, user_id, role)
+		VALUES ($1,$2,'owner')
+		ON CONFLICT DO NOTHING`, coID, userID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to commit transaction")
+		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	recalcCommunityMembersCount(communityID.String())
-	c.JSON(http.StatusOK, gin.H{"message": "Join request approved"})
+	c.JSON(http.StatusCreated, gin.H{"id": coID})
 }
 
-func RejectJoinRequest(c *gin.Context) {
-	requestID := c.Param("request_id")
+func UpdateCommunity(c *gin.Context) {
 	userID := currentUserID(c)
-
-	var communityID uuid.UUID
-	err := database.DB.QueryRow(`SELECT community_id FROM community_join_requests WHERE id = $1`, requestID).Scan(&communityID)
+	id := c.Param("id")
+	if !isCommunityOwnerByUUID(id, userID) {
+		jsonError(c, http.StatusForbidden, "forbidden")
+		return
+	}
+	var body struct {
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		ShortDesc   string   `json:"short_description"`
+		Category    string   `json:"category"`
+		Privacy     string   `json:"privacy"`
+		Website     string   `json:"website"`
+		Region      string   `json:"region"`
+		Tags        []string `json:"tags"`
+		AvatarURL   string   `json:"avatar_url"`
+		BannerURL   string   `json:"banner_url"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	tags := pq.StringArray(body.Tags)
+	_, err := database.DB.Exec(`
+		UPDATE communities SET
+			name        = COALESCE(NULLIF($1,''), name),
+			description = COALESCE(NULLIF($2,''), description),
+			short_description = COALESCE(NULLIF($3,''), short_description),
+			category    = COALESCE(NULLIF($4,''), category),
+			privacy     = COALESCE(NULLIF($5,''), privacy),
+			website     = NULLIF($6,''),
+			region      = NULLIF($7,''),
+			tags        = COALESCE(NULLIF($8::text[],'{}'), tags),
+			avatar_url  = NULLIF($9,''),
+			banner_url  = NULLIF($10,''),
+			updated_at  = NOW()
+		WHERE id=$11 AND deleted_at IS NULL`,
+		body.Name, body.Description, body.ShortDesc, body.Category, body.Privacy,
+		body.Website, body.Region, tags, body.AvatarURL, body.BannerURL, id,
+	)
 	if err != nil {
-		jsonError(c, http.StatusNotFound, "Join request not found")
+		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	allowed, err := requireCommunityOwner(communityID.String(), userID)
-	if err != nil || !allowed {
-		jsonError(c, http.StatusForbidden, "Only community owner can reject requests")
-		return
-	}
-
-	if _, err := database.DB.Exec(`UPDATE community_join_requests SET status = 'rejected' WHERE id = $1`, requestID); err != nil {
-		jsonError(c, http.StatusInternalServerError, "Failed to reject request")
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Join request rejected"})
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
-func SearchCommunities(c *gin.Context) {
+func DeleteCommunity(c *gin.Context) {
 	userID := currentUserID(c)
-	query := c.Query("q")
+	id := c.Param("id")
+	if !isCommunityOwnerByUUID(id, userID) {
+		jsonError(c, http.StatusForbidden, "forbidden")
+		return
+	}
+	_, err := database.DB.Exec(`UPDATE communities SET deleted_at=NOW() WHERE id=$1`, id)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func JoinCommunity(c *gin.Context) {
+	userID := currentUserID(c)
+	id := c.Param("id")
+	tx, err := database.DB.Begin()
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer tx.Rollback()
+	result, err := tx.Exec(`
+		INSERT INTO community_members (community_id, user_id, role) VALUES ($1,$2,'member')
+		ON CONFLICT DO NOTHING`, id, userID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	affected, _ := result.RowsAffected()
+	if affected > 0 {
+		_, _ = tx.Exec(`UPDATE communities SET members_count=members_count+1, activity_count=activity_count+1 WHERE id=$1`, id)
+	}
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func LeaveCommunity(c *gin.Context) {
+	userID := currentUserID(c)
+	id := c.Param("id")
+	var ownerID uuid.UUID
+	_ = database.DB.QueryRow(`SELECT owner_id FROM communities WHERE id=$1`, id).Scan(&ownerID)
+	if ownerID == userID {
+		jsonError(c, http.StatusBadRequest, "owner cannot leave; delete community instead")
+		return
+	}
+	tx, err := database.DB.Begin()
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer tx.Rollback()
+	result, _ := tx.Exec(`DELETE FROM community_members WHERE community_id=$1 AND user_id=$2`, id, userID)
+	if affected, _ := result.RowsAffected(); affected > 0 {
+		_, _ = tx.Exec(`UPDATE communities SET members_count=GREATEST(members_count-1,0) WHERE id=$1`, id)
+	}
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func UpdateCommunityStatus(c *gin.Context) {
+	userID := currentUserID(c)
+	id := c.Param("id")
+	if !isCommunityOwnerByUUID(id, userID) {
+		jsonError(c, http.StatusForbidden, "forbidden")
+		return
+	}
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	body.Status = strings.TrimSpace(body.Status)
+	_, err := database.DB.Exec(`UPDATE communities SET status=NULLIF($1,''), updated_at=NOW() WHERE id=$2`, body.Status, id)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func ListCommunityPosts(c *gin.Context) {
+	userID := currentUserID(c)
+	id := c.Param("id")
+	limit := queryInt(c, "limit", 20)
+	offset := queryInt(c, "offset", 0)
+
 	rows, err := database.DB.Query(`
-        SELECT c.id, c.name, c.description, c.logo_url, c.icon, c.color, c.search_tags, c.is_private,
-               c.owner_id, u.full_name, c.members_count, c.posts_count,
-               EXISTS(SELECT 1 FROM community_members WHERE community_id = c.id AND user_id = $1) AS joined,
-               c.created_at
-        FROM communities c
-        JOIN users u ON c.owner_id = u.id
-        WHERE c.name ILIKE '%' || $2 || '%' OR EXISTS (SELECT 1 FROM unnest(c.search_tags) tag WHERE tag ILIKE '%' || $2 || '%')
-        ORDER BY c.members_count DESC, c.created_at DESC
-        LIMIT 50
-    `, userID, query)
+		SELECT p.id, p.community_id, p.author_id,
+		       COALESCE(u.full_name, u.username, 'Пользователь') AS author_name,
+		       u.avatar_url,
+		       p.title, p.content, p.image_url,
+		       COALESCE(p.tags, '{}'::text[]),
+		       COALESCE(p.likes_count,0), COALESCE(p.comments_count,0),
+		       EXISTS(SELECT 1 FROM post_likes l WHERE l.post_id=p.id AND l.user_id=$2) AS is_liked,
+		       p.created_at
+		FROM posts p
+		INNER JOIN users u ON u.id = p.author_id
+		WHERE p.community_id=$1 AND p.deleted_at IS NULL
+		ORDER BY p.created_at DESC
+		LIMIT $3 OFFSET $4`, id, userID, limit, offset)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer rows.Close()
 
-	communities := make([]models.Community, 0)
-	if err := scanCommunityRows(rows, &communities); err != nil {
+	posts := make([]CommunityPost, 0)
+	for rows.Next() {
+		var p CommunityPost
+		if err := rows.Scan(
+			&p.ID, &p.CommunityID, &p.AuthorID, &p.AuthorName,
+			&p.AuthorAvatar, &p.Title, &p.Content, &p.ImageURL, &p.Tags,
+			&p.LikesCount, &p.CommentsCount, &p.IsLiked, &p.CreatedAt,
+		); err == nil {
+			posts = append(posts, p)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
+}
+
+func CreateCommunityPost(c *gin.Context) {
+	userID := currentUserID(c)
+	communityID := c.Param("id")
+	var isMember bool
+	_ = database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM community_members WHERE community_id=$1 AND user_id=$2)`, communityID, userID).Scan(&isMember)
+	if !isMember {
+		jsonError(c, http.StatusForbidden, "join the community first")
+		return
+	}
+
+	var body struct {
+		Title   string   `json:"title"`
+		Content string   `json:"content" binding:"required,min=1"`
+		Tags    []string `json:"tags"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	tags := pq.StringArray(body.Tags)
+	tx, err := database.DB.Begin()
+	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"communities": communities})
+	defer tx.Rollback()
+
+	var postID uuid.UUID
+	err = tx.QueryRow(`
+		INSERT INTO posts (author_id, author_type, community_id, title, content, short_description, tags, privacy_level)
+		VALUES ($1,'community',$2,NULLIF($3,''),$4,$5,$6,'public')
+		RETURNING id`,
+		userID, communityID, body.Title, body.Content,
+		truncate(body.Content, 180), tags,
+	).Scan(&postID)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	_, _ = tx.Exec(`UPDATE communities SET posts_count=posts_count+1, activity_count=activity_count+3 WHERE id=$1`, communityID)
+	if err := tx.Commit(); err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": postID})
+}
+
+func GetCommunityMembers(c *gin.Context) {
+	id := c.Param("id")
+	limit := queryInt(c, "limit", 50)
+	offset := queryInt(c, "offset", 0)
+
+	rows, err := database.DB.Query(`
+		SELECT u.id, COALESCE(u.full_name, u.username) AS full_name,
+		       COALESCE(u.avatar_url,'') AS avatar_url,
+		       COALESCE(m.role, 'member') AS role,
+		       COALESCE(u.is_online, false) AS is_online,
+		       m.joined_at
+		FROM community_members m
+		INNER JOIN users u ON u.id = m.user_id
+		WHERE m.community_id=$1
+		ORDER BY CASE m.role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END, m.joined_at ASC
+		LIMIT $2 OFFSET $3`, id, limit, offset)
+	if err != nil {
+		jsonError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	members := make([]CommunityMember, 0)
+	for rows.Next() {
+		var m CommunityMember
+		if err := rows.Scan(&m.UserID, &m.FullName, &m.AvatarURL, &m.Role, &m.IsOnline, &m.JoinedAt); err == nil {
+			members = append(members, m)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+// Compatibility endpoints kept for existing clients.
+func RequestJoinCommunity(c *gin.Context) {
+	jsonError(c, http.StatusBadRequest, "private requests are not enabled")
+}
+func GetJoinRequests(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"requests": []interface{}{}}) }
+func ApproveJoinRequest(c *gin.Context) {
+	jsonError(c, http.StatusBadRequest, "join requests are not enabled")
+}
+func RejectJoinRequest(c *gin.Context) {
+	jsonError(c, http.StatusBadRequest, "join requests are not enabled")
+}
+func SearchCommunities(c *gin.Context) { GetCommunities(c) }
+
+func isCommunityOwnerByUUID(communityID string, userID uuid.UUID) bool {
+	var ownerID uuid.UUID
+	_ = database.DB.QueryRow(`SELECT owner_id FROM communities WHERE id=$1 AND deleted_at IS NULL`, communityID).Scan(&ownerID)
+	return ownerID == userID
+}
+
+func queryInt(c *gin.Context, key string, def int) int {
+	if v := c.Query(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return def
+}
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
 }
