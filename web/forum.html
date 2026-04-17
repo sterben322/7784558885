@@ -376,7 +376,7 @@ function renderSections(list){
   c.innerHTML=list.map((s,i)=>{
     const ci=s.color_idx??i%SEC_COLORS.length;
     const av=avc(s.name);
-    return`<div class="section-tile${state.sectionId===s.id?' active':''}" onclick="openSection('${s.id}','${esc(s.name)}')">
+    return`<div class="section-tile${state.sectionId===s.id?' active':''}" onclick="openSection('${s.id}','${encodeURIComponent(s.name||'')}')">
       <div class="sec-icon" style="background:${SEC_COLORS[ci]};color:${SEC_TEXT[ci]}">${SEC_ICONS[ci%SEC_ICONS.length]}</div>
       <div style="flex:1;min-width:0">
         <div class="sec-name">${esc(s.name)}</div>
@@ -394,7 +394,8 @@ function renderSections(list){
   }).join('');
 }
 
-function openSection(id, name){
+function openSection(id, encodedName){
+  const name=decodeURIComponent(encodedName||'');
   state={view:'topics', sectionId:id, sectionName:name, topicId:null, topicName:'', discussionId:null, discussionName:''};
   loadTopics(id);
 }
