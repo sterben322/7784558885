@@ -112,6 +112,8 @@ func GetForumSections(c *gin.Context) {
 
 // CreateForumSection POST /api/forum/sections
 func CreateForumSection(c *gin.Context) {
+	userID := currentUserID(c)
+
 	var body struct {
 		Name        string `json:"name" binding:"required,min=2,max=120"`
 		Description string `json:"description"`
@@ -127,10 +129,10 @@ func CreateForumSection(c *gin.Context) {
 
 	var id string
 	err := database.DB.QueryRowContext(c, `
-		INSERT INTO forum_sections (name, title, description, color_idx)
-		VALUES ($1, $1, $2, $3)
+		INSERT INTO forum_sections (name, title, description, color_idx, creator_id)
+		VALUES ($1, $1, $2, $3, $4::uuid)
 		RETURNING id::text`,
-		body.Name, body.Description, body.ColorIdx,
+		body.Name, body.Description, body.ColorIdx, userID.String(),
 	).Scan(&id)
 	if err != nil {
 		jsonError(c, http.StatusInternalServerError, err.Error())
