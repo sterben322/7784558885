@@ -114,6 +114,8 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/chats", handlers.GetChats)
 		api.GET("/chats/:id/messages", handlers.GetMessages)
 		api.POST("/chats/:id/messages", handlers.SendMessage)
+		api.PUT("/chats/:id/messages/:messageId", handlers.UpdateMessage)
+		api.DELETE("/chats/:id/messages/:messageId", handlers.DeleteMessage)
 		api.GET("/chats/:id/typing", handlers.GetConversationTyping)
 		api.POST("/chats/:id/typing", handlers.SetConversationTyping)
 		api.GET("/chat/conversations", handlers.GetChatConversations)
@@ -121,6 +123,8 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/chat/conversations/:id", handlers.GetChatConversation)
 		api.GET("/chat/conversations/:id/messages", handlers.GetConversationMessages)
 		api.POST("/chat/conversations/:id/messages", handlers.SendConversationMessage)
+		api.PUT("/chat/conversations/:id/messages/:messageId", handlers.UpdateConversationMessage)
+		api.DELETE("/chat/conversations/:id/messages/:messageId", handlers.DeleteConversationMessage)
 
 		api.GET("/dashboard/stats", handlers.GetDashboardStats)
 		api.GET("/resumes", handlers.GetResumes)

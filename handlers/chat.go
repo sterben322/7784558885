@@ -306,7 +306,7 @@ func GetConversationMessages(c *gin.Context) {
 	}
 
 	rows, err := database.DB.Query(`
-		SELECT m.id, m.chat_id, m.content, m.sender_id, u.full_name, m.read, m.created_at,
+		SELECT m.id, m.chat_id, m.content, m.sender_id, u.full_name, m.read, m.created_at, m.updated_at,
 			m.attachment_url, m.attachment_name, m.attachment_size, m.attachment_type, m.image_url
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
@@ -330,6 +330,7 @@ func GetConversationMessages(c *gin.Context) {
 			&msg.SenderName,
 			&msg.Read,
 			&msg.CreatedAt,
+			&msg.UpdatedAt,
 			&msg.AttachmentURL,
 			&msg.AttachmentName,
 			&msg.AttachmentSize,
@@ -453,6 +454,277 @@ func SendConversationMessage(c *gin.Context) {
 	})
 }
 
+func UpdateConversationMessage(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
+	conversationID, ok := parseUUIDParam(c, "id")
+	if !ok {
+		return
+	}
+	messageID, ok := parseUUIDParam(c, "messageId")
+	if !ok {
+		return
+	}
+	userID := currentUserID(c)
+	if err := requireConversationParticipant(conversationID, userID); err != nil {
+		if errors.Is(err, errForbidden) {
+			jsonError(c, http.StatusForbidden, "Access denied")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
+		return
+	}
+
+	var senderID uuid.UUID
+	var existingAttachmentURL sql.NullString
+	err := database.DB.QueryRow(`
+		SELECT sender_id, attachment_url
+		FROM messages
+		WHERE id = $1 AND chat_id = $2
+	`, messageID, conversationID).Scan(&senderID, &existingAttachmentURL)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			jsonError(c, http.StatusNotFound, "Message not found")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to load message")
+		return
+	}
+	if senderID != userID {
+		jsonError(c, http.StatusForbidden, "Only sender can edit message")
+		return
+	}
+
+	var (
+		content          *string
+		attachmentURL    *string
+		attachmentName   *string
+		attachmentSize   *int64
+		attachmentType   *string
+		imageURL         *string
+		removeAttachment bool
+	)
+
+	hasMultipart := strings.HasPrefix(strings.ToLower(c.GetHeader("Content-Type")), "multipart/form-data")
+	if hasMultipart {
+		if err := c.Request.ParseMultipartForm(maxChatAttachmentSize + (1 << 20)); err != nil {
+			jsonError(c, http.StatusBadRequest, "Invalid form data")
+			return
+		}
+		trimmed := strings.TrimSpace(c.PostForm("content"))
+		content = &trimmed
+		removeAttachment = strings.EqualFold(strings.TrimSpace(c.PostForm("remove_attachment")), "true")
+
+		fileHeader, err := c.FormFile("attachment")
+		if err != nil && !errors.Is(err, http.ErrMissingFile) {
+			jsonError(c, http.StatusBadRequest, "Invalid attachment")
+			return
+		}
+		if fileHeader != nil {
+			url, name, size, fileType, isImage, saveErr := saveChatAttachment(fileHeader)
+			if saveErr != nil {
+				switch {
+				case errors.Is(saveErr, errAttachmentTooLarge):
+					jsonError(c, http.StatusBadRequest, "File size exceeds 50MB limit")
+				default:
+					jsonError(c, http.StatusInternalServerError, "Failed to save attachment")
+				}
+				return
+			}
+			attachmentURL = &url
+			attachmentName = &name
+			attachmentSize = &size
+			attachmentType = &fileType
+			if isImage {
+				imageURL = &url
+			}
+			removeAttachment = false
+		}
+	} else {
+		var req struct {
+			Content          *string `json:"content"`
+			Text             *string `json:"text"`
+			RemoveAttachment bool    `json:"remove_attachment"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			jsonError(c, http.StatusBadRequest, "Invalid payload")
+			return
+		}
+		if req.Content != nil {
+			trimmed := strings.TrimSpace(*req.Content)
+			content = &trimmed
+		} else if req.Text != nil {
+			trimmed := strings.TrimSpace(*req.Text)
+			content = &trimmed
+		}
+		removeAttachment = req.RemoveAttachment
+	}
+
+	if content == nil && attachmentURL == nil && !removeAttachment {
+		jsonError(c, http.StatusBadRequest, "No changes provided")
+		return
+	}
+
+	query := `
+		UPDATE messages
+		SET content = COALESCE($3, content),
+			attachment_url = CASE WHEN $4 THEN NULL ELSE COALESCE($5, attachment_url) END,
+			attachment_name = CASE WHEN $4 THEN NULL ELSE COALESCE($6, attachment_name) END,
+			attachment_size = CASE WHEN $4 THEN NULL ELSE COALESCE($7, attachment_size) END,
+			attachment_type = CASE WHEN $4 THEN NULL ELSE COALESCE($8, attachment_type) END,
+			image_url = CASE
+				WHEN $4 THEN NULL
+				WHEN $9 IS NOT NULL THEN $9
+				WHEN $5 IS NOT NULL THEN NULL
+				ELSE image_url
+			END,
+			updated_at = NOW()
+		WHERE id = $1 AND chat_id = $2
+		RETURNING content, attachment_url, attachment_name, attachment_size, attachment_type, image_url, updated_at
+	`
+
+	var (
+		resultContent        string
+		resultAttachmentURL  sql.NullString
+		resultAttachmentName sql.NullString
+		resultAttachmentSize sql.NullInt64
+		resultAttachmentType sql.NullString
+		resultImageURL       sql.NullString
+		resultUpdatedAt      time.Time
+	)
+
+	if err := database.DB.QueryRow(
+		query,
+		messageID,
+		conversationID,
+		content,
+		removeAttachment,
+		attachmentURL,
+		attachmentName,
+		attachmentSize,
+		attachmentType,
+		imageURL,
+	).Scan(
+		&resultContent,
+		&resultAttachmentURL,
+		&resultAttachmentName,
+		&resultAttachmentSize,
+		&resultAttachmentType,
+		&resultImageURL,
+		&resultUpdatedAt,
+	); err != nil {
+		if attachmentURL != nil {
+			deleteChatAttachmentByURL(*attachmentURL)
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to update message")
+		return
+	}
+
+	if strings.TrimSpace(resultContent) == "" && !resultAttachmentURL.Valid {
+		if attachmentURL != nil {
+			deleteChatAttachmentByURL(*attachmentURL)
+		}
+		jsonError(c, http.StatusBadRequest, "Content or attachment is required")
+		return
+	}
+
+	if existingAttachmentURL.Valid && (removeAttachment || attachmentURL != nil) {
+		deleteChatAttachmentByURL(existingAttachmentURL.String)
+	}
+
+	_, _ = database.DB.Exec(`UPDATE chats SET updated_at = NOW() WHERE id = $1`, conversationID)
+
+	response := gin.H{
+		"message":    "Message updated",
+		"id":         messageID,
+		"content":    resultContent,
+		"updated_at": resultUpdatedAt,
+	}
+	if resultAttachmentURL.Valid {
+		response["attachment_url"] = resultAttachmentURL.String
+	}
+	if resultAttachmentName.Valid {
+		response["attachment_name"] = resultAttachmentName.String
+	}
+	if resultAttachmentSize.Valid {
+		response["attachment_size"] = resultAttachmentSize.Int64
+	}
+	if resultAttachmentType.Valid {
+		response["attachment_type"] = resultAttachmentType.String
+	}
+	if resultImageURL.Valid {
+		response["image_url"] = resultImageURL.String
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func DeleteConversationMessage(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
+	conversationID, ok := parseUUIDParam(c, "id")
+	if !ok {
+		return
+	}
+	messageID, ok := parseUUIDParam(c, "messageId")
+	if !ok {
+		return
+	}
+	userID := currentUserID(c)
+	if err := requireConversationParticipant(conversationID, userID); err != nil {
+		if errors.Is(err, errForbidden) {
+			jsonError(c, http.StatusForbidden, "Access denied")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to validate participant")
+		return
+	}
+
+	var (
+		senderID      uuid.UUID
+		attachmentURL sql.NullString
+	)
+	err := database.DB.QueryRow(`
+		SELECT sender_id, attachment_url
+		FROM messages
+		WHERE id = $1 AND chat_id = $2
+	`, messageID, conversationID).Scan(&senderID, &attachmentURL)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			jsonError(c, http.StatusNotFound, "Message not found")
+			return
+		}
+		jsonError(c, http.StatusInternalServerError, "Failed to load message")
+		return
+	}
+	if senderID != userID {
+		jsonError(c, http.StatusForbidden, "Only sender can delete message")
+		return
+	}
+
+	if _, err := database.DB.Exec(`DELETE FROM messages WHERE id = $1 AND chat_id = $2`, messageID, conversationID); err != nil {
+		jsonError(c, http.StatusInternalServerError, "Failed to delete message")
+		return
+	}
+
+	if attachmentURL.Valid {
+		deleteChatAttachmentByURL(attachmentURL.String)
+	}
+
+	_, _ = database.DB.Exec(`
+		UPDATE chats
+		SET updated_at = NOW(),
+			last_message_at = (SELECT MAX(created_at) FROM messages WHERE chat_id = $1)
+		WHERE id = $1
+	`, conversationID)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Message deleted", "id": messageID})
+}
+
 var errAttachmentTooLarge = errors.New("attachment too large")
 
 func saveChatAttachment(fileHeader *multipart.FileHeader) (url, fileName string, fileSize int64, contentType string, isImage bool, err error) {
@@ -507,6 +779,21 @@ func saveChatAttachment(fileHeader *multipart.FileHeader) (url, fileName string,
 
 	url = "/" + filepath.ToSlash(relPath)
 	return url, fileName, fileSize, contentType, isImage, nil
+}
+
+func deleteChatAttachmentByURL(url string) {
+	trimmed := strings.TrimSpace(url)
+	if trimmed == "" {
+		return
+	}
+	rel := strings.TrimPrefix(trimmed, "/")
+	cleanRel := filepath.Clean(rel)
+	baseDir := filepath.Clean(filepath.Join("web", "uploads", "chat"))
+	fullPath := filepath.Clean(filepath.Join("web", cleanRel))
+	if !strings.HasPrefix(fullPath, baseDir+string(os.PathSeparator)) && fullPath != baseDir {
+		return
+	}
+	_ = os.Remove(fullPath)
 }
 
 func SetConversationTyping(c *gin.Context) {
@@ -602,3 +889,9 @@ func GetConversationTyping(c *gin.Context) {
 func GetChats(c *gin.Context)    { GetChatConversations(c) }
 func GetMessages(c *gin.Context) { GetConversationMessages(c) }
 func SendMessage(c *gin.Context) { SendConversationMessage(c) }
+func UpdateMessage(c *gin.Context) {
+	UpdateConversationMessage(c)
+}
+func DeleteMessage(c *gin.Context) {
+	DeleteConversationMessage(c)
+}
