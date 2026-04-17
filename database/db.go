@@ -429,6 +429,47 @@ func CreateTables() error {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`CREATE TABLE IF NOT EXISTS projects (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			author_type VARCHAR(20) NOT NULL CHECK (author_type IN ('user', 'company', 'community')),
+			author_id UUID,
+			author_name VARCHAR(255) NOT NULL,
+			title VARCHAR(300) NOT NULL,
+			category VARCHAR(120),
+			goal VARCHAR(20) NOT NULL DEFAULT 'partner',
+			city VARCHAR(120),
+			tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+			goals TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+			description TEXT,
+			images TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+			status VARCHAR(20) NOT NULL DEFAULT 'active',
+			progress INT,
+			views_count INT NOT NULL DEFAULT 0,
+			responses_count INT NOT NULL DEFAULT 0,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_projects_author_type ON projects(author_type)`,
+		`CREATE INDEX IF NOT EXISTS idx_projects_goal ON projects(goal)`,
+		`CREATE TABLE IF NOT EXISTS project_needs (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+			name VARCHAR(200) NOT NULL,
+			amount_text VARCHAR(120),
+			status VARCHAR(20) NOT NULL DEFAULT 'open',
+			sort_order INT NOT NULL DEFAULT 0,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_project_needs_project_id ON project_needs(project_id, sort_order)`,
+		`CREATE TABLE IF NOT EXISTS project_responses (
+			project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (project_id, user_id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_project_responses_user_id ON project_responses(user_id)`,
 		`CREATE TABLE IF NOT EXISTS post_likes (
             post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -124,6 +124,11 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.POST("/resume", handlers.CreateOrUpdateResume)
 		api.GET("/vacancies", handlers.GetVacancies)
 		api.POST("/vacancies", handlers.CreateVacancy)
+		api.GET("/projects", handlers.GetProjects)
+		api.POST("/projects", handlers.CreateProject)
+		api.GET("/projects/my", handlers.GetMyProjects)
+		api.GET("/projects/stats", handlers.GetProjectStats)
+		api.POST("/projects/:id/respond", handlers.RespondProject)
 
 		api.GET("/search/communities", handlers.SearchCommunities)
 		api.GET("/search/companies", handlers.SearchCompanies)

@@ -330,6 +330,73 @@ type CreateVacancyRequest struct {
 	EmploymentType     *string  `json:"employment_type"`
 	Location           *string  `json:"location"`
 }
+
+type ProjectNeed struct {
+	ID         uuid.UUID `json:"id"`
+	ProjectID  uuid.UUID `json:"project_id,omitempty"`
+	Name       string    `json:"name"`
+	AmountText *string   `json:"amount_text,omitempty"`
+	Status     *string   `json:"status,omitempty"`
+	SortOrder  int       `json:"sort_order,omitempty"`
+}
+
+type Project struct {
+	ID             uuid.UUID     `json:"id"`
+	AuthorType     string        `json:"author_type"`
+	AuthorID       *uuid.UUID    `json:"author_id,omitempty"`
+	AuthorName     string        `json:"author_name"`
+	OwnerName      string        `json:"owner_name,omitempty"`
+	Title          string        `json:"title"`
+	Category       *string       `json:"category,omitempty"`
+	Goal           string        `json:"goal"`
+	City           *string       `json:"city,omitempty"`
+	Tags           []string      `json:"tags"`
+	Goals          []string      `json:"goals"`
+	Description    *string       `json:"description,omitempty"`
+	Needs          []ProjectNeed `json:"needs"`
+	Images         []string      `json:"images"`
+	Status         *string       `json:"status,omitempty"`
+	Progress       *int          `json:"progress,omitempty"`
+	ViewsCount     int           `json:"views_count"`
+	ResponsesCount int           `json:"responses_count"`
+	IsResponded    bool          `json:"is_responded"`
+	CreatedAt      time.Time     `json:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at"`
+}
+
+type CreateProjectNeedRequest struct {
+	Name       string `json:"name"`
+	AmountText string `json:"amount_text"`
+	Status     string `json:"status"`
+}
+
+type CreateProjectRequest struct {
+	AuthorType  string                     `json:"author_type"`
+	AuthorID    *string                    `json:"author_id"`
+	Title       string                     `json:"title" binding:"required"`
+	Category    string                     `json:"category"`
+	Goal        string                     `json:"goal"`
+	City        string                     `json:"city"`
+	Tags        []string                   `json:"tags"`
+	Goals       []string                   `json:"goals"`
+	Description string                     `json:"description"`
+	Needs       []CreateProjectNeedRequest `json:"needs"`
+	Images      []string                   `json:"images"`
+}
+
+type ProjectCategoryStat struct {
+	Name  string `json:"name"`
+	Goal  string `json:"goal"`
+	Count int    `json:"count"`
+}
+
+type ProjectStats struct {
+	Total      int                   `json:"total"`
+	Companies  int                   `json:"companies"`
+	Users      int                   `json:"users"`
+	NewWeek    int                   `json:"new_week"`
+	Categories []ProjectCategoryStat `json:"categories"`
+}
 type AssignRoleRequest struct {
 	UserID   uuid.UUID `json:"user_id" binding:"required"`
 	RoleName string    `json:"role_name" binding:"required"`
