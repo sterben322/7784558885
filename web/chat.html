@@ -505,10 +505,14 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <!-- Context menu -->
 <div class="ctx-menu" id="ctxMenu">
   <div class="ctx-mi" id="ctxReply"><svg viewBox="0 0 24 24"><polyline points="9,17 4,12 9,7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>Ответить</div>
+  <div class="ctx-mi" id="ctxEdit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Редактировать</div>
+  <div class="ctx-mi" id="ctxEditAttachment"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Заменить вложение</div>
+  <div class="ctx-mi" id="ctxRemoveAttachment"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/><line x1="4" y1="4" x2="20" y2="20"/></svg>Удалить вложение</div>
   <div class="ctx-mi" id="ctxCopy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Копировать</div>
   <div class="ctx-mi" id="ctxForward"><svg viewBox="0 0 24 24"><polyline points="15,17 20,12 15,7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>Переслать</div>
   <div class="ctx-mi red" id="ctxDelete"><svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Удалить</div>
 </div>
+<input type="file" id="editAttachInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none">
 
 <script>
 const API='/api',tk=()=>localStorage.getItem('token');
@@ -716,6 +720,7 @@ function normalizeMessage(msg){
     text:msg.text??msg.content??'',
     file,
     image_url:msg.image_url||(msg.attachment_type?.startsWith('image/')?msg.attachment_url:null),
+    is_edited:Boolean(msg.updated_at&&msg.created_at&&new Date(msg.updated_at).getTime()-new Date(msg.created_at).getTime()>1000),
     is_mine:msg.is_mine??(msg.sender_id===myUserId),
     sender_name:msg.sender_name||'Пользователь'
   };
@@ -791,9 +796,10 @@ function buildBubble(msg,isOut,showAvatar,showName,isLast){
   const fileHtml=msg.file?`<a class="bubble-file" href="${esc(msg.file.url||'#')}" target="_blank" rel="noopener noreferrer"><div class="bubble-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="bubble-file-info"><div class="bubble-file-name">${esc(msg.file.name)}</div><div class="bubble-file-size">${esc(msg.file.size)}</div></div></a>`:''
   const imgHtml=msg.image_url?`<img class="bubble-img" src="${esc(msg.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';
   const timeStr=new Date(msg.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const editedHtml=msg.is_edited?'<span style="font-size:11px;color:var(--gmt);margin-right:6px">(изменено)</span>':'';
   const checkHtml=isOut?`<span class="bubble-check${msg.read?'':' unread'}"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/>${msg.read?'<polyline points="20,2 9,13 4,8"/>':''}</svg></span>`:'';
   const tail=showAvatar?'tail':'';
-  row.innerHTML=`${avHtml}<div class="bubble ${isOut?'out':'in'} ${tail}" data-msgid="${esc(msg.id)}">${nameHtml}${replyHtml}${imgHtml}${fileHtml}${msg.text?`<div class="bubble-text">${esc(msg.text)}</div>`:''}<div class="bubble-meta"><span class="bubble-time">${timeStr}</span>${checkHtml}</div></div>`;
+  row.innerHTML=`${avHtml}<div class="bubble ${isOut?'out':'in'} ${tail}" data-msgid="${esc(msg.id)}">${nameHtml}${replyHtml}${imgHtml}${fileHtml}${msg.text?`<div class="bubble-text">${esc(msg.text)}</div>`:''}<div class="bubble-meta">${editedHtml}<span class="bubble-time">${timeStr}</span>${checkHtml}</div></div>`;
   row.querySelector('.bubble').addEventListener('contextmenu',e=>{e.preventDefault();showCtxMenu(e,msg,isOut);});
   return row;
 }
@@ -849,6 +855,9 @@ function showCtxMenu(e,msg,isOut){
   menu.style.top=Math.min(e.clientY,window.innerHeight-160)+'px';
   menu.classList.add('show');
   document.getElementById('ctxDelete').style.display=isOut?'flex':'none';
+  document.getElementById('ctxEdit').style.display=isOut?'flex':'none';
+  document.getElementById('ctxEditAttachment').style.display=isOut&&msg.file?'flex':'none';
+  document.getElementById('ctxRemoveAttachment').style.display=isOut&&msg.file?'flex':'none';
 }
 document.getElementById('ctxReply').addEventListener('click',()=>{
   if(!ctxMsg)return;
@@ -864,12 +873,86 @@ document.getElementById('ctxCopy').addEventListener('click',()=>{
   document.getElementById('ctxMenu').classList.remove('show');
 });
 document.getElementById('ctxForward').addEventListener('click',()=>{document.getElementById('ctxMenu').classList.remove('show');});
-document.getElementById('ctxDelete').addEventListener('click',()=>{
-  if(ctxMsg){
-    document.querySelector(`[data-id="${ctxMsg.id}"]`)?.remove();
-    ctxMsg=null;
-  }
+document.getElementById('ctxEdit').addEventListener('click',async()=>{
+  if(!ctxMsg||!currentConv)return;
   document.getElementById('ctxMenu').classList.remove('show');
+  const nextText=prompt('Изменить текст сообщения',ctxMsg.text||'');
+  if(nextText===null)return;
+  try{
+    const r=await fetch(`${API}/chats/${currentConv.id}/messages/${ctxMsg.id}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({content:nextText})
+    });
+    if(!r.ok)throw 0;
+    await loadMessages(currentConv.id);
+  }catch{
+    alert('Не удалось изменить сообщение.');
+  }
+});
+document.getElementById('ctxEditAttachment').addEventListener('click',()=>{
+  if(!ctxMsg||!currentConv)return;
+  document.getElementById('ctxMenu').classList.remove('show');
+  const input=document.getElementById('editAttachInput');
+  input.value='';
+  input.click();
+});
+document.getElementById('ctxRemoveAttachment').addEventListener('click',async()=>{
+  if(!ctxMsg||!currentConv)return;
+  document.getElementById('ctxMenu').classList.remove('show');
+  if(!(ctxMsg.text||'').trim()){
+    alert('Нельзя удалить единственное вложение без текста. Удалите сообщение целиком.');
+    return;
+  }
+  try{
+    const r=await fetch(`${API}/chats/${currentConv.id}/messages/${ctxMsg.id}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+      body:JSON.stringify({content:ctxMsg.text||'',remove_attachment:true})
+    });
+    if(!r.ok)throw 0;
+    await loadMessages(currentConv.id);
+  }catch{
+    alert('Не удалось удалить вложение.');
+  }
+});
+document.getElementById('ctxDelete').addEventListener('click',async()=>{
+  if(!ctxMsg||!currentConv)return;
+  document.getElementById('ctxMenu').classList.remove('show');
+  if(!confirm('Удалить сообщение?'))return;
+  try{
+    const r=await fetch(`${API}/chats/${currentConv.id}/messages/${ctxMsg.id}`,{
+      method:'DELETE',
+      headers:{Authorization:'Bearer '+tk()}
+    });
+    if(!r.ok)throw 0;
+    await loadMessages(currentConv.id);
+  }catch{
+    alert('Не удалось удалить сообщение.');
+  }
+});
+document.getElementById('editAttachInput').addEventListener('change',async function(){
+  const file=this.files?.[0];
+  this.value='';
+  if(!file||!ctxMsg||!currentConv)return;
+  if(file.size>MAX_ATTACHMENT_SIZE){
+    alert(`Файл «${file.name}» превышает лимит 50 МБ.`);
+    return;
+  }
+  try{
+    const fd=new FormData();
+    fd.append('attachment',file);
+    fd.append('content',ctxMsg.text||'');
+    const r=await fetch(`${API}/chats/${currentConv.id}/messages/${ctxMsg.id}`,{
+      method:'PUT',
+      headers:{Authorization:'Bearer '+tk()},
+      body:fd
+    });
+    if(!r.ok)throw 0;
+    await loadMessages(currentConv.id);
+  }catch{
+    alert('Не удалось заменить вложение.');
+  }
 });
 document.getElementById('replyClose').addEventListener('click',()=>{
   replyTo=null;document.getElementById('replyBar').classList.remove('show');

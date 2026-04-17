@@ -225,6 +225,7 @@ type Message struct {
 	Content        string    `json:"content"`
 	Read           bool      `json:"read"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 	AttachmentURL  *string   `json:"attachment_url,omitempty"`
 	AttachmentName *string   `json:"attachment_name,omitempty"`
 	AttachmentSize *int64    `json:"attachment_size,omitempty"`
