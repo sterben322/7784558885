@@ -20,10 +20,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 /* ── LOGO / TOPBAR / NAV — identical to other pages ── */
 .logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);transition:box-shadow .2s}
 .logo-cell:hover{box-shadow:var(--shm)}
-.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
-.logo-text{display:flex;flex-direction:column;line-height:1.15}
-.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
-.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+.logo-cell .logo-img{display:block;width:auto;height:auto;max-width:100%;max-height:34px;object-fit:contain;flex-shrink:1}
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
 .search-wrap{flex:1;position:relative;display:flex;align-items:center}
 .search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
@@ -199,7 +196,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 
 @media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
 @media(max-width:1000px){.shell{grid-template-columns:220px 1fr;grid-template-areas:"logo topbar""nav main"}.right{display:none}}
-@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}}
+@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span{display:none}.nav-item{justify-content:center;padding:10px}}
 </style>
 </head>
 <body>
@@ -207,8 +204,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 
 <!-- LOGO -->
 <a class="logo-cell" href="/">
-  <img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" onerror="this.style.display='none'">
-  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+  <img class="logo-img" src="/assets/lastop-mark.svg" alt="Lastop logo">
 </a>
 
 <!-- TOPBAR -->

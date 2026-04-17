@@ -1,0 +1,12 @@
+<svg width="120" height="70" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lastop mark">
+  <g transform="translate(8,6)">
+    <path d="M22 2L3 13v16l9 5 10-5 10 5 9-5V13L22 2Z" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linejoin="round"/>
+    <path d="M22 12L12 18 3 13" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path d="M22 12l10 6 9-5" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path d="M12 25l10 5 10-5" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path d="M52 17l-18 10v16l9 5 10-5 10 5 9-5V27L52 17Z" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linejoin="round"/>
+    <path d="M52 27L42 33 34 28" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path d="M52 27l10 6 9-5" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path d="M42 40l10 5 10-5" stroke="#0E6A31" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
