@@ -1,9 +1,12 @@
 package gin
 
 import (
+	"context"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type H map[string]any
@@ -16,6 +19,18 @@ type Context struct {
 	values  map[string]any
 	aborted bool
 }
+
+func (c *Context) requestContext() context.Context {
+	if c != nil && c.Request != nil {
+		return c.Request.Context()
+	}
+	return context.Background()
+}
+
+func (c *Context) Deadline() (time.Time, bool) { return c.requestContext().Deadline() }
+func (c *Context) Done() <-chan struct{}       { return c.requestContext().Done() }
+func (c *Context) Err() error                  { return c.requestContext().Err() }
+func (c *Context) Value(key any) any           { return c.requestContext().Value(key) }
 
 func (c *Context) JSON(code int, obj any) {
 	if c.Writer == nil {
@@ -36,6 +51,14 @@ func (c *Context) Param(key string) string {
 func (c *Context) Query(key string) string                     { return "" }
 func (c *Context) DefaultQuery(key, def string) string         { return def }
 func (c *Context) GetHeader(key string) string                 { return c.Request.Header.Get(key) }
+func (c *Context) PostForm(key string) string                  { return c.Request.FormValue(key) }
+func (c *Context) FormFile(name string) (*multipart.FileHeader, error) {
+	if c.Request == nil {
+		return nil, http.ErrMissingFile
+	}
+	_, header, err := c.Request.FormFile(name)
+	return header, err
+}
 func (c *Context) Abort()                                      { c.aborted = true }
 func (c *Context) Next()                                       {}
 func (c *Context) File(path string)                            { http.ServeFile(c.Writer, c.Request, path) }
@@ -74,6 +97,9 @@ func (g *RouterGroup) POST(relativePath string, handlers ...HandlerFunc) {
 func (g *RouterGroup) PUT(relativePath string, handlers ...HandlerFunc) {
 	g.addRoute(http.MethodPut, relativePath, handlers...)
 }
+func (g *RouterGroup) HEAD(relativePath string, handlers ...HandlerFunc) {
+	g.addRoute(http.MethodHead, relativePath, handlers...)
+}
 func (g *RouterGroup) DELETE(relativePath string, handlers ...HandlerFunc) {
 	g.addRoute(http.MethodDelete, relativePath, handlers...)
 }
@@ -108,6 +134,7 @@ func (e *Engine) Group(relativePath string, handlers ...HandlerFunc) *RouterGrou
 func (e *Engine) GET(relativePath string, handlers ...HandlerFunc)    { e.RouterGroup.GET(relativePath, handlers...) }
 func (e *Engine) POST(relativePath string, handlers ...HandlerFunc)   { e.RouterGroup.POST(relativePath, handlers...) }
 func (e *Engine) PUT(relativePath string, handlers ...HandlerFunc)    { e.RouterGroup.PUT(relativePath, handlers...) }
+func (e *Engine) HEAD(relativePath string, handlers ...HandlerFunc)   { e.RouterGroup.HEAD(relativePath, handlers...) }
 func (e *Engine) DELETE(relativePath string, handlers ...HandlerFunc) { e.RouterGroup.DELETE(relativePath, handlers...) }
 func (e *Engine) Static(relativePath, root string) {}
 func (e *Engine) NoRoute(handlers ...HandlerFunc)  { e.noRouteFunc = handlers }

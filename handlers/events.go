@@ -29,7 +29,7 @@ import (
 
 // ─── helpers ───────────────────────────────────────────────────────
 
-func currentUserID(r *http.Request) string {
+func currentUserIDFromRequest(r *http.Request) string {
 	if v := r.Context().Value("userID"); v != nil {
 		return fmt.Sprintf("%v", v)
 	}
@@ -133,7 +133,7 @@ LEFT JOIN users u ON u.id = e.organizer_id
 
 func EventsList(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 
 	q := r.URL.Query()
 	dateStr := q.Get("date")     // конкретная дата
@@ -278,7 +278,7 @@ func EventsStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 func EventsMy(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 
 	sqlQuery := eventsBaseQuery + `
     JOIN event_registrations er ON er.event_id = e.id AND er.user_id = $1
@@ -311,7 +311,7 @@ func EventsMy(w http.ResponseWriter, r *http.Request) {
 
 func EventGet(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 	id := pathID(r)
 	if id == "" {
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "missing id"})
@@ -347,7 +347,7 @@ func EventGet(w http.ResponseWriter, r *http.Request) {
 
 func EventCreate(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 
 	var req models.CreateEventRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -422,7 +422,7 @@ func EventCreate(w http.ResponseWriter, r *http.Request) {
 
 func EventRegister(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 	id := pathID(r)
 	if id == "" {
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "missing id"})
@@ -466,7 +466,7 @@ func EventRegister(w http.ResponseWriter, r *http.Request) {
 
 func EventUnregister(w http.ResponseWriter, r *http.Request) {
 	db := database.DB
-	userID := currentUserID(r)
+	userID := currentUserIDFromRequest(r)
 	id := pathID(r)
 	if id == "" {
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "missing id"})
