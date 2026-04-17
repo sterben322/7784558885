@@ -1,0 +1,17 @@
+.git
+.gitignore
+README.md
+INTEGRATION.md
+AUDIT.md
+main_events_routes.md
+
+docker-compose.yml
+
+# Local-only stubs are not used in production image
+stubs/
+
+# Local/dev artifacts
+.env
+.env.*
+*.log
+tmp/
