@@ -693,17 +693,45 @@ async function submitCreate(){
   const name=document.getElementById('ci-name')?.value.trim();
   const desc=document.getElementById('ci-desc')?.value.trim();
   if(!name)return;
+  if(name.length<2){
+    alert('Название должно содержать минимум 2 символа.');
+    return;
+  }
   closeModal();
   if(state.view==='sections'){
-    try{await fetch(API+'/forum/sections',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({name,description:desc})});}catch{}
-    loadSections();
+    try{
+      const r=await fetch(API+'/forum/sections',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({name,description:desc})});
+      if(!r.ok){
+        const data=await r.json().catch(()=>({}));
+        throw new Error(data.error||'Не удалось создать раздел.');
+      }
+      loadSections();
+    }catch(e){
+      alert(e.message||'Не удалось создать раздел.');
+    }
   } else if(state.view==='topics'){
     const tags=document.getElementById('ci-tags')?.value.split(',').map(t=>t.trim()).filter(Boolean);
-    try{await fetch(API+'/forum/sections/'+state.sectionId+'/topics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc,tags})});}catch{}
-    loadTopics(state.sectionId);
+    try{
+      const r=await fetch(API+'/forum/sections/'+state.sectionId+'/topics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc,tags})});
+      if(!r.ok){
+        const data=await r.json().catch(()=>({}));
+        throw new Error(data.error||'Не удалось создать тему.');
+      }
+      loadTopics(state.sectionId);
+    }catch(e){
+      alert(e.message||'Не удалось создать тему.');
+    }
   } else if(state.view==='discussions'){
-    try{await fetch(API+'/forum/topics/'+state.topicId+'/discussions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc})});}catch{}
-    loadDiscussions(state.topicId);
+    try{
+      const r=await fetch(API+'/forum/topics/'+state.topicId+'/discussions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({title:name,text:desc})});
+      if(!r.ok){
+        const data=await r.json().catch(()=>({}));
+        throw new Error(data.error||'Не удалось создать обсуждение.');
+      }
+      loadDiscussions(state.topicId);
+    }catch(e){
+      alert(e.message||'Не удалось создать обсуждение.');
+    }
   }
 }
 document.getElementById('createModal').addEventListener('click',e=>{if(e.target===document.getElementById('createModal'))closeModal();});
