@@ -307,9 +307,12 @@ func GetConversationMessages(c *gin.Context) {
 
 	rows, err := database.DB.Query(`
 		SELECT m.id, m.chat_id, m.content, m.sender_id, u.full_name, m.read, m.created_at, m.updated_at,
-			m.attachment_url, m.attachment_name, m.attachment_size, m.attachment_type, m.image_url
+			m.attachment_url, m.attachment_name, m.attachment_size, m.attachment_type, m.image_url,
+			m.reply_to_id, rm.sender_id, COALESCE(ru.full_name, ''), COALESCE(NULLIF(rm.content, ''), rm.attachment_name, 'Вложение')
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
+		LEFT JOIN messages rm ON rm.id = m.reply_to_id
+		LEFT JOIN users ru ON ru.id = rm.sender_id
 		WHERE m.chat_id = $1
 		ORDER BY m.created_at ASC
 	`, conversationID)
@@ -322,6 +325,10 @@ func GetConversationMessages(c *gin.Context) {
 	messages := make([]models.Message, 0)
 	for rows.Next() {
 		var msg models.Message
+		var replyToID sql.NullString
+		var replySenderID sql.NullString
+		var replySenderName sql.NullString
+		var replyText sql.NullString
 		if err := rows.Scan(
 			&msg.ID,
 			&msg.ChatID,
@@ -336,9 +343,30 @@ func GetConversationMessages(c *gin.Context) {
 			&msg.AttachmentSize,
 			&msg.AttachmentType,
 			&msg.ImageURL,
+			&replyToID,
+			&replySenderID,
+			&replySenderName,
+			&replyText,
 		); err != nil {
 			jsonError(c, http.StatusInternalServerError, "Failed to parse messages")
 			return
+		}
+		if replyToID.Valid {
+			replyID, parseErr := uuid.Parse(replyToID.String)
+			if parseErr == nil {
+				msg.ReplyToID = &replyID
+			}
+		}
+		if msg.ReplyToID != nil && replySenderID.Valid {
+			replySenderUUID, parseErr := uuid.Parse(replySenderID.String)
+			if parseErr == nil {
+				msg.ReplyTo = &models.MessageReplyPreview{
+					ID:         *msg.ReplyToID,
+					SenderID:   replySenderUUID,
+					SenderName: replySenderName.String,
+					Text:       replyText.String,
+				}
+			}
 		}
 		messages = append(messages, msg)
 	}
@@ -374,6 +402,7 @@ func SendConversationMessage(c *gin.Context) {
 	var attachmentSize *int64
 	var attachmentType *string
 	var imageURL *string
+	var replyToID *uuid.UUID
 	hasMultipart := strings.HasPrefix(strings.ToLower(c.GetHeader("Content-Type")), "multipart/form-data")
 
 	if hasMultipart {
@@ -384,6 +413,15 @@ func SendConversationMessage(c *gin.Context) {
 		content = strings.TrimSpace(c.PostForm("content"))
 		if content == "" {
 			content = strings.TrimSpace(c.PostForm("text"))
+		}
+		replyToRaw := strings.TrimSpace(c.PostForm("reply_to_id"))
+		if replyToRaw != "" {
+			parsedReplyID, parseErr := uuid.Parse(replyToRaw)
+			if parseErr != nil {
+				jsonError(c, http.StatusBadRequest, "Invalid reply_to_id")
+				return
+			}
+			replyToID = &parsedReplyID
 		}
 		fileHeader, err := c.FormFile("attachment")
 		if err != nil && !errors.Is(err, http.ErrMissingFile) {
@@ -411,8 +449,9 @@ func SendConversationMessage(c *gin.Context) {
 		}
 	} else {
 		var req struct {
-			Content string `json:"content"`
-			Text    string `json:"text"`
+			Content   string  `json:"content"`
+			Text      string  `json:"text"`
+			ReplyToID *string `json:"reply_to_id"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			jsonError(c, http.StatusBadRequest, "Content is required")
@@ -422,20 +461,44 @@ func SendConversationMessage(c *gin.Context) {
 		if content == "" {
 			content = strings.TrimSpace(req.Text)
 		}
+		if req.ReplyToID != nil {
+			parsedReplyID, parseErr := uuid.Parse(strings.TrimSpace(*req.ReplyToID))
+			if parseErr != nil {
+				jsonError(c, http.StatusBadRequest, "Invalid reply_to_id")
+				return
+			}
+			replyToID = &parsedReplyID
+		}
 	}
 
 	if content == "" && attachmentURL == nil {
 		jsonError(c, http.StatusBadRequest, "Content or attachment is required")
 		return
 	}
+	if replyToID != nil {
+		var exists bool
+		if err := database.DB.QueryRow(`
+			SELECT EXISTS(
+				SELECT 1 FROM messages
+				WHERE id = $1 AND chat_id = $2
+			)
+		`, *replyToID, conversationID).Scan(&exists); err != nil {
+			jsonError(c, http.StatusInternalServerError, "Failed to validate reply message")
+			return
+		}
+		if !exists {
+			jsonError(c, http.StatusBadRequest, "Reply message not found")
+			return
+		}
+	}
 
 	messageID := uuid.New()
 	if _, err := database.DB.Exec(`
 		INSERT INTO messages (
-			id, chat_id, sender_id, content, attachment_url, attachment_name, attachment_size, attachment_type, image_url
+			id, chat_id, sender_id, content, attachment_url, attachment_name, attachment_size, attachment_type, image_url, reply_to_id
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, messageID, conversationID, senderID, content, attachmentURL, attachmentName, attachmentSize, attachmentType, imageURL); err != nil {
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	`, messageID, conversationID, senderID, content, attachmentURL, attachmentName, attachmentSize, attachmentType, imageURL, replyToID); err != nil {
 		jsonError(c, http.StatusInternalServerError, "Failed to send message")
 		return
 	}
@@ -451,6 +514,7 @@ func SendConversationMessage(c *gin.Context) {
 		"attachment_size": attachmentSize,
 		"attachment_type": attachmentType,
 		"image_url":       imageURL,
+		"reply_to_id":     replyToID,
 	})
 }
 

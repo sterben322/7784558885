@@ -95,6 +95,8 @@ ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_name TEXT;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_size BIGINT;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS attachment_type TEXT;
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS reply_to_id UUID REFERENCES messages(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_messages_reply_to_id ON messages(reply_to_id);
 
 CREATE TABLE IF NOT EXISTS companies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
