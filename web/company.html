@@ -22,10 +22,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 /* ═══ LOGO ═══ */
 .logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .2s}
 .logo-cell:hover{box-shadow:var(--shm)}
-.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
-.logo-text{display:flex;flex-direction:column;line-height:1.15}
-.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
-.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+.logo-cell .logo-img{display:block;width:auto;height:auto;max-width:100%;max-height:34px;object-fit:contain;flex-shrink:1}
 
 /* ═══ TOPBAR ═══ */
 .topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
@@ -185,7 +182,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 @media(max-width:980px){
   .shell{grid-template-columns:48px 1fr;grid-template-areas:"logo topbar""nav main"}
   .right{display:none}
-  .nav-item span,.logo-text{display:none}
+  .nav-item span{display:none}
   .nav-item{justify-content:center;padding:10px}
 }
 @media(max-width:800px){
@@ -203,7 +200,7 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <div class="shell">
 
 <!-- LOGO -->
-<div class="logo-cell" aria-hidden="true"></div>
+<a class="logo-cell" href="/"><img class="logo-img" src="/assets/lastop-mark.svg" alt="Lastop logo"></a>
 
 <!-- TOPBAR -->
 <header class="topbar">
