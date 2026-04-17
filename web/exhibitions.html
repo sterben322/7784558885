@@ -1,31 +1,1232 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LASTOP | Выставки</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="/assets/styles.css" rel="stylesheet">
-    <script src="/assets/theme.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASTOP GROUP — Выставки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1E8A4C;--gm:#22A05A;--gl:#E8F5EE;--gp:#F0FAF4;--gmt:#5A8A6A;--gb:#C0DECA;
+  --w:#FFF;--bg:#F2F5F3;--t:#1A2A22;--tm:#3A5245;--bdr:#DDE8E2;
+  --red:#E04040;--r:8px;--rm:12px;--rl:18px;--rxl:24px;
+  --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
+}
+html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+.shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
+
+/* ── LOGO ── */
+.logo-cell{grid-area:logo;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;padding:0 14px;gap:10px;text-decoration:none;box-shadow:var(--sh);transition:box-shadow .2s;overflow:hidden}
+.logo-cell:hover{box-shadow:var(--shm)}
+.logo-cell img{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text .lt1{font-size:13px;font-weight:800;color:var(--g);letter-spacing:.04em}
+.logo-text .lt2{font-size:9px;font-weight:600;color:var(--gmt);letter-spacing:.12em;text-transform:uppercase}
+
+/* ── TOPBAR ── */
+.topbar{grid-area:topbar;background:var(--w);border-radius:var(--rl);border:1px solid var(--bdr);display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:var(--sh)}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:11px;color:var(--gmt);pointer-events:none;width:15px;height:15px}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:var(--gp);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gm)}
+.search-wrap input::placeholder{color:var(--gmt)}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;color:var(--g);transition:background .15s,border-color .15s;flex-shrink:0}
+.icon-btn:hover{background:var(--gl);border-color:var(--gb)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:99px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--w)}
+.br{background:var(--red)}.bgg{background:var(--g)}
+
+/* ── NAV ── */
+.nav{grid-area:nav;background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:var(--sh);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav::-webkit-scrollbar{display:none}
+.nav-div{height:1px;background:var(--bdr);margin:6px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;text-decoration:none;color:var(--tm);font-size:13px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.nav-item:hover{background:var(--gp);color:var(--g)}
+.nav-item.active{background:var(--g);color:#fff;font-weight:600}
+.nav-item.active svg *{stroke:#fff}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── MAIN ── */
+.main{grid-area:main;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.right{grid-area:right;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.right::-webkit-scrollbar{display:none}
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:14px;box-shadow:var(--sh)}
+.block-title{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.block-title a{font-size:10px;color:var(--g);text-decoration:none;font-weight:700;letter-spacing:.04em;text-transform:none}
+.block-title a:hover{text-decoration:underline}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);display:flex;align-items:center;gap:8px;padding:10px 14px;flex-shrink:0;box-shadow:var(--sh);flex-wrap:wrap}
+.section-toggle{display:flex;background:var(--gp);border-radius:var(--rm);padding:3px;gap:2px;border:1px solid var(--bdr)}
+.st{padding:6px 14px;border-radius:var(--r);font-size:13px;font-weight:600;color:var(--gmt);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.st .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px rgba(224,64,64,.22);display:inline-block}
+.st .st-cnt{background:var(--gl);color:var(--g);font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;min-width:18px;text-align:center}
+.st.active{background:var(--w);color:var(--g);box-shadow:0 1px 6px rgba(30,138,76,.10)}
+.st.active .st-cnt{background:var(--g);color:#fff}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ftab{padding:5px 12px;border-radius:var(--rm);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;color:var(--tm);font-family:inherit;transition:all .15s}
+.ftab:hover{background:var(--gp);color:var(--g);border-color:var(--gb)}
+.ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.btn-create{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--rm);background:var(--g);border:none;cursor:pointer;color:#fff;font-family:inherit;font-size:12px;font-weight:600;transition:background .15s;white-space:nowrap;flex-shrink:0;margin-left:auto}
+.btn-create:hover{background:var(--gm)}
+.btn-create svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+
+/* ── FEED ── */
+.feed{overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
+.feed::-webkit-scrollbar{width:4px}
+.feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── EXHIBITION CARD ── */
+.ex-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;display:grid;grid-template-columns:210px 1fr;cursor:pointer;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both}
+.ex-card:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+
+.ex-cover{position:relative;min-height:180px;background:linear-gradient(135deg,#8FB5A0 0%,#1E8A4C 100%);display:flex;align-items:flex-end;padding:12px;overflow:hidden}
+.ex-cover.grad-blue{background:linear-gradient(135deg,#85B7EB 0%,#0C447C 100%)}
+.ex-cover.grad-amber{background:linear-gradient(135deg,#FAC775 0%,#854F0B 100%)}
+.ex-cover.grad-purple{background:linear-gradient(135deg,#AFA9EC 0%,#3C3489 100%)}
+.ex-cover.grad-gray{background:linear-gradient(135deg,#B4B2A9 0%,#444441 100%)}
+.ex-cover.grad-coral{background:linear-gradient(135deg,#F5C4B3 0%,#712B13 100%)}
+.ex-cover-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.ex-cover-ovr{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%)}
+.ex-cover-date{position:relative;z-index:2;background:rgba(255,255,255,.95);color:var(--t);border-radius:10px;padding:6px 11px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.ex-cover-date svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--g)}
+.live-dot-big{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(224,64,64,.25);animation:pulse-live 1.6s ease-in-out infinite}
+@keyframes pulse-live{0%,100%{box-shadow:0 0 0 4px rgba(224,64,64,.25)}50%{box-shadow:0 0 0 6px rgba(224,64,64,.12)}}
+.ex-cover-badge{position:absolute;top:10px;right:10px;z-index:2;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.bdg-live{background:var(--red);color:#fff;border:1.5px solid #fff}
+.bdg-live .live-dot-small{width:6px;height:6px;border-radius:50%;background:#fff}
+.bdg-soon{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+.bdg-past{background:#F1EFE8;color:#5F5E5A;border:1px solid #D3D1C7}
+
+.ex-body{padding:14px 16px;min-width:0;display:flex;flex-direction:column}
+.ex-theme{font-size:10px;font-weight:700;color:var(--g);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.ex-title{font-size:15px;font-weight:800;color:var(--t);line-height:1.3;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex-org{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gmt);margin-bottom:9px}
+.ex-org-av{width:18px;height:18px;border-radius:5px;color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+
+.ex-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.pill svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pill-dates{background:#E6F1FB;color:#185FA5}
+.pill-format{background:var(--gp);color:#27500A;border:1px solid var(--gb)}
+.pill-fee{background:#FAEEDA;color:#633806}
+.pill-free{background:var(--gl);color:var(--g)}
+.pill-parts{background:#F0E6FB;color:#5E2C8C}
+
+.ex-desc{font-size:12px;color:var(--tm);line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.tag{padding:3px 10px;border-radius:99px;background:var(--gp);color:var(--tm);font-size:10px;font-weight:600;border:1px solid var(--bdr)}
+
+.ex-foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.ex-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gmt)}
+.ex-stat svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ex-foot-btns{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+.btn-visit{padding:6px 14px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);color:var(--g);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-visit:hover{background:var(--gb)}
+.btn-visit.registered{background:var(--g);color:#fff;border-color:var(--g)}
+.btn-part{padding:6px 14px;border-radius:var(--rm);background:var(--g);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-part:hover{background:var(--gm)}
+.btn-part.registered{background:var(--gl);color:var(--g);border:1px solid var(--gb)}
+
+/* ── RIGHT SIDEBAR ── */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.stat-row:last-child{border-bottom:none;padding-bottom:0}
+.stat-lbl{font-size:12px;color:var(--gmt);display:flex;align-items:center;gap:6px}
+.stat-val{font-size:13px;font-weight:700;color:var(--t)}
+.stat-val.live{color:var(--red);display:flex;align-items:center;gap:5px}
+
+.date-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);align-items:flex-start;cursor:pointer;border-radius:var(--r)}
+.date-item:last-child{border-bottom:none;padding-bottom:0}
+.date-item:hover{background:var(--gp)}
+.date-chip{width:42px;flex-shrink:0;background:var(--gp);border:1px solid var(--bdr);border-radius:var(--r);padding:4px 0;text-align:center}
+.date-chip.live-chip{background:#FDECEC;border-color:#F7C1C1}
+.date-chip.live-chip .date-day,.date-chip.live-chip .date-mon{color:#A32D2D}
+.date-day{font-size:16px;font-weight:800;color:var(--t);line-height:1}
+.date-mon{font-size:9px;font-weight:700;color:var(--gmt);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.date-info{flex:1;min-width:0}
+.date-ttl{font-size:12px;font-weight:600;color:var(--t);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.date-sub{font-size:10px;color:var(--gmt);margin-top:2px;display:flex;align-items:center;gap:4px}
+.date-sub .live-dot-tiny{width:6px;height:6px;border-radius:50%;background:var(--red)}
+
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.cat-item:hover{background:var(--gp)}
+.cat-name{font-size:12px;color:var(--t);font-weight:500}
+.cat-cnt{font-size:11px;color:var(--gmt)}
+
+.my-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s}
+.my-item:hover{background:var(--gp)}
+.my-logo{width:28px;height:28px;border-radius:var(--r);font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.my-name{font-size:12px;font-weight:600;color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.my-sub{font-size:10px;color:var(--gmt);margin-top:1px}
+.my-dot{width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.my-dot.dot-live{background:var(--red);box-shadow:0 0 0 3px rgba(224,64,64,.20)}
+.my-dot.dot-soon{background:#FAC775}
+.my-dot.dot-done{background:#D3D1C7}
+.empty-block{text-align:center;padding:16px 8px;color:var(--gmt)}
+.empty-block svg{width:28px;height:28px;fill:none;stroke:var(--gb);stroke-width:1.4;stroke-linecap:round;margin-bottom:8px}
+.empty-block p{font-size:12px;line-height:1.5}
+.btn-empty{width:100%;padding:7px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);color:var(--g);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:10px}
+.btn-empty:hover{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* ── AD ── */
+.ad-block{background:#F8F5FF;border:1px solid #DDD0F0;border-radius:var(--rxl);padding:14px;position:relative;overflow:hidden}
+.ad-label{position:absolute;top:10px;left:10px;background:#EAE0FA;color:#8060C0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:6px}
+.ad-content{margin-top:20px;text-align:center}
+.ad-title{font-size:13px;font-weight:700;color:#5040A0}
+.ad-sub{font-size:11px;color:#7060B0;margin-top:3px}
+.ad-btn{display:block;margin:10px auto 0;padding:7px 20px;border-radius:var(--rm);background:#7060B0;color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ad-btn:hover{opacity:.88}
+
+/* ── SKELETON ── */
+.skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);overflow:hidden;display:grid;grid-template-columns:210px 1fr}
+.sl{background:var(--bg);border-radius:var(--r);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,18,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:var(--rxl);border:1px solid var(--bdr);box-shadow:0 24px 60px rgba(30,138,76,.15);padding:24px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;position:sticky;top:-24px;background:var(--w);padding-top:0;z-index:1}
+.modal-head h3{font-size:16px;font-weight:800;color:var(--t)}
+.modal-x{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);transition:background .15s;flex-shrink:0}
+.modal-x:hover{background:var(--gl);color:var(--g)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.form-row{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px}
+.form-input{width:100%;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color .2s;background:var(--gp)}
+.form-input:focus{border-color:var(--gm)}
+.form-input::placeholder{color:var(--gmt)}
+textarea.form-input{resize:none;height:90px;line-height:1.55}
+select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-section{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;padding:8px 0 4px;border-top:1px solid var(--bdr);margin-bottom:8px;margin-top:4px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--bdr)}
+.btn-sec{padding:8px 18px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s}
+.btn-sec:hover{background:var(--gp)}
+.btn-pri{padding:8px 22px;border-radius:var(--rm);border:none;background:var(--g);font-family:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.btn-pri:hover{opacity:.88}
+.btn-pri:disabled{background:var(--gb);cursor:not-allowed}
+
+/* cover upload */
+.cover-upload{aspect-ratio:16/7;border-radius:var(--rm);border:1.5px dashed var(--bdr);background:var(--gp);display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s,background .15s}
+.cover-upload:hover{border-color:var(--g);background:var(--gl)}
+.cover-upload img{width:100%;height:100%;object-fit:cover;display:block}
+.cover-upload .hint{color:var(--gmt);font-size:12px;text-align:center;padding:10px}
+.cover-upload .hint svg{width:24px;height:24px;display:block;margin:0 auto 6px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
+.cover-upload .rm{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;border:none;cursor:pointer;z-index:2}
+.cover-upload .rm svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5}
+
+/* program days (modal) */
+.prog-day-row{display:grid;grid-template-columns:110px 1fr 34px;gap:8px;margin-bottom:8px;align-items:flex-start}
+.prog-day-row input[type="date"]{padding:8px 10px;font-size:12px}
+.rm-btn{width:34px;height:34px;border-radius:var(--rm);border:1.5px solid var(--bdr);background:var(--w);color:var(--gmt);cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .15s}
+.rm-btn:hover{background:#FDECEC;border-color:#F0A0A0;color:var(--red)}
+.rm-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.btn-add{padding:6px 14px;border-radius:var(--rm);border:1.5px dashed var(--gb);background:var(--gp);color:var(--g);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-add:hover{background:var(--gl);border-color:var(--g);border-style:solid}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{position:fixed;top:0;right:-540px;width:540px;max-width:92vw;height:100vh;background:var(--w);border-left:1px solid var(--bdr);box-shadow:-4px 0 30px rgba(30,138,76,.08);z-index:150;transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
+.detail-panel.open{right:0}
+.detail-panel::-webkit-scrollbar{width:4px}
+.detail-panel::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
+.dp-close{position:sticky;top:0;background:var(--w);padding:12px 16px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;z-index:1}
+.dp-close-btn{width:30px;height:30px;border-radius:var(--r);background:var(--gp);border:none;cursor:pointer;display:grid;place-items:center;color:var(--gmt);flex-shrink:0}
+.dp-close-btn:hover{background:var(--gl);color:var(--g)}
+.dp-close-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.dp-close span{font-size:13px;font-weight:700;color:var(--t)}
+.dp-body{padding:0 0 16px;flex:1}
+
+.dp-hero{position:relative;aspect-ratio:16/7;background:linear-gradient(135deg,#8FB5A0 0%,#1E8A4C 100%);overflow:hidden}
+.dp-hero-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.dp-hero-ovr{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.65) 100%)}
+.dp-hero-content{position:absolute;left:16px;right:16px;bottom:14px;color:#fff;z-index:2}
+.dp-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:8px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35)}
+.dp-hero-badge.live{background:var(--red);border-color:#fff}
+.dp-hero-title{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
+.dp-hero-theme{font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+
+.dp-sect{padding:16px}
+.dp-section{font-size:11px;font-weight:700;color:var(--gmt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--bdr)}
+.dp-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.dp-org{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t);font-weight:600}
+.dp-org-av{width:36px;height:36px;border-radius:var(--rm);color:#fff;font-size:14px;font-weight:800;display:grid;place-items:center;flex-shrink:0}
+.dp-org-sub{font-size:11px;color:var(--gmt);font-weight:500;margin-top:2px}
+.dp-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.dp-text{font-size:13px;color:var(--tm);line-height:1.65;margin-bottom:14px;white-space:pre-wrap}
+.dp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+
+.dp-program{margin-bottom:14px}
+.dp-prog-day{border:1px solid var(--bdr);border-radius:var(--rm);margin-bottom:8px;overflow:hidden}
+.dp-prog-day-head{background:var(--gp);padding:8px 12px;font-size:12px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)}
+.dp-prog-day-chip{background:var(--g);color:#fff;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.dp-prog-items{padding:4px 0}
+.dp-prog-item{padding:8px 12px;font-size:12px;color:var(--tm);display:grid;grid-template-columns:70px 1fr;gap:8px;border-bottom:1px dashed var(--bdr)}
+.dp-prog-item:last-child{border-bottom:none}
+.dp-prog-time{color:var(--g);font-weight:700}
+.dp-prog-ttl{color:var(--t);font-weight:600;line-height:1.4}
+
+.dp-exp-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.dp-exp-item{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--bdr);border-radius:var(--rm);text-decoration:none;color:var(--t);transition:all .15s;background:var(--w)}
+.dp-exp-item:hover{border-color:var(--gb);background:var(--gp)}
+.dp-exp-logo{width:28px;height:28px;border-radius:var(--r);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.dp-exp-name{font-size:12px;font-weight:600;color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp-exp-sub{font-size:10px;color:var(--gmt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.dp-actions{display:flex;gap:8px;padding:14px 16px;border-top:1px solid var(--bdr);position:sticky;bottom:0;background:var(--w)}
+.dp-btn-pri{flex:1;padding:10px;border-radius:var(--rm);background:var(--g);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.dp-btn-pri:hover{background:var(--gm)}
+.dp-btn-pri.registered{background:var(--gl);color:var(--g);border:1px solid var(--gb)}
+.dp-btn-sec{flex:1;padding:10px;border-radius:var(--rm);background:var(--gl);border:1px solid var(--gb);color:var(--g);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.dp-btn-sec:hover{background:var(--gb)}
+.dp-btn-sec.registered{background:var(--g);color:#fff;border-color:var(--g)}
+.panel-overlay{position:fixed;inset:0;z-index:140;background:rgba(15,25,18,.25);display:none}
+.panel-overlay.show{display:block}
+
+@media(max-width:1200px){.shell{grid-template-columns:220px 1fr 240px}}
+@media(max-width:1000px){.shell{grid-template-columns:220px 1fr;grid-template-areas:"logo topbar""nav main"}.right{display:none}}
+@media(max-width:820px){.ex-card,.skeleton{grid-template-columns:1fr}.ex-cover{min-height:140px}}
+@media(max-width:740px){.shell{grid-template-columns:48px 1fr}.nav-item span,.logo-text{display:none}.nav-item{justify-content:center;padding:10px}.filter-tabs{display:none}.detail-panel{width:100%}}
+</style>
 </head>
-<body class="bg-white text-[#273244]">
-<div class="mx-auto min-h-screen max-w-5xl px-4 py-10">
-    <div class="rounded-3xl border border-[#e7ecef] bg-white p-8 shadow-[0_18px_60px_rgba(162,175,186,0.12)]">
-        <h1 class="text-3xl font-semibold">Выставки</h1>
-        <p class="mt-2 text-[#6b7785]">Раздел готов к публикации: сетка мероприятий, фильтры и CTA.</p>
-        <div class="mt-6 grid gap-4 md:grid-cols-3" id="expoList"></div>
-        <div class="mt-8"><a href="/" class="rounded-xl bg-[#4c8d78] px-5 py-3 font-medium text-white">Вернуться на главную</a></div>
+<body>
+<div class="shell">
+
+<!-- LOGO -->
+<a class="logo-cell" href="/">
+  <img src="/assets/lastop-group-logo.svg" alt="LASTOP GROUP" onerror="this.style.display='none'">
+  <div class="logo-text"><span class="lt1">LASTOP</span><span class="lt2">GROUP</span></div>
+</a>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Поиск выставок…" autocomplete="off">
+  </div>
+  <button class="icon-btn" title="Уведомления">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="badge br" id="bellCount">3</span>
+  </button>
+  <button class="icon-btn" title="Сообщения" onclick="location.href='/chat.html'">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    <span class="badge bgg" id="chatCount">7</span>
+  </button>
+  <button class="icon-btn" title="Настройки" onclick="location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
+
+<!-- NAV: все иконки строго по референсу jobs_1.html + новый пункт «Выставки» (storefront) -->
+<nav class="nav">
+  <a class="nav-item" href="/"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Главная</span></a>
+  <a class="nav-item" href="/dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Новости</span></a>
+  <a class="nav-item" href="/forum.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Форум</span></a>
+  <a class="nav-item" href="/companies.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Компании</span></a>
+  <a class="nav-item" href="/communities.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Сообщества</span></a>
+  <a class="nav-item" href="/projects.html"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Проекты</span></a>
+  <a class="nav-item active" href="/exhibitions.html"><svg viewBox="0 0 24 24"><path d="M3 9l1-4h16l1 4"/><path d="M3 9h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M8 13h8"/><path d="M8 17h5"/></svg><span>Выставки</span></a>
+  <a class="nav-item" href="/events.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Мероприятия</span></a>
+  <a class="nav-item" href="/jobs.html"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg><span>Резюме</span></a>
+  <div class="nav-div"></div>
+  <a class="nav-item" href="/chat.html"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg><span>Чат</span></a>
+  <a class="nav-item" href="/profile.html"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="section-toggle">
+      <button class="st" id="btnLive" onclick="setMode('live')">
+        <span class="live-dot"></span>
+        Идут
+        <span class="st-cnt" id="cntLive">0</span>
+      </button>
+      <button class="st active" id="btnSoon" onclick="setMode('soon')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Предстоящие
+        <span class="st-cnt" id="cntSoon">0</span>
+      </button>
+      <button class="st" id="btnPast" onclick="setMode('past')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+        Прошедшие
+        <span class="st-cnt" id="cntPast">0</span>
+      </button>
     </div>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="ftab active" data-industry="">Все отрасли</button>
+      <button class="ftab" data-industry="Логистика и транспорт">Логистика</button>
+      <button class="ftab" data-industry="ВЭД и таможня">ВЭД</button>
+      <button class="ftab" data-industry="IT в логистике">IT</button>
+      <button class="ftab" data-industry="Агропром">Агро</button>
+      <button class="ftab" data-industry="Производство">Производство</button>
+    </div>
+    <button class="btn-create" id="btnCreate" onclick="openCreateModal()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Провести выставку</span>
+    </button>
+  </div>
+
+  <!-- FEED -->
+  <div class="feed" id="feed"></div>
 </div>
+
+<!-- RIGHT -->
+<aside class="right" id="rightSidebar">
+  <div class="card" id="statsCard">
+    <div class="block-title">Статистика</div>
+    <div id="statsList"></div>
+  </div>
+  <div class="card" id="upcomingCard">
+    <div class="block-title"><span>Ближайшие</span><a href="#" onclick="setMode('soon');return false;">календарь →</a></div>
+    <div id="upcomingList"></div>
+  </div>
+  <div class="card">
+    <div class="block-title">Отрасли</div>
+    <div id="catList"></div>
+  </div>
+  <div class="card" id="myItemsCard">
+    <div class="block-title">Мои выставки</div>
+    <div id="myItemsList"></div>
+  </div>
+  <div class="ad-block">
+    <div class="ad-label">реклама</div>
+    <div class="ad-content">
+      <div class="ad-title">LogTech Summit 2026</div>
+      <div class="ad-sub">партнёрская выставка · июнь</div>
+      <button class="ad-btn">Узнать подробнее</button>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-close">
+    <button class="dp-close-btn" onclick="closeDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span id="dpCloseLabel">Выставка</span>
+  </div>
+  <div class="dp-body" id="dpBody"></div>
+  <div class="dp-actions" id="dpActions"></div>
+</div>
+
+<!-- MODAL: CREATE EXHIBITION -->
+<div class="modal-bg" id="modalExhibition">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Провести онлайн-выставку</h3>
+      <button class="modal-x" onclick="closeCreateModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Название выставки *</label>
+      <input class="form-input" id="exTitle" placeholder="LogisticsPro Moscow 2026…" maxlength="150">
+    </div>
+
+    <div class="form-grid2">
+      <div class="form-row">
+        <label class="form-label">Отрасль</label>
+        <select class="form-input" id="exIndustry">
+          <option value="">Выбрать…</option>
+          <option>Логистика и транспорт</option>
+          <option>ВЭД и таможня</option>
+          <option>IT в логистике</option>
+          <option>Агропром</option>
+          <option>Производство</option>
+          <option>Складская логистика</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Тема / подтема</label>
+        <input class="form-input" id="exTheme" placeholder="Автоматизация складов">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Обложка выставки</label>
+      <div class="cover-upload" id="coverUpload" onclick="document.getElementById('coverInput').click()">
+        <div class="hint"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Нажмите, чтобы загрузить<br><span style="font-size:10px">PNG/JPG, до 2 МБ</span></div>
+      </div>
+      <input type="file" id="coverInput" accept="image/*" hidden>
+    </div>
+
+    <div class="form-grid2">
+      <div class="form-row">
+        <label class="form-label">Дата начала *</label>
+        <input class="form-input" id="exStart" type="date">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Дата окончания *</label>
+        <input class="form-input" id="exEnd" type="date">
+      </div>
+    </div>
+
+    <div class="form-grid2">
+      <div class="form-row">
+        <label class="form-label">Формат</label>
+        <select class="form-input" id="exFormat">
+          <option value="online">Онлайн</option>
+          <option value="hybrid">Гибрид (онлайн + офлайн)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Стоимость стенда (₽)</label>
+        <input class="form-input" id="exFee" type="number" min="0" placeholder="0 — бесплатно">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Краткое описание *</label>
+      <textarea class="form-input" id="exDesc" placeholder="О чём выставка, кому полезна, что ждать на стендах…" style="height:100px"></textarea>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Теги (через запятую)</label>
+      <input class="form-input" id="exTags" placeholder="TMS, таможня, СНГ, ИТ…">
+    </div>
+
+    <div class="form-section">Программа по дням</div>
+    <div id="programList"></div>
+    <button class="btn-add" type="button" onclick="addProgramDay()">+ Добавить день программы</button>
+
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeCreateModal()">Отмена</button>
+      <button class="btn-pri" id="exSubmitBtn" onclick="submitExhibition()">Опубликовать</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const items = ['Иннопром 2026', 'TechnoBuild Expo', 'LogiTrans Forum'];
-const container = document.getElementById('expoList');
-items.forEach((name, idx) => {
-  const card = document.createElement('div');
-  card.className = 'rounded-2xl border border-[#e7ecef] p-4';
-  card.innerHTML = `<div class="text-sm text-[#8a97a4]">${idx + 1} квартал 2026</div><div class="mt-1 font-semibold">${name}</div>`;
-  container.appendChild(card);
+const API='/api', tk=()=>localStorage.getItem('token');
+const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
+const COVER_GRADS=['','grad-blue','grad-amber','grad-purple','grad-gray','grad-coral'];
+const MONTHS=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_FULL=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function avc(s){return COLORS[(s||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
+function grad(s){return COVER_GRADS[(s||'').charCodeAt(0)%COVER_GRADS.length]||''}
+function letter(s){return((s||'?')[0]).toUpperCase();}
+function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
+function fmtMoney(n){if(!n||n===0)return'Бесплатно';if(n>=1000)return Math.round(n/1000)+'к ₽';return n+' ₽';}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
+function fmtDateRange(a,b){
+  const d1=new Date(a),d2=new Date(b);
+  if(isNaN(d1))return'';
+  if(d1.getMonth()===d2.getMonth())return`${d1.getDate()}–${d2.getDate()} ${MONTHS[d1.getMonth()]}`;
+  return`${d1.getDate()} ${MONTHS[d1.getMonth()]} — ${d2.getDate()} ${MONTHS[d2.getMonth()]}`;
+}
+function statusOf(ex){
+  const now=new Date(); const s=new Date(ex.start_date); const e=new Date(ex.end_date||ex.start_date);
+  if(isNaN(s))return'soon';
+  if(now<s) return 'soon';
+  if(now>e) return 'past';
+  return 'live';
+}
+function daysLabel(n){
+  n=Math.abs(n); const v=n%10, h=n%100;
+  if(h>=11&&h<=19)return'дней';
+  if(v===1)return'день';
+  if(v>=2&&v<=4)return'дня';
+  return'дней';
+}
+
+let mode='soon', currentIndustry='', myUserID=0;
+const exhibitionStore=new Map();
+
+/* ── AUTH ── */
+(async()=>{
+  if(!tk()){location.href='/login.html';return;}
+  try{
+    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{user={}}=await r.json();
+    myUserID=user.id||0;
+    localStorage.setItem('user',JSON.stringify(user));
+  }catch{
+    const u=JSON.parse(localStorage.getItem('user')||'{}');
+    myUserID=u.id||0;
+    if(!myUserID){location.href='/login.html';}
+  }
+})();
+
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  const p=new URLSearchParams(location.search);
+  if(['live','soon','past'].includes(p.get('tab'))) mode=p.get('tab');
+  applyMode();
+  loadFeed();
+  loadStats();
+  loadUpcoming();
+  loadMyItems();
+  setupFilters();
+  setupSearch();
+  setupCoverUpload();
 });
+
+/* ── MODE ── */
+function setMode(m){
+  mode=m; applyMode();
+  loadFeed();
+  loadMyItems();
+  history.replaceState(null,'',`/exhibitions.html?tab=${m}`);
+}
+function applyMode(){
+  document.getElementById('btnLive').classList.toggle('active',mode==='live');
+  document.getElementById('btnSoon').classList.toggle('active',mode==='soon');
+  document.getElementById('btnPast').classList.toggle('active',mode==='past');
+  currentIndustry='';
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.industry===''));
+  const titles={live:'идущие',soon:'предстоящие',past:'прошедшие'};
+  document.title=`LASTOP GROUP — Выставки (${titles[mode]})`;
+}
+
+/* ── FILTERS / SEARCH ── */
+function setupFilters(){
+  document.getElementById('filterTabs').addEventListener('click',e=>{
+    const btn=e.target.closest('.ftab'); if(!btn)return;
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentIndustry=btn.dataset.industry;
+    loadFeed();
+  });
+}
+let sT;
+function setupSearch(){
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    clearTimeout(sT);
+    const q=e.target.value.trim();
+    sT=setTimeout(()=>loadFeed(q),350);
+  });
+}
+
+/* ── LOAD FEED ── */
+async function loadFeed(q=''){
+  const feed=document.getElementById('feed');
+  feed.innerHTML=skels(3);
+  let url=`${API}/exhibitions?status=${mode}&limit=30`;
+  if(currentIndustry) url+=`&industry=${encodeURIComponent(currentIndustry)}`;
+  if(q) url+=`&q=${encodeURIComponent(q)}`;
+  let list=[];
+  try{
+    const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    list=Array.isArray(data.exhibitions)?data.exhibitions:[];
+  }catch{}
+  if(!list.length){
+    const all=demoExhibitions();
+    list=all.filter(e=>{
+      const st=statusOf(e);
+      if(mode==='live') return st==='live';
+      if(mode==='soon') return st==='soon';
+      return st==='past';
+    });
+    if(currentIndustry) list=list.filter(e=>e.industry===currentIndustry);
+    if(q){const ql=q.toLowerCase(); list=list.filter(e=>(e.title||'').toLowerCase().includes(ql)||(e.description||'').toLowerCase().includes(ql));}
+  }
+  exhibitionStore.clear();
+  list.forEach(e=>exhibitionStore.set(String(e.id),e));
+  render(list);
+}
+
+function render(list){
+  const feed=document.getElementById('feed');
+  if(!list.length){
+    const emptyMsg={live:'Сейчас нет идущих выставок',soon:'Предстоящие выставки не найдены',past:'Архив пуст'}[mode];
+    feed.innerHTML=`<div style="padding:40px;text-align:center;color:var(--gmt)">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gb)" stroke-width="1.4" stroke-linecap="round" style="margin-bottom:12px"><path d="M3 9l1-4h16l1 4"/><path d="M3 9h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">${emptyMsg}</div>
+      <div style="font-size:12px">Попробуйте изменить фильтры или загляните позже</div>
+    </div>`;
+    return;
+  }
+  feed.innerHTML=list.map((e,i)=>buildCard(e,i)).join('');
+  feed.style.paddingBottom='10px';
+}
+
+/* ── CARD ── */
+function buildCard(e,i){
+  const st=statusOf(e);
+  const orgName=e.organizer_name||'Организатор';
+  const orgColor=avc(orgName);
+  const coverGrad=grad(e.title||'');
+  const delay=(i*0.05).toFixed(2);
+  const eid=String(e.id);
+
+  let badgeHtml='', dateHtml='';
+  if(st==='live'){
+    const daysGone=Math.max(1,Math.ceil((Date.now()-new Date(e.start_date))/86400000));
+    badgeHtml=`<div class="ex-cover-badge bdg-live"><span class="live-dot-small"></span>LIVE</div>`;
+    dateHtml=`<div class="ex-cover-date"><span class="live-dot-big"></span>Идёт ${daysGone}-й день · ${fmtDateRange(e.start_date,e.end_date)}</div>`;
+  } else if(st==='soon'){
+    const d=daysBetween(new Date(),e.start_date);
+    badgeHtml=`<div class="ex-cover-badge bdg-soon">через ${d} ${daysLabel(d)}</div>`;
+    dateHtml=`<div class="ex-cover-date"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${fmtDateRange(e.start_date,e.end_date)}</div>`;
+  } else {
+    badgeHtml=`<div class="ex-cover-badge bdg-past">Прошла</div>`;
+    dateHtml=`<div class="ex-cover-date"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${fmtDateRange(e.start_date,e.end_date)}</div>`;
+  }
+
+  const days=(daysBetween(e.start_date,e.end_date)+1)||1;
+  const fee=(!e.fee||e.fee===0)
+    ? `<div class="pill pill-free"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Бесплатно</div>`
+    : `<div class="pill pill-fee"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>от ${fmtMoney(e.fee)} / стенд</div>`;
+
+  const parts=(e.visitors_registered||e.visitors_count)?`<div class="pill pill-parts"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${num(e.visitors_registered||e.visitors_count)} ${st==='past'?'посетителей':(st==='live'?'посетителей':'записались')}</div>`:'';
+
+  const tags=(e.tags||[]).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  const coverImg=e.cover?`<div class="ex-cover-img" style="background-image:url('${escAttr(e.cover)}')"></div>`:'';
+
+  const isExpo=e.is_exhibitor; const isVis=e.is_registered;
+  const partBtn=st==='past'
+    ? `<button class="btn-part" disabled style="opacity:.5;cursor:default">Завершилась</button>`
+    : `<button class="btn-part ${isExpo?'registered':''}" onclick="event.stopPropagation();regExhibitor('${escAttr(eid)}',this)">${isExpo?'✓ Экспонент':'Участвовать'}</button>`;
+  const visitBtn=st==='past'
+    ? `<button class="btn-visit" onclick="event.stopPropagation();openExDetail('${escAttr(eid)}')">Смотреть архив</button>`
+    : `<button class="btn-visit ${isVis?'registered':''}" onclick="event.stopPropagation();regVisitor('${escAttr(eid)}',this)">${isVis?'✓ Записан':(st==='live'?'Зайти на выставку':'Посетить')}</button>`;
+
+  return`<div class="ex-card" style="animation-delay:${delay}s" onclick="openExDetail('${escAttr(eid)}')">
+    <div class="ex-cover ${coverGrad}">
+      ${coverImg}
+      <div class="ex-cover-ovr"></div>
+      ${badgeHtml}
+      ${dateHtml}
+    </div>
+    <div class="ex-body">
+      ${e.industry?`<div class="ex-theme">${esc(e.industry)}${e.theme?' · '+esc(e.theme):''}</div>`:''}
+      <div class="ex-title">${esc(e.title||'Выставка')}</div>
+      <div class="ex-org">
+        <div class="ex-org-av" style="background:${orgColor}">${letter(orgName)}</div>
+        Организатор: <strong style="color:var(--t);font-weight:600">${esc(orgName)}</strong>${e.exhibitors_count?` · ${num(e.exhibitors_count)} экспонент${e.exhibitors_count===1?'':'ов'}`:''}
+      </div>
+      <div class="ex-meta">
+        <div class="pill pill-dates"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>${days} ${daysLabel(days)} · ${fmtDateRange(e.start_date,e.end_date)}</div>
+        <div class="pill pill-format"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>${e.format==='hybrid'?'Гибрид':'Онлайн'}</div>
+        ${fee}
+        ${parts}
+      </div>
+      ${e.description?`<div class="ex-desc">${esc(e.description)}</div>`:''}
+      ${tags?`<div class="ex-tags">${tags}${(e.tags||[]).length>4?`<span class="tag">+${(e.tags||[]).length-4}</span>`:''}</div>`:''}
+      <div class="ex-foot">
+        <div class="ex-stat"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${num(e.views_count||0)}</div>
+        ${e.exhibitors_count?`<div class="ex-stat"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>${num(e.exhibitors_count)} экспонент.</div>`:''}
+        <div class="ex-foot-btns">
+          ${visitBtn}
+          ${partBtn}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── DETAIL PANEL ── */
+function openExDetail(eid){
+  const e=exhibitionStore.get(String(eid));
+  if(!e)return;
+  const st=statusOf(e);
+  const orgName=e.organizer_name||'Организатор';
+  const orgColor=avc(orgName);
+  const coverGrad=grad(e.title||'');
+  const coverImg=e.cover?`<div class="dp-hero-img" style="background-image:url('${escAttr(e.cover)}')"></div>`:'';
+
+  let heroBadge='';
+  if(st==='live')heroBadge=`<div class="dp-hero-badge live"><span class="live-dot-big" style="width:7px;height:7px;box-shadow:none"></span>LIVE · идёт сейчас</div>`;
+  else if(st==='soon'){const d=daysBetween(new Date(),e.start_date);heroBadge=`<div class="dp-hero-badge">Старт через ${d} ${daysLabel(d)}</div>`;}
+  else heroBadge=`<div class="dp-hero-badge">Архив выставки</div>`;
+
+  document.getElementById('dpCloseLabel').textContent='Выставка';
+  const days=(daysBetween(e.start_date,e.end_date)+1)||1;
+  const tags=(e.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  const program=Array.isArray(e.program)?e.program:[];
+  const exhibitors=Array.isArray(e.exhibitors)?e.exhibitors:[];
+
+  const metaPills=[
+    `<div class="pill pill-dates"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/></svg>${days} ${daysLabel(days)} · ${fmtDateRange(e.start_date,e.end_date)}</div>`,
+    `<div class="pill pill-format"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>${e.format==='hybrid'?'Гибрид':'Онлайн'}</div>`,
+    (!e.fee||e.fee===0)
+      ? `<div class="pill pill-free"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Посещение бесплатно</div>`
+      : `<div class="pill pill-fee"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/></svg>Стенд от ${fmtMoney(e.fee)}</div>`,
+    e.visitors_registered?`<div class="pill pill-parts"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${num(e.visitors_registered)} записались</div>`:''
+  ].filter(Boolean).join('');
+
+  const programHtml=program.length?`
+    <div class="dp-section">Программа</div>
+    <div class="dp-program">
+      ${program.map((d,i)=>`
+        <div class="dp-prog-day">
+          <div class="dp-prog-day-head">
+            <span class="dp-prog-day-chip">День ${i+1}</span>
+            <span>${esc(d.date?fmtSingleDate(d.date):'')}${d.title?' · '+esc(d.title):''}</span>
+          </div>
+          ${(d.items||[]).length?`<div class="dp-prog-items">${(d.items||[]).map(it=>`
+            <div class="dp-prog-item">
+              <div class="dp-prog-time">${esc(it.time||'')}</div>
+              <div class="dp-prog-ttl">${esc(it.title||'')}</div>
+            </div>`).join('')}</div>`:''}
+        </div>
+      `).join('')}
+    </div>`:'';
+
+  const exhibitorsHtml=exhibitors.length?`
+    <div class="dp-section">Экспоненты (${exhibitors.length})</div>
+    <div class="dp-exp-list">
+      ${exhibitors.slice(0,12).map(x=>`
+        <a class="dp-exp-item" href="/company-profile.html?id=${escAttr(x.id||'')}" onclick="event.stopPropagation()">
+          <div class="dp-exp-logo" style="background:${avc(x.name||'')}">${letter(x.name||'?')}</div>
+          <div style="min-width:0">
+            <div class="dp-exp-name">${esc(x.name||'')}</div>
+            ${x.industry?`<div class="dp-exp-sub">${esc(x.industry)}</div>`:''}
+          </div>
+        </a>
+      `).join('')}
+    </div>
+    ${exhibitors.length>12?`<div style="font-size:11px;color:var(--gmt);text-align:center;margin-bottom:14px">и ещё ${exhibitors.length-12}…</div>`:''}
+  `:'';
+
+  document.getElementById('dpBody').innerHTML=`
+    <div class="dp-hero ${coverGrad}">
+      ${coverImg}
+      <div class="dp-hero-ovr"></div>
+      <div class="dp-hero-content">
+        ${heroBadge}
+        <div class="dp-hero-title">${esc(e.title||'Выставка')}</div>
+        ${e.industry?`<div class="dp-hero-theme">${esc(e.industry)}${e.theme?' · '+esc(e.theme):''}</div>`:''}
+      </div>
+    </div>
+    <div class="dp-sect">
+      <div class="dp-head">
+        <div class="dp-org-av" style="background:${orgColor}">${letter(orgName)}</div>
+        <div>
+          <div class="dp-org">${esc(orgName)}</div>
+          <div class="dp-org-sub">Организатор выставки${e.exhibitors_count?' · '+num(e.exhibitors_count)+' экспонент.':''}</div>
+        </div>
+      </div>
+      <div class="dp-pills">${metaPills}</div>
+      ${e.description?`<div class="dp-section">О выставке</div><div class="dp-text">${esc(e.description)}</div>`:''}
+      ${tags?`<div class="dp-section">Теги</div><div class="dp-tags">${tags}</div>`:''}
+      ${programHtml}
+      ${exhibitorsHtml}
+      <div class="dp-section">Статистика</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        <div style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--g)">${num(e.exhibitors_count||0)}</div>
+          <div style="font-size:10px;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Экспоненты</div>
+        </div>
+        <div style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--g)">${num(e.visitors_registered||e.visitors_count||0)}</div>
+          <div style="font-size:10px;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">${st==='past'?'Посетителей':'Записалось'}</div>
+        </div>
+        <div style="background:var(--gp);border-radius:var(--rm);border:1px solid var(--bdr);padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--g)">${num(e.views_count||0)}</div>
+          <div style="font-size:10px;color:var(--gmt);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Просмотров</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const partBtn=st==='past'
+    ? `<button class="dp-btn-pri" disabled style="opacity:.5;cursor:default">Выставка завершилась</button>`
+    : `<button class="dp-btn-pri ${e.is_exhibitor?'registered':''}" onclick="regExhibitorDetail('${escAttr(String(e.id))}',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        ${e.is_exhibitor?'✓ Вы — экспонент':'Участвовать'}
+      </button>`;
+  const visitBtn=st==='past'
+    ? `<button class="dp-btn-sec" onclick="closeDetail()">Закрыть архив</button>`
+    : `<button class="dp-btn-sec ${e.is_registered?'registered':''}" onclick="regVisitorDetail('${escAttr(String(e.id))}',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        ${e.is_registered?'✓ Вы записаны':(st==='live'?'Зайти на выставку':'Посетить')}
+      </button>`;
+
+  document.getElementById('dpActions').innerHTML=`${visitBtn}${partBtn}`;
+  openDetailPanel();
+}
+
+function fmtSingleDate(d){
+  const dt=new Date(d); if(isNaN(dt))return d;
+  return`${dt.getDate()} ${MONTHS_FULL[dt.getMonth()]}`;
+}
+
+function openDetailPanel(){
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('panelOverlay').classList.add('show');
+}
+function closeDetail(){
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('show');
+}
+
+/* ── ACTIONS ── */
+async function regExhibitor(id, btn){
+  if(btn.classList.contains('registered'))return;
+  try{await fetch(`${API}/exhibitions/${id}/participate`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  btn.textContent='✓ Экспонент';
+  btn.classList.add('registered');
+  const it=exhibitionStore.get(String(id)); if(it)it.is_exhibitor=true;
+}
+async function regVisitor(id, btn){
+  if(btn.classList.contains('registered'))return;
+  try{await fetch(`${API}/exhibitions/${id}/attend`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  btn.textContent='✓ Записан';
+  btn.classList.add('registered');
+  const it=exhibitionStore.get(String(id)); if(it)it.is_registered=true;
+}
+async function regExhibitorDetail(id, btn){
+  if(btn.classList.contains('registered'))return;
+  try{await fetch(`${API}/exhibitions/${id}/participate`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Вы — экспонент`;
+  btn.classList.add('registered');
+  const it=exhibitionStore.get(String(id)); if(it)it.is_exhibitor=true;
+}
+async function regVisitorDetail(id, btn){
+  if(btn.classList.contains('registered'))return;
+  try{await fetch(`${API}/exhibitions/${id}/attend`,{method:'POST',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Вы записаны`;
+  btn.classList.add('registered');
+  const it=exhibitionStore.get(String(id)); if(it)it.is_registered=true;
+}
+
+/* ── STATS ── */
+async function loadStats(){
+  try{
+    const r=await fetch(`${API}/exhibitions/stats`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const{stats={}}=await r.json();
+    renderStats(stats);
+    renderCats(stats.industries||[]);
+    document.getElementById('cntLive').textContent=num(stats.live||0);
+    document.getElementById('cntSoon').textContent=num(stats.soon||0);
+    document.getElementById('cntPast').textContent=num(stats.past||0);
+  }catch{
+    const all=demoExhibitions();
+    const live=all.filter(e=>statusOf(e)==='live').length;
+    const soon=all.filter(e=>statusOf(e)==='soon').length;
+    const past=all.filter(e=>statusOf(e)==='past').length;
+    const exponents=all.reduce((a,e)=>a+(statusOf(e)==='live'?(e.exhibitors_count||0):0),0);
+    renderStats({total:live+soon+past,live,soon,past,exhibitors_online:exponents});
+    renderCats([
+      {name:'Логистика и транспорт',count:48},
+      {name:'ВЭД и таможня',count:36},
+      {name:'IT в логистике',count:24},
+      {name:'Агропром',count:29},
+      {name:'Производство',count:22},
+      {name:'Складская логистика',count:14},
+    ]);
+    document.getElementById('cntLive').textContent=num(live);
+    document.getElementById('cntSoon').textContent=num(soon);
+    document.getElementById('cntPast').textContent=num(past);
+  }
+}
+function renderStats(s){
+  document.getElementById('statsList').innerHTML=`
+    <div class="stat-row"><span class="stat-lbl">Всего выставок</span><span class="stat-val">${num(s.total||0)}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Идут сейчас</span><span class="stat-val live"><span class="live-dot-big" style="width:7px;height:7px;box-shadow:none"></span>${num(s.live||0)}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Предстоящие</span><span class="stat-val">${num(s.soon||0)}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Экспонентов онлайн</span><span class="stat-val">${num(s.exhibitors_online||0)}</span></div>`;
+}
+function renderCats(cats){
+  document.getElementById('catList').innerHTML=cats.map(c=>`
+    <div class="cat-item" onclick="filterByIndustry('${escAttr(c.name||'')}')">
+      <span class="cat-name">${esc(c.name)}</span>
+      <span class="cat-cnt">${num(c.count||0)}</span>
+    </div>`).join('');
+}
+function filterByIndustry(ind){
+  currentIndustry=ind;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.industry===ind));
+  loadFeed();
+}
+
+/* ── UPCOMING ── */
+async function loadUpcoming(){
+  try{
+    const r=await fetch(`${API}/exhibitions?status=live,soon&limit=4`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    renderUpcoming(Array.isArray(data.exhibitions)?data.exhibitions:[]);
+  }catch{
+    const all=demoExhibitions().filter(e=>statusOf(e)!=='past').slice(0,4);
+    renderUpcoming(all);
+  }
+}
+function renderUpcoming(list){
+  const el=document.getElementById('upcomingList');
+  if(!list.length){el.innerHTML=`<div class="empty-block"><p>Ничего не запланировано</p></div>`;return;}
+  list.forEach(e=>exhibitionStore.set(String(e.id),e));
+  el.innerHTML=list.map(e=>{
+    const st=statusOf(e);
+    const d=new Date(e.start_date);
+    const isLive=st==='live';
+    const sub=isLive?`<span class="live-dot-tiny"></span>Идёт ${Math.max(1,Math.ceil((Date.now()-d)/86400000))}-й день`
+                    :`через ${daysBetween(new Date(),d)} ${daysLabel(daysBetween(new Date(),d))}`;
+    return`<div class="date-item" onclick="openExDetail('${escAttr(String(e.id))}')">
+      <div class="date-chip ${isLive?'live-chip':''}">
+        <div class="date-day">${d.getDate()}</div>
+        <div class="date-mon">${MONTHS[d.getMonth()]}</div>
+      </div>
+      <div class="date-info">
+        <div class="date-ttl">${esc(e.title||'')}</div>
+        <div class="date-sub">${sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── MY ITEMS ── */
+async function loadMyItems(){
+  try{
+    const r=await fetch(`${API}/exhibitions/my`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    renderMyItems(Array.isArray(data.exhibitions)?data.exhibitions:[]);
+  }catch{renderMyItems([]);}
+}
+function renderMyItems(list){
+  const el=document.getElementById('myItemsList');
+  if(!list.length){
+    el.innerHTML=`<div class="empty-block">
+      <svg viewBox="0 0 24 24"><path d="M3 9l1-4h16l1 4"/><path d="M3 9h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M8 13h8"/></svg>
+      <p>Вы пока нигде не записаны</p>
+      <button class="btn-empty" onclick="setMode('soon')">Смотреть предстоящие</button>
+    </div>`;
+    return;
+  }
+  list.forEach(e=>exhibitionStore.set(String(e.id),e));
+  el.innerHTML=list.map(e=>{
+    const st=statusOf(e);
+    const dot={live:'dot-live',soon:'dot-soon',past:'dot-done'}[st];
+    const role=e.is_exhibitor?'Я экспонент':'Я посетитель';
+    const whenLabel=st==='live'?'идёт сейчас'
+                    :st==='soon'?`через ${daysBetween(new Date(),e.start_date)} ${daysLabel(daysBetween(new Date(),e.start_date))}`
+                    :'прошла';
+    return`<div class="my-item" onclick="openExDetail('${escAttr(String(e.id))}')">
+      <div class="my-logo" style="background:${avc(e.title||'')}">${letter(e.title||'?')}</div>
+      <div style="flex:1;min-width:0">
+        <div class="my-name">${esc(e.title||'')}</div>
+        <div class="my-sub">${role} · ${whenLabel}</div>
+      </div>
+      <div class="my-dot ${dot}"></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── CREATE MODAL ── */
+function openCreateModal(){
+  resetExForm();
+  document.getElementById('modalExhibition').classList.add('open');
+  setTimeout(()=>document.getElementById('exTitle').focus(),150);
+}
+function closeCreateModal(){document.getElementById('modalExhibition').classList.remove('open');}
+
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));closeDetail();}});
+
+/* ── FORM: program + cover ── */
+let programState=[], coverState='';
+
+function resetExForm(){
+  ['exTitle','exTheme','exStart','exEnd','exFee','exDesc','exTags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('exIndustry').value='';
+  document.getElementById('exFormat').value='online';
+  programState=[{date:'',title:'',items:[{time:'',title:''}]}];
+  coverState='';
+  renderProgram();
+  renderCoverSlot();
+}
+
+function renderProgram(){
+  const host=document.getElementById('programList');
+  host.innerHTML=programState.map((d,i)=>`
+    <div style="border:1px solid var(--bdr);border-radius:var(--rm);padding:10px;margin-bottom:10px;background:var(--gp)">
+      <div class="prog-day-row">
+        <input class="form-input" type="date" value="${escAttr(d.date)}" onchange="programState[${i}].date=this.value">
+        <input class="form-input" placeholder="Название дня (например: Открытие)" value="${escAttr(d.title)}" oninput="programState[${i}].title=this.value">
+        <button type="button" class="rm-btn" onclick="removeDay(${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--gmt);text-transform:uppercase;margin:4px 0 6px">События дня</div>
+      ${(d.items||[]).map((it,j)=>`
+        <div style="display:grid;grid-template-columns:90px 1fr 34px;gap:6px;margin-bottom:6px">
+          <input class="form-input" placeholder="10:00" value="${escAttr(it.time)}" oninput="programState[${i}].items[${j}].time=this.value" style="padding:7px 10px;font-size:12px">
+          <input class="form-input" placeholder="Открытие, пленарное заседание…" value="${escAttr(it.title)}" oninput="programState[${i}].items[${j}].title=this.value" style="padding:7px 10px;font-size:12px">
+          <button type="button" class="rm-btn" onclick="removeItem(${i},${j})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      `).join('')}
+      <button type="button" class="btn-add" onclick="addItem(${i})" style="font-size:11px;padding:4px 10px">+ Событие</button>
+    </div>
+  `).join('');
+}
+function addProgramDay(){programState.push({date:'',title:'',items:[{time:'',title:''}]});renderProgram();}
+function removeDay(i){programState.splice(i,1);if(!programState.length)programState=[{date:'',title:'',items:[{time:'',title:''}]}];renderProgram();}
+function addItem(i){programState[i].items.push({time:'',title:''});renderProgram();}
+function removeItem(i,j){programState[i].items.splice(j,1);if(!programState[i].items.length)programState[i].items=[{time:'',title:''}];renderProgram();}
+
+function setupCoverUpload(){
+  document.getElementById('coverInput').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{coverState=ev.target.result;renderCoverSlot();};
+    reader.readAsDataURL(f);
+    e.target.value='';
+  });
+}
+function renderCoverSlot(){
+  const host=document.getElementById('coverUpload');
+  if(coverState){
+    host.innerHTML=`<img src="${escAttr(coverState)}" alt=""><button type="button" class="rm" onclick="event.stopPropagation();removeCover()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    host.style.borderStyle='solid'; host.style.padding='0';
+  } else {
+    host.innerHTML=`<div class="hint"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Нажмите, чтобы загрузить<br><span style="font-size:10px">PNG/JPG, до 2 МБ</span></div>`;
+    host.style.borderStyle='dashed';
+  }
+}
+function removeCover(){coverState='';renderCoverSlot();}
+
+/* ── SUBMIT ── */
+async function submitExhibition(){
+  const title=document.getElementById('exTitle').value.trim();
+  const start=document.getElementById('exStart').value;
+  const end=document.getElementById('exEnd').value;
+  if(!title){alert('Укажите название выставки');return;}
+  if(!start||!end){alert('Укажите даты проведения');return;}
+  if(new Date(end)<new Date(start)){alert('Дата окончания раньше даты начала');return;}
+
+  const btn=document.getElementById('exSubmitBtn');
+  btn.disabled=true;btn.textContent='Публикация…';
+
+  const body={
+    title,
+    industry:document.getElementById('exIndustry').value,
+    theme:document.getElementById('exTheme').value.trim(),
+    cover:coverState,
+    start_date:start,
+    end_date:end,
+    format:document.getElementById('exFormat').value,
+    fee:parseInt(document.getElementById('exFee').value)||0,
+    description:document.getElementById('exDesc').value.trim(),
+    tags:document.getElementById('exTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    program:programState.map(d=>({date:d.date,title:d.title,items:(d.items||[]).filter(it=>it.title.trim())})).filter(d=>d.date||d.title||(d.items||[]).length),
+  };
+  try{
+    const r=await fetch(`${API}/exhibitions`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    if(r.ok){closeCreateModal();loadFeed();loadStats();loadUpcoming();loadMyItems();}
+    else throw 0;
+  }catch{
+    closeCreateModal(); loadFeed();
+  }
+  btn.disabled=false;btn.textContent='Опубликовать';
+}
+
+/* ── SKELETONS ── */
+function skels(n){return Array(n).fill(0).map(()=>`
+  <div class="skeleton">
+    <div class="sl" style="min-height:180px;border-radius:0"></div>
+    <div style="padding:14px 16px">
+      <div class="sl" style="height:10px;width:30%;margin-bottom:8px;border-radius:6px"></div>
+      <div class="sl" style="height:16px;width:80%;margin-bottom:8px;border-radius:6px"></div>
+      <div class="sl" style="height:11px;width:55%;margin-bottom:12px;border-radius:6px"></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <div class="sl" style="height:20px;width:110px;border-radius:99px"></div>
+        <div class="sl" style="height:20px;width:70px;border-radius:99px"></div>
+        <div class="sl" style="height:20px;width:90px;border-radius:99px"></div>
+      </div>
+      <div class="sl" style="height:11px;width:100%;margin-bottom:5px;border-radius:6px"></div>
+      <div class="sl" style="height:11px;width:70%;margin-bottom:12px;border-radius:6px"></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <div class="sl" style="height:26px;width:90px;border-radius:12px"></div>
+        <div class="sl" style="height:26px;width:110px;border-radius:12px"></div>
+      </div>
+    </div>
+  </div>`).join('');}
+
+/* ── DEMO DATA ── */
+function demoExhibitions(){
+  const now=Date.now(), day=86400000;
+  return[
+    {id:'e1',title:'LogisticsPro Moscow 2026',industry:'Логистика и транспорт',theme:'Автоматизация и TMS',
+     organizer_name:'LogisticsPro Russia',organizer_id:'co-1',
+     start_date:new Date(now-2*day).toISOString().split('T')[0],
+     end_date:new Date(now+2*day).toISOString().split('T')[0],
+     format:'online',fee:45000,
+     description:'Главное отраслевое событие года. Трансграничные перевозки, TMS, автоматизация складов, переход на отечественное ПО. Онлайн-стенды 320 компаний, живые демонстрации, деловая программа.',
+     tags:['TMS','WMS','таможня','СНГ'],
+     exhibitors_count:320,visitors_registered:11823,visitors_count:11823,views_count:8400,
+     is_exhibitor:false,is_registered:true,
+     program:[
+       {date:new Date(now-2*day).toISOString().split('T')[0],title:'Открытие',items:[{time:'10:00',title:'Пленарное заседание «Логистика 2026: вызовы и решения»'},{time:'12:00',title:'Открытие онлайн-стендов'},{time:'15:00',title:'Круглый стол: импортозамещение ПО'}]},
+       {date:new Date(now-day).toISOString().split('T')[0],title:'День TMS-решений',items:[{time:'10:00',title:'Демо TMS-платформ отечественных вендоров'},{time:'14:00',title:'Кейсы внедрения: сеть X5 Retail'}]},
+       {date:new Date(now).toISOString().split('T')[0],title:'День сегодня · ВЭД и таможня',items:[{time:'11:00',title:'Новое таможенное регулирование ЕАЭС'},{time:'16:00',title:'Практикум: декларирование экспорта'}]},
+     ],
+     exhibitors:[
+       {id:'c-1',name:'TMS Masters',industry:'IT в логистике'},
+       {id:'c-2',name:'NorthBridge Logistics',industry:'Логистика'},
+       {id:'c-3',name:'GlobalFreight',industry:'Логистика'},
+       {id:'c-4',name:'CustomsBroker RU',industry:'ВЭД'},
+       {id:'c-5',name:'Warehouse Pro',industry:'Склад'},
+       {id:'c-6',name:'LogTech Alliance',industry:'IT'},
+     ]},
+    {id:'e2',title:'CustomsExpo 2026 — ВЭД без границ',industry:'ВЭД и таможня',theme:'Экспорт и декларирование',
+     organizer_name:'«ТаможПром»',organizer_id:'co-2',
+     start_date:new Date(now+12*day).toISOString().split('T')[0],
+     end_date:new Date(now+16*day).toISOString().split('T')[0],
+     format:'online',fee:0,
+     description:'Таможенное оформление, ТН ВЭД, новое регулирование экспорта в ЕАЭС, цифровизация деклараций. Мастер-классы от таможенных брокеров и представителей ФТС.',
+     tags:['декларирование','ЕАЭС','экспорт','ФТС'],
+     exhibitors_count:180,visitors_registered:5421,views_count:2100,
+     is_exhibitor:false,is_registered:false,
+     program:[
+       {date:new Date(now+12*day).toISOString().split('T')[0],title:'Пленарный день',items:[{time:'10:00',title:'Новое регулирование ЕАЭС в 2026'}]},
+       {date:new Date(now+13*day).toISOString().split('T')[0],title:'Практика декларирования',items:[{time:'11:00',title:'Практикум: сложные случаи классификации ТН ВЭД'}]},
+     ]},
+    {id:'e3',title:'AgroTech Volga 2026',industry:'Агропром',theme:'Технологии и экспорт',
+     organizer_name:'Volga AgroForum',organizer_id:'co-3',
+     start_date:new Date(now+38*day).toISOString().split('T')[0],
+     end_date:new Date(now+41*day).toISOString().split('T')[0],
+     format:'online',fee:28000,
+     description:'Технологии точного земледелия, переработка сельхозпродукции, экспорт зерна. Выставочные стенды производителей техники, семян, удобрений и экспортёров.',
+     tags:['точное-земледелие','экспорт-зерна','АПК'],
+     exhibitors_count:95,visitors_registered:2104,views_count:890,
+     is_exhibitor:false,is_registered:false},
+    {id:'e4',title:'LogTech Digital 2026 — импортозамещение',industry:'IT в логистике',theme:'Отечественные TMS/WMS/ERP',
+     organizer_name:'LogTech Alliance',organizer_id:'co-4',
+     start_date:new Date(now+64*day).toISOString().split('T')[0],
+     end_date:new Date(now+66*day).toISOString().split('T')[0],
+     format:'online',fee:0,
+     description:'Российские TMS, WMS, ERP для логистики. Интеграции с 1С, Битрикс24. Демо-сессии вендоров, круглые столы по миграции с SAP/Oracle.',
+     tags:['импортозамещение','TMS','ERP','1С'],
+     exhibitors_count:60,visitors_registered:1284,views_count:540,
+     is_exhibitor:false,is_registered:false},
+    {id:'e5',title:'WarehouseExpo — автоматизация склада',industry:'Складская логистика',theme:'WMS и робототехника',
+     organizer_name:'WarehouseExpo',organizer_id:'co-5',
+     start_date:new Date(now-60*day).toISOString().split('T')[0],
+     end_date:new Date(now-57*day).toISOString().split('T')[0],
+     format:'online',fee:35000,
+     description:'Прошедшая выставка: современные WMS-системы, роботизация склада, кейсы крупнейших операторов.',
+     tags:['WMS','роботизация','склад'],
+     exhibitors_count:142,visitors_registered:4680,views_count:6200,
+     is_exhibitor:false,is_registered:false},
+    {id:'e6',title:'ProductionForum Ural 2026',industry:'Производство',theme:'Станкостроение и индустрия 4.0',
+     organizer_name:'Ural Industrial',organizer_id:'co-6',
+     start_date:new Date(now-95*day).toISOString().split('T')[0],
+     end_date:new Date(now-92*day).toISOString().split('T')[0],
+     format:'hybrid',fee:52000,
+     description:'Архивная выставка: современное станкостроение, цифровые двойники, ИИ в производстве.',
+     tags:['производство','станки','индустрия4.0'],
+     exhibitors_count:210,visitors_registered:7821,views_count:9400,
+     is_exhibitor:false,is_registered:false},
+  ];
+}
 </script>
 </body>
 </html>
