@@ -132,6 +132,11 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 .feed::-webkit-scrollbar{width:4px}
 .feed::-webkit-scrollbar-thumb{background:var(--gb);border-radius:99px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.square-feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-content:start}
+.square-feed .item-card{aspect-ratio:1/1;display:flex;flex-direction:column}
+.square-feed .item-footer{margin-top:auto;flex-wrap:wrap}
+.square-feed .item-body{-webkit-line-clamp:3}
+
 
 /* SKELETON */
 .skeleton{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rxl);padding:16px;
@@ -351,7 +356,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
     Создать
   </button>
 </div>
-<div class="feed" id="feed"></div>
+<div class="feed square-feed" id="feed"></div>
 </div>
 
 <!-- RIGHT -->
