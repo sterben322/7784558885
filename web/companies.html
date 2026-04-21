@@ -16,6 +16,20 @@
   --sh:0 2px 12px rgba(30,138,76,.07);--shm:0 6px 24px rgba(30,138,76,.13)
 }
 html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);font-size:14px}
+/* Unified card standard: keeps content inside cards on all pages */
+.card,.item-card,.cv-card,.job-card,.co-card,.hero-card,.stat-card,.news-card,.forum-card{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.card *, .item-card *, .cv-card *, .job-card *, .co-card *, .hero-card *, .stat-card *, .news-card *, .forum-card *{
+  min-width:0;
+}
+.item-title,.item-sub,.item-body,.job-title,.job-company,.job-desc,.cv-name,.cv-pos,.co-name,.co-industry,.co-meta-item,.co-link span,.co-addr span{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
 .shell{display:grid;grid-template-columns:220px 1fr 264px;grid-template-rows:56px 1fr;
   grid-template-areas:"logo topbar topbar""nav main right";height:100vh;gap:10px;padding:10px}
 
