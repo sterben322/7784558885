@@ -461,8 +461,7 @@
         return;
       }
 
-      const footer = `<a href="/search.html?q=${encodeURIComponent(input.value.trim())}" class="global-search__all-results">Показать все результаты</a>`;
-      showDropdown(`${html}${footer}`);
+      showDropdown(html);
     }
 
     async function runSearch(rawValue) {
@@ -540,9 +539,7 @@
           window.location.href = flatResults[activeIndex].route;
           return;
         }
-        const query = input.value.trim();
-        if (!query) return;
-        window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
+        runSearch(input.value);
       }
     });
 
