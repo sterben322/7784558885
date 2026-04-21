@@ -520,7 +520,6 @@ function skels(n,h=120){return Array(n).fill(0).map(()=>`
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-const STORAGE_KEY='catalog-items-v1';
 const seedCatalog=[
   {id:1,name:'TMS LASTOP Pro',type:'product',category:'Программное обеспечение',company:'LASTOP Digital',price:'от 45 000 ₽/мес',description:'Полнофункциональная TMS-система для управления транспортными заказами. Интеграция с 1С, маркетплейсами и ЭДО.',rating:4.8,reviews:34,createdAt:'2026-03-03T10:00:00Z'},
   {id:2,name:'WMS CloudLogic',type:'product',category:'Программное обеспечение',company:'CloudLogic',price:'от 28 000 ₽/мес',description:'Система управления складом с мобильным приложением для сборщиков. Поддержка ячеечного хранения и FIFO.',rating:4.6,reviews:21,createdAt:'2026-04-06T10:00:00Z'},
@@ -530,16 +529,29 @@ const seedCatalog=[
 ];
 const state={section:'product',category:'Все',search:'',items:[]};
 
-function loadCatalog(){
-  const raw=localStorage.getItem(STORAGE_KEY);
-  if(!raw){state.items=[...seedCatalog];saveCatalog();return;}
-  try{state.items=JSON.parse(raw);}catch{state.items=[...seedCatalog];saveCatalog();}
+async function loadCatalog(){
+  const params=new URLSearchParams({limit:'200'});
+  if(state.section)params.set('type',state.section);
+  if(state.category!=='Все')params.set('category',state.category);
+  if(state.search)params.set('q',state.search);
+  try{
+    const r=await fetch(`${API}/catalog?${params.toString()}`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    state.items=(data.items||[]).map((i)=>({
+      ...i,
+      createdAt:i.created_at||i.createdAt||new Date().toISOString()
+    }));
+    if(!state.items.length && !state.search && state.category==='Все'){
+      state.items=[...seedCatalog];
+    }
+  }catch{
+    state.items=[...seedCatalog];
+  }
 }
-function saveCatalog(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.items));}
 function sectionLabel(type){return type==='service'?'Услуга':'Товар';}
 function visibleItems(){
   return state.items.filter(item=>{
-    if(item.type!==state.section)return false;
     if(state.category!=='Все'&&item.category!==state.category)return false;
     if(!state.search)return true;
     const h=`${item.name} ${item.company} ${item.description} ${item.category}`.toLowerCase();
@@ -579,8 +591,6 @@ function renderFeed(){
     </div>
     <div class="item-body">${esc(c.description)}</div>
     <div class="item-footer">
-      <button class="btn-sec js-stub-detail" data-section="Каталог: ${esc(c.name)}" style="padding:5px 12px;font-size:11px">Подробнее</button>
-      <button class="btn-pri" style="padding:5px 14px;font-size:11px;margin-left:auto">Запросить КП</button>
       <button class="btn-sec" data-action="details">Подробнее</button>
       <button class="btn-pri" style="margin-left:auto" data-action="request">Запросить КП</button>
     </div>
@@ -611,7 +621,10 @@ function renderCategoryList(){
     syncSectionButtons();renderAll();
   }));
 }
-function renderAll(){renderFilters();renderFeed();renderStats();renderCategoryList();}
+async function renderAll(){
+  await loadCatalog();
+  renderFilters();renderFeed();renderStats();renderCategoryList();
+}
 function syncSectionButtons(){
   document.querySelectorAll('.st').forEach(btn=>btn.classList.toggle('active',btn.dataset.section===state.section));
 }
@@ -632,9 +645,8 @@ function showDetails(item){
 }
 function openCatalogModal(){document.getElementById('catalogModal').classList.add('open');}
 function closeCatalogModal(){document.getElementById('catalogModal').classList.remove('open');document.getElementById('catalogForm').reset();}
-onSearch=(q)=>{state.search=q;renderFeed();};
+onSearch=(q)=>{state.search=q;renderAll();};
 
-loadCatalog();
 renderAll();
 syncSectionButtons();
 
@@ -650,24 +662,32 @@ document.getElementById('catalogModalCancel').addEventListener('click',closeCata
 document.getElementById('catalogModal').addEventListener('click',e=>{if(e.target.id==='catalogModal')closeCatalogModal();});
 document.getElementById('catalogForm').addEventListener('submit',e=>{
   e.preventDefault();
-  const fd=new FormData(e.target);
-  const item={
-    id:Date.now(),
-    type:fd.get('type'),
-    category:String(fd.get('category')||'').trim(),
-    name:String(fd.get('name')||'').trim(),
-    company:String(fd.get('company')||'').trim(),
-    price:String(fd.get('price')||'').trim(),
-    description:String(fd.get('description')||'').trim(),
-    rating:null,reviews:0,createdAt:new Date().toISOString()
-  };
-  state.items.unshift(item);
-  saveCatalog();
-  state.section=item.type;
-  state.category='Все';
-  syncSectionButtons();
-  renderAll();
-  closeCatalogModal();
+  (async()=>{
+    const fd=new FormData(e.target);
+    const item={
+      type:fd.get('type'),
+      category:String(fd.get('category')||'').trim(),
+      name:String(fd.get('name')||'').trim(),
+      company:String(fd.get('company')||'').trim(),
+      price:String(fd.get('price')||'').trim(),
+      description:String(fd.get('description')||'').trim(),
+    };
+    try{
+      const r=await fetch(`${API}/catalog`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
+        body:JSON.stringify(item)
+      });
+      if(!r.ok)throw 0;
+      state.section=item.type;
+      state.category='Все';
+      syncSectionButtons();
+      await renderAll();
+      closeCatalogModal();
+    }catch{
+      alert('Не удалось сохранить в каталог. Проверьте подключение к API.');
+    }
+  })();
 });
 document.getElementById('feed').addEventListener('click',e=>{
   const card=e.target.closest('.item-card'); if(!card)return;
@@ -677,15 +697,6 @@ document.getElementById('feed').addEventListener('click',e=>{
   if(action==='details'){showDetails(item);return;}
   if(action==='request'){alert(`Запрос на коммерческое предложение отправлен компании ${item.company}`);return;}
 });
-
-
-document.querySelectorAll('.js-stub-detail').forEach((btn)=>{
-  btn.addEventListener('click',()=>{
-    const section = btn.dataset.section || 'Детали раздела';
-    window.location.href = `/stub.html?section=${encodeURIComponent(section)}`;
-  });
-});
-
 </script>
 </body>
 </html>
