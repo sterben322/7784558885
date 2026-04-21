@@ -429,6 +429,28 @@ func CreateTables() error {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS creator_id UUID REFERENCES users(id) ON DELETE SET NULL`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS category VARCHAR(120)`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS city VARCHAR(120)`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS work_format VARCHAR(80)`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS salary_from INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS salary_to INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS description TEXT`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS requirements TEXT`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'active'`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS views_count INT NOT NULL DEFAULT 0`,
+		`ALTER TABLE vacancies ADD COLUMN IF NOT EXISTS responses_count INT NOT NULL DEFAULT 0`,
+		`CREATE INDEX IF NOT EXISTS idx_vacancies_created_at ON vacancies(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_vacancies_creator_id ON vacancies(creator_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_vacancies_category ON vacancies(category)`,
+		`CREATE TABLE IF NOT EXISTS job_responses (
+			job_id UUID NOT NULL REFERENCES vacancies(id) ON DELETE CASCADE,
+			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (job_id, user_id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_job_responses_user_id ON job_responses(user_id)`,
 		`CREATE TABLE IF NOT EXISTS projects (
 			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 			creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
