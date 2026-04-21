@@ -43,6 +43,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.GET("/friends/candidates", handlers.GetAddableUsers)
 		api.GET("/friends/status/:id", handlers.GetFriendStatus)
 		api.POST("/friends/request/:id", handlers.SendFriendRequest)
+		api.POST("/friends/request-by-name", handlers.SendFriendRequestByName)
 		api.POST("/friends/accept/:id", handlers.AcceptFriendRequest)
 		api.POST("/friends/reject/:id", handlers.RejectFriendRequest)
 		api.POST("/friends/cancel/:id", handlers.CancelFriendRequest)

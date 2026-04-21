@@ -41,6 +41,97 @@ func parseFriendID(c *gin.Context) (uuid.UUID, bool) {
 	return friendID, true
 }
 
+func resolveFriendIDByName(currentUserID uuid.UUID, rawName string) (uuid.UUID, string, error) {
+	name := strings.TrimSpace(rawName)
+	if name == "" {
+		return uuid.Nil, "", nil
+	}
+
+	exactRows, err := database.DB.Query(`
+		SELECT id, COALESCE(NULLIF(full_name, ''), NULLIF(name, ''), email) AS display_name
+		FROM users
+		WHERE id <> $1::uuid
+		  AND (
+			LOWER(COALESCE(full_name, '')) = LOWER($2)
+			OR LOWER(COALESCE(name, '')) = LOWER($2)
+			OR LOWER(email) = LOWER($2)
+		  )
+		ORDER BY full_name ASC
+		LIMIT 2
+	`, currentUserID, name)
+	if err != nil {
+		return uuid.Nil, "", err
+	}
+	defer exactRows.Close()
+
+	var exactMatches []struct {
+		ID   uuid.UUID
+		Name string
+	}
+	for exactRows.Next() {
+		var match struct {
+			ID   uuid.UUID
+			Name string
+		}
+		if scanErr := exactRows.Scan(&match.ID, &match.Name); scanErr != nil {
+			return uuid.Nil, "", scanErr
+		}
+		exactMatches = append(exactMatches, match)
+	}
+	if err = exactRows.Err(); err != nil {
+		return uuid.Nil, "", err
+	}
+	if len(exactMatches) == 1 {
+		return exactMatches[0].ID, exactMatches[0].Name, nil
+	}
+	if len(exactMatches) > 1 {
+		return uuid.Nil, "", sql.ErrNoRows
+	}
+
+	likeRows, err := database.DB.Query(`
+		SELECT id, COALESCE(NULLIF(full_name, ''), NULLIF(name, ''), email) AS display_name
+		FROM users
+		WHERE id <> $1::uuid
+		  AND (
+			COALESCE(full_name, '') ILIKE '%' || $2 || '%'
+			OR COALESCE(name, '') ILIKE '%' || $2 || '%'
+			OR email ILIKE '%' || $2 || '%'
+		  )
+		ORDER BY full_name ASC
+		LIMIT 2
+	`, currentUserID, name)
+	if err != nil {
+		return uuid.Nil, "", err
+	}
+	defer likeRows.Close()
+
+	var likeMatches []struct {
+		ID   uuid.UUID
+		Name string
+	}
+	for likeRows.Next() {
+		var match struct {
+			ID   uuid.UUID
+			Name string
+		}
+		if scanErr := likeRows.Scan(&match.ID, &match.Name); scanErr != nil {
+			return uuid.Nil, "", scanErr
+		}
+		likeMatches = append(likeMatches, match)
+	}
+	if err = likeRows.Err(); err != nil {
+		return uuid.Nil, "", err
+	}
+	if len(likeMatches) == 1 {
+		return likeMatches[0].ID, likeMatches[0].Name, nil
+	}
+	if len(likeMatches) > 1 {
+		return uuid.Nil, "", sql.ErrNoRows
+	}
+
+	return uuid.Nil, "", nil
+}
+
 func userExists(userID uuid.UUID) (bool, error) {
 	var exists bool
 	err := database.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`, userID).Scan(&exists)
@@ -82,7 +173,10 @@ func SendFriendRequest(c *gin.Context) {
 	if !ok {
 		return
 	}
+	sendFriendRequestByID(c, requesterID, targetID)
+}
 
+func sendFriendRequestByID(c *gin.Context, requesterID, targetID uuid.UUID) {
 	if requesterID == targetID {
 		friendError(c, http.StatusBadRequest, "Нельзя отправить заявку самому себе")
 		return
@@ -158,6 +252,33 @@ func SendFriendRequest(c *gin.Context) {
 	default:
 		friendError(c, http.StatusBadRequest, "Недопустимый статус связи")
 	}
+}
+
+func SendFriendRequestByName(c *gin.Context) {
+	if !ensureDatabase(c) {
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		friendError(c, http.StatusBadRequest, "Укажите имя пользователя")
+		return
+	}
+
+	currentUser := currentUserID(c)
+	targetID, _, err := resolveFriendIDByName(currentUser, req.Name)
+	if err != nil {
+		friendDBError(c, http.StatusInternalServerError, "Database error", err)
+		return
+	}
+	if targetID == uuid.Nil {
+		friendError(c, http.StatusNotFound, "Пользователь не найден или найдено несколько совпадений, уточните имя")
+		return
+	}
+
+	sendFriendRequestByID(c, currentUser, targetID)
 }
 
 func AcceptFriendRequest(c *gin.Context) {
