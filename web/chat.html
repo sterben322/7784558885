@@ -497,54 +497,139 @@ function skels(n,h=120){return Array(n).fill(0).map(()=>`
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-const DIALOGS=[
-  {id:1,name:'Мария Захарова',preview:'Спасибо за информацию!',time:'12:34',unread:2,color:'#5AB080'},
-  {id:2,name:'Дмитрий Козлов',preview:'Когда удобно созвониться?',time:'11:20',unread:0,color:'#3A90C0'},
-  {id:3,name:'LASTOP Digital',preview:'Ваша заявка обработана',time:'вчера',unread:0,color:'#1A8A6A'},
-  {id:4,name:'Алексей Иванов',preview:'Документы отправлены',time:'вчера',unread:1,color:'#C07030'},
-];
-const MSGS=[
-  {me:false,text:'Добрый день! Видела ваше резюме на платформе.'},
-  {me:true,text:'Здравствуйте! Да, я активно ищу новые проекты.'},
-  {me:false,text:'Мы ищем логиста с опытом в международных перевозках. У вас есть опыт работы с маршрутами СНГ–ЕС?'},
-  {me:true,text:'Да, 7 лет работаю с этим направлением. Есть опыт таможенного оформления и мультимодальных перевозок.'},
-  {me:false,text:'Отлично! Спасибо за информацию!'},
-];
-document.getElementById('chatList').innerHTML=DIALOGS.map((d,i)=>`
-  <div class="chat-row${i===0?' active':''}" onclick="selectDialog(${d.id})">
-    <div class="chat-av" style="background:${d.color}">${letter(d.name)}</div>
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="chat-row-name">${esc(d.name)}</div>
-        <div class="chat-row-time">${esc(d.time)}</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
-        <div class="chat-row-preview">${esc(d.preview)}</div>
-        ${d.unread?`<span class="chat-unread">${d.unread}</span>`:''}
-      </div>
-    </div>
-  </div>`).join('');
-function renderMsgs(msgs){
-  document.getElementById('chatMessages').innerHTML=msgs.map(m=>`
-    <div class="msg ${m.me?'me':'them'}">
-      <div class="msg-bubble">${esc(m.text)}</div>
-      <div class="msg-time">${m.me?'Вы · ':''}только что</div>
-    </div>`).join('');
-  const el=document.getElementById('chatMessages');
-  el.scrollTop=el.scrollHeight;
+let conversations = [];
+let activeConversationId = null;
+let currentUserId = '';
+
+function authHeaders(extra = {}) {
+  return Object.assign({ Authorization: 'Bearer ' + tk() }, extra);
 }
-function selectDialog(id){
-  document.querySelectorAll('.chat-row').forEach((r,i)=>r.classList.toggle('active',i===id-1));
+
+async function apiJSON(url, options = {}) {
+  const res = await fetch(url, options);
+  let body = {};
+  try { body = await res.json(); } catch {}
+  if (!res.ok) throw new Error(body.error || body.message || `HTTP ${res.status}`);
+  return body;
 }
-function sendMsg(){
-  const inp=document.getElementById('chatInput');
-  const txt=inp.value.trim();
-  if(!txt)return;
-  MSGS.push({me:true,text:txt});
-  renderMsgs(MSGS);
-  inp.value='';
+
+function getConversationTitle(chat) {
+  return chat?.name || 'Диалог';
 }
-renderMsgs(MSGS);
+
+function renderConversations() {
+  const list = document.getElementById('chatList');
+  if (!conversations.length) {
+    list.innerHTML = `<div style="padding:14px;color:var(--gmt);font-size:12px">Пока нет диалогов.</div>`;
+    return;
+  }
+  list.innerHTML = conversations.map((chat) => {
+    const name = getConversationTitle(chat);
+    const chatId = chat.id;
+    const preview = chat.last_message || 'Нет сообщений';
+    const isActive = activeConversationId === chatId;
+    const unread = Number(chat.unread_count || 0);
+    return `
+      <div class="chat-row${isActive ? ' active' : ''}" onclick="selectDialog('${chatId}')">
+        <div class="chat-av" style="background:${avc(name)}">${letter(name)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="chat-row-name">${esc(name)}</div>
+            <div class="chat-row-time">${esc(ago(chat.last_message_at || chat.updated_at || chat.created_at))}</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+            <div class="chat-row-preview">${esc(preview)}</div>
+            ${unread ? `<span class="chat-unread">${unread}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderHeader(chat) {
+  const name = getConversationTitle(chat);
+  document.getElementById('chatHeader').innerHTML = `
+    <div style="width:34px;height:34px;border-radius:50%;background:${avc(name)};color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700">${letter(name)}</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--t)">${esc(name)}</div>
+      <div style="font-size:11px;color:var(--gmt)">Диалог</div>
+    </div>`;
+}
+
+function renderMsgs(msgs) {
+  const wrap = document.getElementById('chatMessages');
+  if (!msgs.length) {
+    wrap.innerHTML = `<div style="color:var(--gmt);font-size:12px">Начните диалог первым сообщением.</div>`;
+    return;
+  }
+  wrap.innerHTML = msgs.map((m) => {
+    const isMe = m.sender_id === currentUserId;
+    return `
+      <div class="msg ${isMe ? 'me' : 'them'}">
+        <div class="msg-bubble">${esc(m.content || '')}</div>
+        <div class="msg-time">${isMe ? 'Вы · ' : ''}${esc(ago(m.created_at))}</div>
+      </div>`;
+  }).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function loadConversations() {
+  const data = await apiJSON(API + '/chat/conversations', { headers: authHeaders() });
+  conversations = data.conversations || data.chats || [];
+  if (!activeConversationId && conversations.length) {
+    activeConversationId = conversations[0].id;
+  }
+  renderConversations();
+}
+
+async function selectDialog(id) {
+  activeConversationId = id;
+  renderConversations();
+  const chat = conversations.find((c) => c.id === id);
+  if (chat) renderHeader(chat);
+  const data = await apiJSON(API + `/chat/conversations/${id}/messages`, { headers: authHeaders() });
+  renderMsgs(data.messages || []);
+}
+
+async function maybeStartConversationFromQuery() {
+  const friendId = new URLSearchParams(location.search).get('user');
+  if (!friendId) return;
+  try {
+    const data = await apiJSON(API + `/chat/conversations/start/${friendId}`, {
+      method: 'POST',
+      headers: authHeaders()
+    });
+    activeConversationId = data?.conversation?.id || activeConversationId;
+  } catch (e) {
+    console.warn('Cannot start chat by query user:', e);
+  }
+}
+
+async function sendMsg() {
+  const inp = document.getElementById('chatInput');
+  const txt = inp.value.trim();
+  if (!txt || !activeConversationId) return;
+  await apiJSON(API + `/chat/conversations/${activeConversationId}/messages`, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ content: txt })
+  });
+  inp.value = '';
+  await loadConversations();
+  await selectDialog(activeConversationId);
+}
+
+(async function initChat() {
+  const cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  currentUserId = cachedUser.id || '';
+  await maybeStartConversationFromQuery();
+  await loadConversations();
+  if (activeConversationId) {
+    await selectDialog(activeConversationId);
+  } else {
+    document.getElementById('chatMessages').innerHTML = `<div style="color:var(--gmt);font-size:12px">Выберите диалог слева.</div>`;
+  }
+})();
 
 </script>
 </body>
