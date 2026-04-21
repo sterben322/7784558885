@@ -338,10 +338,10 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 <div class="toolbar">
   <div style="font-size:15px;font-weight:800;color:var(--t)">Лента</div>
   <div class="filter-tabs" style="margin-left:8px">
-    <button class="ftab active">Все</button>
-    <button class="ftab">Новости</button>
-    <button class="ftab">Проекты</button>
-    <button class="ftab">Компании</button>
+    <button class="ftab active" type="button" data-filter="all">Все</button>
+    <button class="ftab" type="button" data-filter="news">Новости</button>
+    <button class="ftab" type="button" data-filter="projects">Проекты</button>
+    <button class="ftab" type="button" data-filter="companies">Компании</button>
   </div>
   <button class="btn-create" onclick="document.getElementById('modalCreate').classList.add('open')">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -503,6 +503,41 @@ function skels(n,h=120){return Array(n).fill(0).map(()=>`
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
+const DEMO_POSTS=[
+  {id:1,type:'companies',author:'Никита Клишин',role:'Участник LASTOP',ago:'1 д назад',text:'ООО «Ластоп Групп» — российская интеграционная компания, формирующая инфраструктуру системного взаимодействия бизнеса. Платформа фиксирует роли участников, объединяет коммерческие и образовательные контуры, сопровождает мероприятия.',likes:12,comments:3},
+  {id:2,type:'projects',author:'Мария Захарова',role:'Логист · NorthBridge',ago:'3 ч назад',text:'Рады сообщить об открытии нового маршрута СНГ–ЕС. Мультимодальная перевозка с таможенным сопровождением. Принимаем грузы от 5 тонн.',likes:8,comments:1},
+  {id:3,type:'news',author:'LASTOP Digital',role:'Компания',ago:'5 ч назад',text:'Обновление платформы v2.4: добавлен модуль аналитики по резюме и вакансиям, улучшен поиск по навыкам, новый дашборд для компаний.',likes:34,comments:9},
+];
+let activeFeedFilter='all';
+function applyFeedFilter(filter){
+  activeFeedFilter=filter;
+  const filtered=filter==='all'?DEMO_POSTS:DEMO_POSTS.filter(post=>post.type===filter);
+  renderFeed(filtered);
+}
+document.querySelectorAll('.ftab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.ftab').forEach(btn=>btn.classList.remove('active'));
+    tab.classList.add('active');
+    applyFeedFilter(tab.dataset.filter||'all');
+  });
+});
+function renderFeed(posts){
+  const f=document.getElementById('feed');
+  const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#1A8A6A'];
+  if(!posts.length){
+    f.innerHTML=`
+      <div class="item-card">
+        <div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:6px">Пока пусто</div>
+        <div style="font-size:12px;color:var(--gmt)">В этом разделе ещё нет публикаций.</div>
+      </div>`;
+    return;
+  }
+  f.innerHTML=posts.map((p,i)=>`
+    <div class="item-card" style="animation-delay:${i*.07}s">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:38px;height:38px;border-radius:50%;background:${COLORS[i%COLORS.length]};
+          color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0">
+          ${letter(p.author)}
 const HOME_SECTIONS=[
   {title:'Новости',subtitle:'2 свежие новости из раздела «Новости»',icon:'📰',href:'/dashboard.html',items:[
     {title:'Экспорт стройматериалов вырос на 12% в Q2',meta:'Сегодня · 09:40',text:'Опубликован свежий обзор по рынку: рост связан с запуском новых контейнерных маршрутов.'},
@@ -586,11 +621,18 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
     document.getElementById('modalCreate').classList.remove('open');
     document.getElementById('postTitle').value='';
     document.getElementById('postContent').value='';
+    DEMO_POSTS.unshift({
+      id:Date.now(),
+      type:'news',
+      author:JSON.parse(localStorage.getItem('user')||'{}').full_name||'Вы',
+      role:'Участник LASTOP',
+      ago:'только что',
     HOME_SECTIONS[0].items.unshift({
       title:title||'Новая новость',
       meta:'Только что',
       text:content,
     });
+    applyFeedFilter(activeFeedFilter);
     HOME_SECTIONS[0].items=HOME_SECTIONS[0].items.slice(0,2);
     renderFeed(HOME_SECTIONS);
     showToast('Публикация добавлена.');
@@ -606,6 +648,7 @@ document.getElementById('suggestList').innerHTML=['Логисты СНГ','Та�
 document.querySelectorAll('.suggest-join-btn').forEach(btn=>{
   btn.addEventListener('click',()=>location.href='/communities.html');
 });
+applyFeedFilter('all');
 renderFeed(HOME_SECTIONS);
 
 </script>
