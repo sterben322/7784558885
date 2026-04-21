@@ -114,6 +114,8 @@ func main() {
 		"/employees.html":         "employees.html",
 		"/forum":                  "forum.html",
 		"/forum.html":             "forum.html",
+		"/friends":                "friends.html",
+		"/friends.html":           "friends.html",
 		"/chat":                   "chat.html",
 		"/chat.html":              "chat.html",
 		"/catalog":                "catalog.html",
