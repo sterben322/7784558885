@@ -560,6 +560,8 @@ function renderFeed(){
     </div>
     <div class="item-body">${esc(c.description)}</div>
     <div class="item-footer">
+      <button class="btn-sec js-stub-detail" data-section="Каталог: ${esc(c.name)}" style="padding:5px 12px;font-size:11px">Подробнее</button>
+      <button class="btn-pri" style="padding:5px 14px;font-size:11px;margin-left:auto">Запросить КП</button>
       <button class="btn-sec" data-action="details">Подробнее</button>
       <button class="btn-pri" style="margin-left:auto" data-action="request">Запросить КП</button>
     </div>
@@ -655,6 +657,14 @@ document.getElementById('feed').addEventListener('click',e=>{
   const action=e.target.dataset.action;
   if(action==='details'){showDetails(item);return;}
   if(action==='request'){alert(`Запрос на коммерческое предложение отправлен компании ${item.company}`);return;}
+});
+
+
+document.querySelectorAll('.js-stub-detail').forEach((btn)=>{
+  btn.addEventListener('click',()=>{
+    const section = btn.dataset.section || 'Детали раздела';
+    window.location.href = `/stub.html?section=${encodeURIComponent(section)}`;
+  });
 });
 
 </script>
