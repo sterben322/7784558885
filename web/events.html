@@ -385,108 +385,182 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 </div>
 
 <script>
+const API='/api';
+const tk=()=>localStorage.getItem('token');
+const TYPE_LABELS={conference:'Конференция',webinar:'Вебинар',networking:'Нетворкинг',workshop:'Воркшоп',roundtable:'Круглый стол'};
+const TYPE_TO_API={'Все':'','Конференции':'conference','Вебинары':'webinar','Нетворкинг':'networking'};
+const TYPE_BADGES={conference:'badge-warm',webinar:'badge-green',networking:'badge-gray',workshop:'badge-warm',roundtable:'badge-gray'};
+let state={events:[],myEvents:[],stats:null,activeType:'',search:'',view:'list'};
 
-const API='/api', tk=()=>localStorage.getItem('token');
-const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function avc(s){return COLORS[(s||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
-function letter(s){return((s||'?')[0]).toUpperCase();}
-function fmtSal(n){if(!n)return'';return n>=1000?Math.round(n/1000)+'к ₽':n+' ₽';}
-function ago(ts){if(!ts)return'';const m=Math.max(1,Math.floor((Date.now()-new Date(ts))/60000));
-  if(m<60)return m+' мин назад';if(m<1440)return Math.floor(m/60)+' ч назад';
-  if(m<10080)return Math.floor(m/1440)+' д назад';
-  return new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});}
-function num(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,'')+'к':n;}
+function num(n){const v=Number(n||0);return v>=1000?(v/1000).toFixed(1).replace(/\.0$/,'')+'к':String(v);}
+function price(v){const n=Number(v||0);return n>0?new Intl.NumberFormat('ru-RU').format(n)+' ₽':'Бесплатно';}
+function fmtDate(v){if(!v) return '—'; const d=new Date(v); return Number.isNaN(d.getTime())?v:d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});}
+function fmtTime(ev){return ev.time_start&&ev.time_end?`${ev.time_start}–${ev.time_end}`:ev.time_start||'';}
+function eventTypeLabel(t){return TYPE_LABELS[t]||t||'Событие';}
 
-/* Profile dropdown */
+async function api(url,opt={}){
+  const r=await fetch(API+url,{...opt,headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk(),...(opt.headers||{})}});
+  let data={};
+  try{data=await r.json();}catch{}
+  if(!r.ok) throw new Error(data.error||'Ошибка запроса');
+  return data;
+}
+
 function toggleProfile(){document.getElementById('profileBlock').classList.toggle('open');}
-document.addEventListener('click',e=>{
-  const pb=document.getElementById('profileBlock');
-  if(pb&&!pb.contains(e.target))pb.classList.remove('open');
-});
+document.addEventListener('click',e=>{const pb=document.getElementById('profileBlock'); if(pb&&!pb.contains(e.target)) pb.classList.remove('open');});
 function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
 function populateProfile(user){
   if(!user)return;
   const name=user.full_name||user.name||'Пользователь';
   const role=user.role||user.position||'Участник LASTOP';
-  const av=document.getElementById('pbAv');
-  const nm=document.getElementById('pbName');
-  const rl=document.getElementById('pbRole');
-  if(av)av.textContent=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-  if(nm)nm.textContent=name;
-  if(rl)rl.textContent=role;
+  const av=document.getElementById('pbAv'); if(av) av.textContent=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const nm=document.getElementById('pbName'); if(nm) nm.textContent=name;
+  const rl=document.getElementById('pbRole'); if(rl) rl.textContent=role;
+}
+function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
+function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
+
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  if(!state.events.length){feed.innerHTML='<div class="card" style="text-align:center;color:var(--gmt)">События не найдены</div>'; return;}
+  if(state.view==='calendar'){
+    const byDate=state.events.reduce((a,e)=>((a[e.date]=a[e.date]||[]).push(e),a),{});
+    feed.innerHTML=Object.keys(byDate).sort().map(date=>`<div class="card"><div class="block-title" style="margin-bottom:8px">${fmtDate(date)}</div>${byDate[date].map(renderEventRow).join('')}</div>`).join('');
+    return;
+  }
+  feed.innerHTML=state.events.map(renderEventCard).join('');
 }
 
-/* Auth */
-(async()=>{
-  if(!tk()){location.href='/login.html';return;}
+function renderEventCard(e){
+  const registered=e.is_registered?'<span class="tag">Вы записаны</span>':'';
+  return `<div class="item-card" onclick="openEvent('${e.id}')">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+      <span class="item-badge ${TYPE_BADGES[e.type]||'badge-gray'}">${esc(eventTypeLabel(e.type))}</span>
+      <span style="font-size:11px;color:var(--gmt)">${fmtDate(e.date)}</span>
+    </div>
+    <div class="item-title">${esc(e.title)}</div>
+    <div style="font-size:11px;color:var(--gmt);margin:3px 0 6px">📍 ${esc(e.city||'Онлайн')}</div>
+    <div class="item-body">${esc(e.description||'Без описания')}</div>
+    <div class="item-footer">
+      <span style="font-size:12px;font-weight:700;color:var(--g)">${price(e.fee)}</span>
+      <span style="font-size:11px;color:var(--gmt)">👥 ${num(e.registered_count||0)}</span>
+      ${registered}
+      <button class="btn-pri" style="margin-left:auto;padding:5px 14px;font-size:11px" onclick="event.stopPropagation();toggleRegister('${e.id}',${Boolean(e.is_registered)})">${e.is_registered?'Отменить':'Записаться'}</button>
+    </div>
+  </div>`;
+}
+function renderEventRow(e){
+  return `<div style="padding:7px 0;border-bottom:1px solid var(--bdr);cursor:pointer" onclick="openEvent('${e.id}')">
+    <div style="font-size:12px;font-weight:700">${esc(e.title)}</div>
+    <div style="font-size:11px;color:var(--gmt);margin-top:2px">${fmtTime(e)} · ${esc(eventTypeLabel(e.type))}</div>
+  </div>`;
+}
+
+function renderSidebar(){
+  const soon=state.events.slice(0,4);
+  document.getElementById('soonList').innerHTML=soon.length?soon.map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--bdr);cursor:pointer" onclick="openEvent('${e.id}')"><div style="font-size:12px;font-weight:600;color:var(--t)">${esc(e.title)}</div><div style="font-size:10px;color:var(--gmt);margin-top:2px">${fmtDate(e.date)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--gmt)">Нет ближайших событий</div>';
+  document.getElementById('myEvents').innerHTML=state.myEvents.length?state.myEvents.slice(0,4).map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px"><div style="font-weight:600">${esc(e.title)}</div><div style="font-size:10px;color:var(--gmt)">${fmtDate(e.date)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--gmt);padding:8px 0">Вы ещё не зарегистрировались ни на одно событие</div>';
+}
+
+async function loadEvents(){
+  const p=new URLSearchParams();
+  if(state.activeType) p.set('type',state.activeType);
+  if(state.search) p.set('q',state.search);
+  const {events=[]}=await api('/events?'+p.toString());
+  state.events=events;
+  renderFeed();
+}
+
+async function loadSidebar(){
+  try{const {events=[]}=await api('/events/my'); state.myEvents=events;}catch{state.myEvents=[];}
+  renderSidebar();
+}
+
+async function openEvent(id){
+  const {event}=await api('/events/'+id);
+  document.getElementById('dpLabel').textContent=event.title||'Детали';
+  document.getElementById('dpBody').innerHTML=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <span class="item-badge ${TYPE_BADGES[event.type]||'badge-gray'}">${esc(eventTypeLabel(event.type))}</span>
+      <span class="tag">${esc(event.format||'')}</span>
+    </div>
+    <div class="stat-row"><span class="stat-lbl">Дата</span><span class="stat-val">${fmtDate(event.date)}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Время</span><span class="stat-val">${esc(fmtTime(event)||'—')}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Город</span><span class="stat-val">${esc(event.city||'Онлайн')}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Участники</span><span class="stat-val">${num(event.registered_count||0)}</span></div>
+    <div style="margin-top:12px;font-size:12px;line-height:1.6;color:var(--tm)">${esc(event.description||'Без описания')}</div>`;
+  document.getElementById('dpActions').innerHTML=`
+    <button class="btn-pri" onclick="toggleRegister('${event.id}',${Boolean(event.is_registered)})">${event.is_registered?'Отменить запись':'Записаться'}</button>
+    <button class="btn-sec" onclick="closePanel()">Закрыть</button>`;
+  openPanel();
+}
+
+async function toggleRegister(id,registered){
   try{
-    const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
-    if(!r.ok)throw 0;
-    const{user={}}=await r.json();
+    await api('/events/'+id+'/register',{method:registered?'DELETE':'POST'});
+    await Promise.all([loadEvents(),loadSidebar()]);
+    closePanel();
+  }catch(e){alert(e.message||'Не удалось изменить запись');}
+}
+
+function getCreateModal(){
+  let m=document.getElementById('createEventModal');
+  if(m) return m;
+  m=document.createElement('div');
+  m.id='createEventModal';m.className='modal-bg';
+  m.innerHTML=`<div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><h3>Создать событие</h3><button class="modal-x" onclick="toggleCreateModal(false)"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+    <form id="eventCreateForm">
+      <div class="form-row"><label class="form-label">Название</label><input class="form-input" name="title" required></div>
+      <div class="form-grid2"><div class="form-row"><label class="form-label">Тип</label><select class="form-input" name="type"><option value="conference">Конференция</option><option value="webinar">Вебинар</option><option value="networking">Нетворкинг</option></select></div>
+      <div class="form-row"><label class="form-label">Формат</label><select class="form-input" name="format"><option value="offline">Оффлайн</option><option value="online">Онлайн</option><option value="hybrid">Гибрид</option></select></div></div>
+      <div class="form-grid2"><div class="form-row"><label class="form-label">Дата</label><input type="date" class="form-input" name="date" required></div><div class="form-row"><label class="form-label">Город</label><input class="form-input" name="city" placeholder="Москва"></div></div>
+      <div class="form-grid2"><div class="form-row"><label class="form-label">Начало</label><input type="time" class="form-input" name="time_start"></div><div class="form-row"><label class="form-label">Окончание</label><input type="time" class="form-input" name="time_end"></div></div>
+      <div class="form-row"><label class="form-label">Описание</label><textarea class="form-input" name="description" placeholder="Кратко опишите мероприятие"></textarea></div>
+      <div class="modal-footer"><button type="button" class="btn-sec" onclick="toggleCreateModal(false)">Отмена</button><button class="btn-pri" type="submit">Создать</button></div>
+    </form>
+  </div>`;
+  m.addEventListener('click',()=>toggleCreateModal(false));
+  document.body.appendChild(m);
+  document.getElementById('eventCreateForm').addEventListener('submit',submitCreate);
+  return m;
+}
+function toggleCreateModal(open){getCreateModal().classList.toggle('open',open);}
+async function submitCreate(e){
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const payload=Object.fromEntries(fd.entries());
+  payload.fee=0; payload.seats_total=0; payload.category='logistics';
+  try{
+    await api('/events',{method:'POST',body:JSON.stringify(payload)});
+    toggleCreateModal(false);
+    e.target.reset();
+    await loadEvents();
+  }catch(err){alert(err.message||'Не удалось создать событие');}
+}
+
+async function boot(){
+  if(!tk()){location.href='/login.html';return;}
+  document.getElementById('feed').innerHTML='<div class="skeleton" style="height:140px"></div><div class="skeleton" style="height:140px"></div>';
+  try{
+    const {user={}}=await api('/me');
     localStorage.setItem('user',JSON.stringify(user));
     populateProfile(user);
   }catch{
     const u=JSON.parse(localStorage.getItem('user')||'{}');
-    populateProfile(u);
-    if(!u.id){location.href='/login.html';}
+    populateProfile(u); if(!u.id){location.href='/login.html';return;}
   }
-})();
+  await Promise.all([loadEvents(),loadSidebar()]);
+}
 
-/* Search debounce */
-let _sT;
-document.getElementById('searchInput')?.addEventListener('input',e=>{
-  clearTimeout(_sT);
-  _sT=setTimeout(()=>onSearch(e.target.value.trim()),350);
-});
-function onSearch(q){/* override per-page */}
+let sTimer;
+document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(sTimer);sTimer=setTimeout(async()=>{state.search=e.target.value.trim(); await loadEvents();},300);});
+document.querySelectorAll('.ftab').forEach(btn=>btn.addEventListener('click',async()=>{document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');state.activeType=TYPE_TO_API[btn.textContent.trim()]||'';await loadEvents();}));
+document.querySelectorAll('.st').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.st').forEach(x=>x.classList.remove('active'));btn.classList.add('active');state.view=btn.textContent.includes('Календарь')?'calendar':'list';renderFeed();}));
+document.querySelector('.btn-create').addEventListener('click',()=>toggleCreateModal(true));
 
-/* Skeleton builder */
-function skels(n,h=120){return Array(n).fill(0).map(()=>`
-  <div class="skeleton" style="height:${h}px">
-    <div style="display:flex;gap:12px;margin-bottom:12px">
-      <div class="sl" style="width:44px;height:44px;border-radius:12px;flex-shrink:0"></div>
-      <div style="flex:1">
-        <div class="sl" style="height:13px;width:55%;margin-bottom:7px;border-radius:6px"></div>
-        <div class="sl" style="height:11px;width:35%;border-radius:6px"></div>
-      </div>
-      <div class="sl" style="width:60px;height:22px;border-radius:99px;flex-shrink:0"></div>
-    </div>
-    <div class="sl" style="height:11px;width:100%;margin-bottom:5px;border-radius:6px"></div>
-    <div class="sl" style="height:11px;width:75%;border-radius:6px"></div>
-  </div>`).join('');}
-
-function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
-function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
-
-const EVENTS=[
-  {title:'LogisticsPro 2026',type:'Конференция',date:'14–16 мая 2026',city:'Москва',desc:'Ключевое отраслевое событие года. Более 3000 участников, 80 спикеров, выставочная зона.',price:'от 12 000 ₽',attending:312},
-  {title:'Вебинар: Изменения в таможенном законодательстве 2026',type:'Вебинар',date:'22 апреля 2026',city:'Онлайн',desc:'Разбираем новые требования ФТС, изменения в ТН ВЭД и практику применения.',price:'Бесплатно',attending:847},
-  {title:'Нетворкинг для логистов: Москва',type:'Нетворкинг',date:'3 мая 2026',city:'Москва',desc:'Неформальная встреча специалистов отрасли. Обмен контактами, кейсы, партнёрства.',price:'500 ₽',attending:64},
-];
-const COLORS_EV={'Конференция':'badge-warm','Вебинар':'badge-green','Нетворкинг':'badge-gray'};
-document.getElementById('feed').innerHTML=EVENTS.map((e,i)=>`
-  <div class="item-card" style="animation-delay:${i*.07}s">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
-      <span class="item-badge ${COLORS_EV[e.type]||'badge-gray'}">${esc(e.type)}</span>
-      <span style="font-size:11px;color:var(--gmt)">${esc(e.date)}</span>
-    </div>
-    <div class="item-title">${esc(e.title)}</div>
-    <div style="font-size:11px;color:var(--gmt);margin:3px 0 6px">📍 ${esc(e.city)}</div>
-    <div class="item-body">${esc(e.desc)}</div>
-    <div class="item-footer">
-      <span style="font-size:12px;font-weight:700;color:var(--g)">${esc(e.price)}</span>
-      <span style="font-size:11px;color:var(--gmt);margin-left:8px">👥 ${num(e.attending)}</span>
-      <button class="btn-pri" style="margin-left:auto;padding:5px 14px;font-size:11px">Зарегистрироваться</button>
-    </div>
-  </div>`).join('');
-document.getElementById('soonList').innerHTML=EVENTS.slice(0,2).map(e=>`
-  <div style="padding:6px 0;border-bottom:1px solid var(--bdr)">
-    <div style="font-size:12px;font-weight:600;color:var(--t)">${esc(e.title)}</div>
-    <div style="font-size:10px;color:var(--gmt);margin-top:2px">${esc(e.date)}</div>
-  </div>`).join('');
-document.getElementById('myEvents').innerHTML='<div style="font-size:12px;color:var(--gmt);padding:8px 0">Вы ещё не зарегистрировались ни на одно событие</div>';
-
+boot();
 </script>
 </body>
 </html>
