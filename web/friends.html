@@ -3,13 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Друзья, сообщества, новости и резюме</title>
+  <title>LASTOP | Друзья</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
-    <h1 class="text-2xl font-bold">Социальный кабинет</h1>
-    <p class="text-sm text-slate-600">Управляйте друзьями, вступайте в сообщества, публикуйте новости и резюме.</p>
+    <header class="flex items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold">Друзья</h1>
+        <p class="text-sm text-slate-600">Управляйте заявками и списком контактов.</p>
+      </div>
+      <a href="/dashboard.html" class="px-3 py-2 rounded-lg border text-sm bg-white">На главную</a>
+    </header>
 
     <section class="bg-white rounded-xl shadow-sm p-4 space-y-3">
       <h2 class="font-semibold text-lg">Добавить в друзья</h2>
@@ -25,41 +30,13 @@
       </div>
     </section>
 
-    <section class="bg-white rounded-xl shadow-sm p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Сообщества</h2>
-      <div class="flex gap-2">
-        <input id="communityId" class="border rounded-lg px-3 py-2 flex-1" placeholder="UUID сообщества" />
-        <button onclick="joinCommunity()" class="px-4 py-2 rounded-lg bg-emerald-600 text-white">Вступить</button>
+    <section class="bg-white rounded-xl shadow-sm p-4">
+      <h2 class="font-semibold text-lg mb-3">Где теперь остальные функции</h2>
+      <div class="grid md:grid-cols-3 gap-3 text-sm">
+        <a class="p-3 border rounded-lg hover:bg-slate-50" href="/communities.html"><div class="font-medium">Сообщества</div><div class="text-slate-600">Вступление/выход и «Мои сообщества»</div></a>
+        <a class="p-3 border rounded-lg hover:bg-slate-50" href="/dashboard.html"><div class="font-medium">Новости</div><div class="text-slate-600">Публикация новостей от пользователя, компании или сообщества</div></a>
+        <a class="p-3 border rounded-lg hover:bg-slate-50" href="/jobs.html"><div class="font-medium">Резюме</div><div class="text-slate-600">Создание и редактирование резюме в разделе «Резюме»</div></a>
       </div>
-      <div id="communityMessage" class="text-sm"></div>
-      <h3 class="font-medium">Мои сообщества</h3>
-      <div id="myCommunities" class="space-y-2 text-sm"></div>
-    </section>
-
-    <section class="bg-white rounded-xl shadow-sm p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Создать новость</h2>
-      <div class="grid md:grid-cols-2 gap-3">
-        <select id="newsAuthorType" class="border rounded-lg px-3 py-2">
-          <option value="user">От моего имени</option>
-          <option value="community">От сообщества</option>
-          <option value="company">От компании</option>
-        </select>
-        <input id="newsTargetId" class="border rounded-lg px-3 py-2" placeholder="target_id (для community/company)" />
-      </div>
-      <input id="newsTitle" class="border rounded-lg px-3 py-2 w-full" placeholder="Заголовок" />
-      <textarea id="newsContent" class="border rounded-lg px-3 py-2 w-full" rows="4" placeholder="Текст новости"></textarea>
-      <button onclick="createNews()" class="px-4 py-2 rounded-lg bg-violet-600 text-white">Опубликовать новость</button>
-      <div id="newsMessage" class="text-sm"></div>
-    </section>
-
-    <section class="bg-white rounded-xl shadow-sm p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Опубликовать резюме</h2>
-      <input id="resumeTitle" class="border rounded-lg px-3 py-2 w-full" placeholder="Должность / заголовок" />
-      <textarea id="resumeAbout" class="border rounded-lg px-3 py-2 w-full" rows="4" placeholder="О себе"></textarea>
-      <input id="resumeSkills" class="border rounded-lg px-3 py-2 w-full" placeholder="Навыки через запятую" />
-      <button onclick="saveResume()" class="px-4 py-2 rounded-lg bg-amber-600 text-white">Сохранить резюме</button>
-      <div id="resumeMessage" class="text-sm"></div>
-      <div id="myResume" class="text-sm bg-slate-50 rounded-lg p-3"></div>
     </section>
   </main>
 
@@ -87,9 +64,9 @@ async function loadFriends() {
     const incoming = await api('/friends/requests/incoming', {headers: auth()});
     const outgoing = await api('/friends/requests/outgoing', {headers: auth()});
 
-    renderList('friendsList', (friends.data?.friends || friends.friends || []).map(f => `<div class="p-2 border rounded">${f.friend_name || f.full_name || f.friend_id}</div>`));
-    renderList('incomingList', (incoming.data?.requests || incoming.requests || []).map(r => `<div class="p-2 border rounded space-y-1"><div>${r.requester_name || r.full_name || r.requester_id}</div><div class="flex gap-2"><button class="px-2 py-1 rounded bg-emerald-600 text-white" onclick="acceptReq('${r.requester_id}')">Принять</button><button class="px-2 py-1 rounded bg-rose-600 text-white" onclick="rejectReq('${r.requester_id}')">Отклонить</button></div></div>`));
-    renderList('outgoingList', (outgoing.data?.requests || outgoing.requests || []).map(r => `<div class="p-2 border rounded space-y-1"><div>${r.target_name || r.full_name || r.friend_id || r.target_id}</div><button class="px-2 py-1 rounded bg-slate-700 text-white" onclick="cancelReq('${r.target_id || r.friend_id}')">Отменить</button></div>`));
+    renderList('friendsList', (friends.data?.friends || friends.friends || []).map(f => `<div class="p-2 border rounded">${f.friend_name || f.full_name || f.friend_id}</div>`), 'Пока нет друзей');
+    renderList('incomingList', (incoming.data?.requests || incoming.requests || []).map(r => `<div class="p-2 border rounded space-y-1"><div>${r.requester_name || r.full_name || r.requester_id}</div><div class="flex gap-2"><button class="px-2 py-1 rounded bg-emerald-600 text-white" onclick="acceptReq('${r.requester_id}')">Принять</button><button class="px-2 py-1 rounded bg-rose-600 text-white" onclick="rejectReq('${r.requester_id}')">Отклонить</button></div></div>`), 'Нет входящих заявок');
+    renderList('outgoingList', (outgoing.data?.requests || outgoing.requests || []).map(r => `<div class="p-2 border rounded space-y-1"><div>${r.target_name || r.full_name || r.friend_id || r.target_id}</div><button class="px-2 py-1 rounded bg-slate-700 text-white" onclick="cancelReq('${r.target_id || r.friend_id}')">Отменить</button></div>`), 'Нет исходящих заявок');
   } catch (e) {
     document.getElementById('friendMessage').textContent = e.message;
   }
@@ -102,72 +79,15 @@ async function sendFriendRequest() {
     const data = await api(`/friends/request/${id}`, {method:'POST', headers: auth()});
     document.getElementById('friendMessage').textContent = data.message || 'Заявка отправлена';
     loadFriends();
-  } catch (e) { document.getElementById('friendMessage').textContent = e.message; }
+  } catch (e) {
+    document.getElementById('friendMessage').textContent = e.message;
+  }
 }
 const acceptReq = async (id)=>{ await api(`/friends/accept/${id}`, {method:'POST', headers: auth()}); loadFriends(); };
 const rejectReq = async (id)=>{ await api(`/friends/reject/${id}`, {method:'POST', headers: auth()}); loadFriends(); };
 const cancelReq = async (id)=>{ await api(`/friends/cancel/${id}`, {method:'POST', headers: auth()}); loadFriends(); };
 
-async function loadCommunities() {
-  try {
-    const data = await api('/communities/my', {headers: auth()});
-    renderList('myCommunities', (data.communities || []).map(c => `<div class="p-2 border rounded flex items-center justify-between"><span>${c.name}</span><button class="px-2 py-1 rounded bg-slate-700 text-white" onclick="leaveCommunity('${c.id}')">Покинуть</button></div>`));
-  } catch (e) { document.getElementById('communityMessage').textContent = e.message; }
-}
-async function joinCommunity() {
-  const id = document.getElementById('communityId').value.trim();
-  if (!id) return;
-  try {
-    await api(`/communities/${id}/join`, {method:'POST', headers: auth()});
-    document.getElementById('communityMessage').textContent = 'Вступление выполнено';
-    loadCommunities();
-  } catch (e) { document.getElementById('communityMessage').textContent = e.message; }
-}
-const leaveCommunity = async (id)=>{ await api(`/communities/${id}/leave`, {method:'DELETE', headers: auth()}); loadCommunities(); };
-
-async function createNews() {
-  const authorType = document.getElementById('newsAuthorType').value;
-  const target = document.getElementById('newsTargetId').value.trim();
-  const body = {
-    title: document.getElementById('newsTitle').value.trim(),
-    content: document.getElementById('newsContent').value.trim(),
-    privacy_level: 'public'
-  };
-  if (!body.content) return;
-  if ((authorType === 'community' || authorType === 'company') && target) body.target_id = target;
-  try {
-    await api(`/posts?author_type=${authorType}`, {method:'POST', headers: auth(), body: JSON.stringify(body)});
-    document.getElementById('newsMessage').textContent = 'Новость опубликована';
-  } catch (e) { document.getElementById('newsMessage').textContent = e.message; }
-}
-
-async function loadMyResume() {
-  try {
-    const data = await api('/resume/me', {headers: auth()});
-    const r = data.resume;
-    if (!r) { document.getElementById('myResume').textContent = 'Резюме пока не опубликовано'; return; }
-    document.getElementById('myResume').innerHTML = `<div class="font-medium">${r.title || 'Без названия'}</div><div>${r.about || ''}</div><div class="text-slate-600">Навыки: ${(r.skills || []).join(', ')}</div>`;
-  } catch (e) { document.getElementById('resumeMessage').textContent = e.message; }
-}
-
-async function saveResume() {
-  const body = {
-    title: document.getElementById('resumeTitle').value.trim(),
-    about: document.getElementById('resumeAbout').value.trim(),
-    skills: document.getElementById('resumeSkills').value.split(',').map(s => s.trim()).filter(Boolean),
-    education_levels: [],
-    previous_workplaces: []
-  };
-  try {
-    await api('/resume', {method:'POST', headers: auth(), body: JSON.stringify(body)});
-    document.getElementById('resumeMessage').textContent = 'Резюме сохранено';
-    loadMyResume();
-  } catch (e) { document.getElementById('resumeMessage').textContent = e.message; }
-}
-
 loadFriends();
-loadCommunities();
-loadMyResume();
 </script>
 </body>
 </html>
