@@ -14,6 +14,20 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text)}
+/* Unified card standard: keeps content inside cards on all pages */
+.card,.item-card,.cv-card,.job-card,.co-card,.hero-card,.stat-card,.news-card,.forum-card{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.card *, .item-card *, .cv-card *, .job-card *, .co-card *, .hero-card *, .stat-card *, .news-card *, .forum-card *{
+  min-width:0;
+}
+.item-title,.item-sub,.item-body,.job-title,.job-company,.job-desc,.cv-name,.cv-pos,.co-name,.co-industry,.co-meta-item,.co-link span,.co-addr span,.content-title,.content-meta{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
     .page{max-width:1180px;margin:0 auto;padding:24px}
     .header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
     h1{margin:0;font-size:28px}
