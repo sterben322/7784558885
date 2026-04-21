@@ -132,6 +132,8 @@ func main() {
 		"/jobs.html":              "jobs.html",
 		"/projects":               "projects.html",
 		"/projects.html":          "projects.html",
+		"/analytics":              "analytics.html",
+		"/analytics.html":         "analytics.html",
 		"/exhibitions":            "exhibitions.html",
 		"/exhibitions.html":       "exhibitions.html",
 		"/events":                 "events.html",
