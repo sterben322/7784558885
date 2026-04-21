@@ -411,7 +411,12 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 
 <script>
 
-const API='/api', tk=()=>localStorage.getItem('token');
+const API='/api';
+const tk=()=>localStorage.getItem('token')||sessionStorage.getItem('token')||'';
+function redirectToLogin(){
+  const next=encodeURIComponent(window.location.pathname+window.location.search+window.location.hash);
+  window.location.href=`/login.html?next=${next}`;
+}
 const COLORS=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#B05090','#208090','#C04030','#3B6D11'];
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function avc(s){return COLORS[(s||'').charCodeAt(0)%COLORS.length]||COLORS[0];}
@@ -519,6 +524,11 @@ function renderNews(items){
 }
 
 document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
+  if(!tk()){
+    showToast('Чтобы публиковать новости, войдите в аккаунт.');
+    setTimeout(redirectToLogin, 600);
+    return;
+  }
   const title=(document.getElementById('postTitle')?.value||'').trim();
   const content=(document.getElementById('postContent')?.value||'').trim();
   if(!content){
@@ -533,7 +543,13 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
       body:JSON.stringify(body),
     });
     if(!response.ok){
-      throw new Error('post_create_failed');
+      if(response.status===401){
+        showToast('Сессия истекла. Войдите снова.');
+        setTimeout(redirectToLogin, 800);
+        return;
+      }
+      const payload=await response.json().catch(()=>({}));
+      throw new Error(payload.error||'post_create_failed');
     }
     createModal.classList.remove('open');
     document.getElementById('postTitle').value='';
@@ -548,8 +564,10 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
     });
     renderNews(NEWS);
     showToast('Публикация добавлена.');
-  }catch{
-    showToast('Не удалось опубликовать. Проверьте авторизацию и попробуйте снова.');
+  }catch(error){
+    showToast(error?.message&&error.message!=='post_create_failed'
+      ? error.message
+      : 'Не удалось опубликовать новость. Попробуйте снова.');
   }
 });
 
