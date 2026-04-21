@@ -657,6 +657,11 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
       author:JSON.parse(localStorage.getItem('user')||'{}').full_name||'Вы',
       role:'Участник LASTOP',
       ago:'только что',
+      text:content,
+      likes:0,
+      comments:0,
+      title:title||'Новая новость',
+    });
     HOME_SECTIONS[0].items.unshift({
       title:title||'Новая новость',
       meta:'Только что',
