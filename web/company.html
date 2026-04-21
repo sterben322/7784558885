@@ -306,6 +306,20 @@ html,body{height:100%;overflow:hidden;font-family:'Manrope',sans-serif;backgroun
 <script>
 const API='/api', tk=()=>localStorage.getItem('token');
 const initials=(n='')=>String(n).trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'U';
+const toText=v=>typeof v==='string'?v.trim():'';
+const toNum=v=>Number.isFinite(Number(v))?Number(v):0;
+const normalizeCompany=(company={})=>({
+  id:String(company.id||''),
+  name:toText(company.name)||'Без названия',
+  industry:toText(company.industry||company.economic_sector)||'Не указана',
+  status:toText(company.status),
+  tags:Array.isArray(company.tags)?company.tags.filter(Boolean):Array.isArray(company.search_tags)?company.search_tags.filter(Boolean):[],
+  employees:toNum(company.employees??company.employee_count),
+  subscribers:toNum(company.subscribers??company.followers_count),
+  website:toText(company.website),
+  address:toText(company.address),
+});
+const normalizeMe=(payload={})=>payload?.user||payload||{};
 
 function fillSidebarUser(user){
   document.getElementById('profileName').textContent=user?.full_name||user?.name||'Пользователь';
@@ -344,7 +358,7 @@ function initSidebarMenu(){
   try{
     const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok){localStorage.clear();location.href='/login.html';return;}
-    const user=await r.json();
+    const user=normalizeMe(await r.json());
     fillSidebarUser(user);
   }catch{}
   initSidebarMenu();
@@ -405,10 +419,11 @@ function getDemoCompanies(){
 async function loadCompanies(){
   showSkeletons();
   try{
-    const r=await fetch(API+'/companies?limit=50',{headers:{Authorization:'Bearer '+tk()}});
+    const q=encodeURIComponent(searchQuery||'');
+    const r=await fetch(API+'/search/companies?q='+q,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{companies=[]}=await r.json();
-    allCompanies=companies.length?companies:getDemoCompanies();
+    allCompanies=companies.length?companies.map(normalizeCompany):getDemoCompanies();
   }catch{
     allCompanies=getDemoCompanies();
   }
@@ -555,7 +570,7 @@ async function toggleFollow(btn,companyId){
   if(comp) comp.subscribers=(comp.subscribers||0)+(isFollowed?-1:1);
 
   try{
-    await fetch(API+'/companies/'+companyId+'/follow',{method,headers:{Authorization:'Bearer '+tk()}});
+    await fetch(API+'/company/'+companyId+'/follow',{method,headers:{Authorization:'Bearer '+tk()}});
   }catch{}
 }
 

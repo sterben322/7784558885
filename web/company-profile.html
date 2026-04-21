@@ -418,6 +418,28 @@ const API='/api', tk=()=>localStorage.getItem('token');
 const AVC=['#5AB080','#3A90C0','#9060C0','#C07030','#E04040','#1A8A6A','#208090','#B05090'];
 const BANNERS=['linear-gradient(135deg,#185FA5,#378ADD)','linear-gradient(135deg,#854F0B,#EF9F27)','linear-gradient(135deg,#534AB7,#7F77DD)','linear-gradient(135deg,#0F6E56,#1D9E75)','linear-gradient(135deg,#993C1D,#D85A30)','linear-gradient(135deg,#185FA5,#1D9E75)','linear-gradient(135deg,#72243E,#D4537E)','linear-gradient(135deg,#27500A,#639922)'];
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const toText=v=>typeof v==='string'?v.trim():'';
+const toNum=v=>Number.isFinite(Number(v))?Number(v):0;
+const normalizeMe=payload=>payload?.user||payload||{};
+const normalizeCompany=(company={})=>({
+  ...company,
+  id: String(company.id||'demo'),
+  name: toText(company.name)||'Компания',
+  industry: toText(company.industry||company.economic_sector)||'Не указана',
+  status: toText(company.status),
+  inn: toText(company.inn),
+  address: toText(company.address),
+  website: toText(company.website),
+  email: toText(company.email),
+  employees_count: toNum(company.employees_count ?? company.employee_count),
+  subscribers_count: toNum(company.subscribers_count ?? company.followers_count),
+  posts_count: toNum(company.posts_count),
+  is_followed: Boolean(company.is_followed ?? company.is_following),
+  created_at: company.created_at,
+  employees: Array.isArray(company.employees)?company.employees:[],
+  projects: Array.isArray(company.projects)?company.projects:[],
+  partners: Array.isArray(company.partners)?company.partners:[],
+});
 function avc(n){return AVC[(n||'').charCodeAt(0)%AVC.length]||AVC[0];}
 function banner(n){return BANNERS[(n||'').charCodeAt(0)%BANNERS.length]||BANNERS[0];}
 function fmtNum(n){if(!n&&n!==0)return'—';return n>=1000?(Math.round(n/100)/10).toFixed(1).replace('.0','')+'к':String(n);}
@@ -434,12 +456,13 @@ let companyData=null, isOwnCompany=false, isFollowed=false;
   try{
     const [meR,coR]=await Promise.all([
       fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}}),
-      fetch(API+(companyId?'/companies/'+companyId:'/me/company'),{headers:{Authorization:'Bearer '+tk()}})
+      fetch(API+(companyId?('/company?id='+encodeURIComponent(companyId)):'/company'),{headers:{Authorization:'Bearer '+tk()}})
     ]);
-    const{user={}}=meR.ok?await meR.json():{};
-    const co=coR.ok?await coR.json():null;
-    companyData=co?.company||co||getDemoCompany();
-    isOwnCompany=!!(user.company_id&&user.company_id===companyData.id)||(!!user.is_company_admin);
+    const meData=meR.ok?normalizeMe(await meR.json()):{};
+    const coPayload=coR.ok?await coR.json():null;
+    const rawCompany=coPayload?.company||coPayload||null;
+    companyData=rawCompany?normalizeCompany(rawCompany):getDemoCompany();
+    isOwnCompany=String(meData?.id||'')===String(companyData.owner_id||'');
     isFollowed=!!(companyData.is_followed);
     fillPage();
   }catch{
@@ -544,7 +567,7 @@ async function toggleFollow(){
   if(companyData)companyData.subscribers_count=(companyData.subscribers_count||0)+(isFollowed?1:-1);
   document.getElementById('statSubs').textContent=fmtNum(companyData?.subscribers_count);
   updateFollowBtn();
-  try{await fetch(API+'/companies/'+(companyData?.id||'demo')+'/follow',{method:isFollowed?'POST':'DELETE',headers:{Authorization:'Bearer '+tk()}});}catch{}
+  try{await fetch(API+'/company/'+(companyData?.id||'demo')+'/follow',{method:isFollowed?'POST':'DELETE',headers:{Authorization:'Bearer '+tk()}});}catch{}
 }
 
 /* ── EMPLOYEES ── */
@@ -615,7 +638,7 @@ function showSkeletons(){
 async function loadPosts(coId,coName,color){
   showSkeletons();
   try{
-    const r=await fetch(API+'/companies/'+coId+'/posts',{headers:{Authorization:'Bearer '+tk()}});
+    const r=await fetch(API+'/walls/company/'+coId,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{posts=[]}=await r.json();
     if(!posts.length)throw 0;
