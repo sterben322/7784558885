@@ -95,6 +95,7 @@ func RegisterProtectedRoutes(r *gin.Engine) {
 		api.POST("/posts", handlers.CreatePost)
 		api.GET("/feed", handlers.GetFeed)
 		api.GET("/news", handlers.GetNews)
+		api.GET("/news/dashboard", handlers.GetNewsDashboard)
 		api.GET("/walls/:type/:id", handlers.GetWall)
 		api.GET("/posts/:id", handlers.GetPost)
 		api.POST("/posts/:id/like", handlers.LikePost)
