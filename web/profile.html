@@ -353,56 +353,24 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
       <div style="font-size:16px;font-weight:800;color:var(--t)" id="profileName">Никита Клишин</div>
       <div style="font-size:12px;color:var(--gmt)" id="profileRole">Участник LASTOP</div>
     </div>
-    <button class="profile-edit-btn" style="margin-top:32px">✏️ Редактировать</button>
+    <button class="profile-edit-btn" style="margin-top:32px" id="profileEditBtn">✏️ Редактировать</button>
   </div>
-  <div style="display:flex;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr)">
-    <div style="text-align:center"><div style="font-size:16px;font-weight:800;color:var(--t)">3</div><div style="font-size:10px;color:var(--gmt)">Проекта</div></div>
-    <div style="text-align:center"><div style="font-size:16px;font-weight:800;color:var(--t)">124</div><div style="font-size:10px;color:var(--gmt)">Контакта</div></div>
-    <div style="text-align:center"><div style="font-size:16px;font-weight:800;color:var(--t)">12</div><div style="font-size:10px;color:var(--gmt)">Публикаций</div></div>
-  </div>
+  <div id="profileActions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--bdr)"></div>
 </div>
 <div class="profile-tabs">
   <button class="ptab active">Лента</button>
   <button class="ptab">Резюме</button>
   <button class="ptab">Контакты</button>
 </div>
-<div class="feed" id="feed">
-  <div class="item-card">
-    <div style="font-size:13px;color:var(--tm);line-height:1.6">ООО «Ластоп Групп» — российская интеграционная компания, формирующая инфраструктуру системного взаимодействия бизнеса. В основе — цифровая платформа «Ластоп».</div>
-    <div style="display:flex;align-items:center;gap:12px;padding-top:10px;border-top:1px solid var(--bdr);margin-top:10px">
-      <span style="font-size:11px;color:var(--gmt)">❤️ 0</span>
-      <span style="font-size:11px;color:var(--gmt)">💬 0</span>
-    </div>
-  </div>
-</div>
+<div class="feed" id="feed"></div>
 </div>
 
 <!-- RIGHT -->
 <aside class="right">
 
-<div class="card">
-  <div class="block-title">Контактная информация</div>
-  <div class="stat-row"><span class="stat-lbl">Город</span><span style="font-size:12px;color:var(--t);font-weight:500">Москва</span></div>
-  <div class="stat-row"><span class="stat-lbl">Отрасль</span><span style="font-size:12px;color:var(--t);font-weight:500">Логистика</span></div>
-  <div class="stat-row"><span class="stat-lbl">На платформе</span><span style="font-size:12px;color:var(--t);font-weight:500">с 2025 г.</span></div>
-</div>
-<div class="card">
-  <div class="block-title">Навыки</div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px">
-    <span class="tag">TMS</span><span class="tag">ВЭД</span><span class="tag">Логистика</span>
-    <span class="tag">Таможня</span><span class="tag">1С</span>
-  </div>
-</div>
-<div class="card">
-  <div class="block-title">Компания</div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="width:36px;height:36px;border-radius:var(--r);background:var(--g);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700">L</div>
-    <div>
-      <div style="font-size:12px;font-weight:700;color:var(--t)">LASTOP GROUP</div>
-      <div style="font-size:10px;color:var(--gmt)">Участник</div>
-    </div>
-  </div>
-</div>
+<div class="card" id="contactCard"></div>
+<div class="card" id="privacyCard" style="display:none"></div>
+<div class="card" id="friendsCard"></div>
 </aside>
 
 </div>
@@ -452,19 +420,166 @@ function populateProfile(user){
 }
 
 /* Auth */
+const state={me:null,viewedUser:null,viewedId:null,isSelf:true,friendStatus:'self'};
+
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  if(!feed)return;
+  const u=state.viewedUser||{};
+  const company=u.company_name||'Компания не указана';
+  const position=u.position||'Роль не указана';
+  const privacy=u.is_private_profile?'Закрытый профиль':'Открытый профиль';
+  feed.innerHTML=`<div class="item-card"><div class="item-title">О пользователе</div>
+    <div class="item-body">${esc(u.full_name||'Пользователь')} — ${esc(position)}. Компания: ${esc(company)}.</div>
+    <div class="item-footer"><span class="tag">${esc(privacy)}</span>${u.phone?`<span class="tag">Телефон: ${esc(u.phone)}</span>`:''}</div></div>`;
+}
+
+function renderContactCard(){
+  const card=document.getElementById('contactCard');
+  if(!card)return;
+  const u=state.viewedUser||{};
+  card.innerHTML=`<div class="block-title">Контактная информация</div>
+    <div class="stat-row"><span class="stat-lbl">Email</span><span style="font-size:12px;color:var(--t);font-weight:500">${esc(u.email||'Скрыт')}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Телефон</span><span style="font-size:12px;color:var(--t);font-weight:500">${esc(u.phone||'Не указан')}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Компания</span><span style="font-size:12px;color:var(--t);font-weight:500">${esc(u.company_name||'Не указана')}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Должность</span><span style="font-size:12px;color:var(--t);font-weight:500">${esc(u.position||'Не указана')}</span></div>`;
+}
+
+function renderPrivacyCard(){
+  const card=document.getElementById('privacyCard');
+  if(!card)return;
+  if(!state.isSelf){card.style.display='none'; return;}
+  card.style.display='block';
+  const checked=state.viewedUser?.is_private_profile?'checked':'';
+  card.innerHTML=`<div class="block-title">Настройки профиля</div>
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--tm)">
+      <span>Закрытый профиль</span>
+      <input type="checkbox" id="privacyToggle" ${checked}>
+    </label>
+    <div style="margin-top:8px;font-size:11px;color:var(--gmt)">В закрытом профиле ваши друзья и контакты скрываются от других пользователей.</div>`;
+  const t=document.getElementById('privacyToggle');
+  t?.addEventListener('change',async()=>{
+    try{
+      const r=await fetch(API+'/profile/settings',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify({is_private_profile:t.checked})});
+      if(!r.ok)throw new Error();
+      state.viewedUser.is_private_profile=t.checked;
+      renderFeed();
+    }catch{alert('Не удалось обновить настройки приватности'); t.checked=!t.checked;}
+  });
+}
+
+async function loadFriends(){
+  const card=document.getElementById('friendsCard');
+  if(!card)return;
+  try{
+    const r=await fetch(`${API}/users/${state.viewedId}/friends`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    const friends=data.friends||[];
+    card.innerHTML=`<div class="block-title">Друзья (${friends.length})</div>` + (friends.length?friends.slice(0,6).map(f=>`<div class="stat-row"><span class="stat-lbl">${esc(f.friend_name||'Пользователь')}</span><span style="font-size:11px;color:var(--gmt)">${ago(f.created_at)}</span></div>`).join(''):'<div style="font-size:12px;color:var(--gmt)">Пока нет друзей в списке.</div>');
+  }catch{
+    card.innerHTML='<div class="block-title">Друзья</div><div style="font-size:12px;color:var(--gmt)">Список друзей недоступен.</div>';
+  }
+}
+
+async function loadFriendStatus(){
+  if(state.isSelf){state.friendStatus='self';return;}
+  try{
+    const r=await fetch(`${API}/friends/status/${state.viewedId}`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!r.ok)throw new Error();
+    const j=await r.json();
+    state.friendStatus=j.data?.status||'none';
+  }catch{state.friendStatus='none';}
+}
+
+async function friendAction(kind){
+  const id=state.viewedId;
+  const headers={Authorization:'Bearer '+tk()};
+  const map={
+    add:['POST',`${API}/friends/request/${id}`],
+    cancel:['POST',`${API}/friends/cancel/${id}`],
+    accept:['POST',`${API}/friends/accept/${id}`],
+    reject:['POST',`${API}/friends/reject/${id}`],
+    remove:['DELETE',`${API}/friends/${id}`]
+  };
+  const [method,url]=map[kind]||[];
+  if(!method)return;
+  try{const r=await fetch(url,{method,headers}); if(!r.ok) throw new Error(); await loadFriendStatus(); renderActions(); loadFriends();}
+  catch{alert('Не удалось выполнить действие. Попробуйте позже.');}
+}
+
+function renderActions(){
+  const wrap=document.getElementById('profileActions');
+  const editBtn=document.getElementById('profileEditBtn');
+  if(editBtn)editBtn.style.display=state.isSelf?'inline-flex':'none';
+  if(state.isSelf){
+    wrap.innerHTML='<span style="font-size:12px;color:var(--gmt)">Это ваш личный профиль</span>';
+    return;
+  }
+  const common=`<button class="btn-sec" onclick="location.href='/chat.html'">Написать</button>`;
+  const actions={
+    none:`<button class="btn-pri" onclick="friendAction('add')">Добавить в друзья</button>${common}`,
+    outgoing_pending:`<button class="btn-sec" onclick="friendAction('cancel')">Отменить заявку</button>${common}`,
+    incoming_pending:`<button class="btn-pri" onclick="friendAction('accept')">Принять заявку</button><button class="btn-sec" onclick="friendAction('reject')">Отклонить</button>`,
+    accepted:`<button class="btn-sec" onclick="friendAction('remove')">Удалить из друзей</button>${common}`
+  };
+  wrap.innerHTML=actions[state.friendStatus]||actions.none;
+}
+
+function renderProfile(){
+  const u=state.viewedUser||{};
+  const name=u.full_name||u.name||'Пользователь';
+  const role=u.position||'Участник LASTOP';
+  const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  ['profileAvBig','pbAv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=initials;});
+  const pn=document.getElementById('profileName');if(pn)pn.textContent=name;
+  const pr=document.getElementById('profileRole');if(pr)pr.textContent=role;
+  renderContactCard();
+  renderPrivacyCard();
+  renderFeed();
+  renderActions();
+}
+
+async function loadViewedProfile(){
+  const params=new URLSearchParams(location.search);
+  const requested=params.get('id')||params.get('userId');
+  state.viewedId=requested||state.me?.id;
+  state.isSelf=!requested||requested===state.me?.id;
+  try{
+    const url=state.isSelf?`${API}/me`:`${API}/users/${encodeURIComponent(state.viewedId)}`;
+    const r=await fetch(url,{headers:{Authorization:'Bearer '+tk()}});
+    if(r.status===403){
+      document.getElementById('feed').innerHTML='<div class="item-card"><div class="item-title">Профиль закрыт</div><div class="item-body">Пользователь ограничил доступ к данным профиля.</div></div>';
+      document.getElementById('profileActions').innerHTML='';
+      return;
+    }
+    if(!r.ok)throw new Error();
+    const j=await r.json();
+    state.viewedUser=j.user||{};
+    await loadFriendStatus();
+    renderProfile();
+    await loadFriends();
+  }catch{
+    document.getElementById('feed').innerHTML='<div class="item-card"><div class="item-title">Ошибка</div><div class="item-body">Не удалось загрузить профиль.</div></div>';
+  }
+}
+
 (async()=>{
   if(!tk()){location.href='/login.html';return;}
   try{
     const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const{user={}}=await r.json();
+    state.me=user;
     localStorage.setItem('user',JSON.stringify(user));
     populateProfile(user);
   }catch{
     const u=JSON.parse(localStorage.getItem('user')||'{}');
+    state.me=u;
     populateProfile(u);
-    if(!u.id){location.href='/login.html';}
+    if(!u.id){location.href='/login.html'; return;}
   }
+  await loadViewedProfile();
 })();
 
 /* Search debounce */
@@ -473,40 +588,36 @@ document.getElementById('searchInput')?.addEventListener('input',e=>{
   clearTimeout(_sT);
   _sT=setTimeout(()=>onSearch(e.target.value.trim()),350);
 });
-function onSearch(q){/* override per-page */}
+function onSearch(q){if(q)location.href=`/search.html?q=${encodeURIComponent(q)}`;}
 
-/* Skeleton builder */
-function skels(n,h=120){return Array(n).fill(0).map(()=>`
-  <div class="skeleton" style="height:${h}px">
-    <div style="display:flex;gap:12px;margin-bottom:12px">
-      <div class="sl" style="width:44px;height:44px;border-radius:12px;flex-shrink:0"></div>
-      <div style="flex:1">
-        <div class="sl" style="height:13px;width:55%;margin-bottom:7px;border-radius:6px"></div>
-        <div class="sl" style="height:11px;width:35%;border-radius:6px"></div>
-      </div>
-      <div class="sl" style="width:60px;height:22px;border-radius:99px;flex-shrink:0"></div>
-    </div>
-    <div class="sl" style="height:11px;width:100%;margin-bottom:5px;border-radius:6px"></div>
-    <div class="sl" style="height:11px;width:75%;border-radius:6px"></div>
-  </div>`).join('');}
+/* profile edit */
+document.getElementById('profileEditBtn')?.addEventListener('click',async()=>{
+  if(!state.isSelf)return;
+  const current=state.viewedUser||{};
+  const first=prompt('Имя',current.first_name||''); if(first===null) return;
+  const last=prompt('Фамилия',current.last_name||''); if(last===null) return;
+  const company=prompt('Компания',current.company_name||''); if(company===null) return;
+  const phone=prompt('Телефон',current.phone||''); if(phone===null) return;
+  const position=prompt('Должность',current.position||''); if(position===null) return;
+  const payload={first_name:first.trim(),last_name:last.trim(),full_name:`${first} ${last}`.trim(),company_name:company.trim()||null,phone:phone.trim()||null,position:position.trim()||null,avatar_url:current.avatar_url||null};
+  try{
+    const r=await fetch(API+'/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(payload)});
+    if(!r.ok)throw new Error();
+    state.viewedUser={...state.viewedUser,...payload,full_name:payload.full_name};
+    state.me={...state.me,...state.viewedUser};
+    localStorage.setItem('user',JSON.stringify(state.me));
+    populateProfile(state.me);
+    renderProfile();
+  }catch{alert('Не удалось сохранить профиль');}
+});
 
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-(()=>{
-  const u=JSON.parse(localStorage.getItem('user')||'{}');
-  const name=u.full_name||u.name||'Пользователь';
-  const role=u.role||u.position||'Участник LASTOP';
-  const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-  ['profileAvBig','pbAv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=initials;});
-  const pn=document.getElementById('profileName');if(pn)pn.textContent=name;
-  const pr=document.getElementById('profileRole');if(pr)pr.textContent=role;
-  const av=document.getElementById('composeAv');if(av)av.textContent=initials;
-  document.querySelectorAll('.ptab').forEach(btn=>btn.addEventListener('click',function(){
-    document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
-    this.classList.add('active');
-  }));
-})();
+document.querySelectorAll('.ptab').forEach(btn=>btn.addEventListener('click',function(){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  this.classList.add('active');
+}));
 
 </script>
 </body>
