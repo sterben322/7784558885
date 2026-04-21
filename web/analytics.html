@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LASTOP GROUP — Аналитика контента</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#f2f5f3;--surface:#fff;--border:#dce8e1;--text:#1d2d24;--muted:#617b6d;
+      --green:#1e8a4c;--green-soft:#e9f5ee;--shadow:0 4px 18px rgba(20,77,44,.08);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text)}
+    .page{max-width:1180px;margin:0 auto;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+    h1{margin:0;font-size:28px}
+    .subtitle{margin:6px 0 0;color:var(--muted)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+    .filters{padding:18px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;margin-bottom:16px}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .label{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+    select{height:42px;border:1.5px solid var(--border);border-radius:10px;padding:0 12px;background:#f8fbf9;font:500 14px Manrope;color:var(--text)}
+    .summary{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{padding:8px 12px;border-radius:999px;background:var(--green-soft);color:var(--green);font-size:12px;font-weight:700}
+
+    .table-wrap{padding:14px 14px 4px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .content-title{font-weight:700}
+    .content-meta{font-size:12px;color:var(--muted);margin-top:4px}
+    .metric{font-weight:700;color:var(--green)}
+    .engagement{font-weight:800}
+
+    .empty{padding:28px;text-align:center;color:var(--muted)}
+
+    @media (max-width:900px){
+      .filters{grid-template-columns:1fr}
+      .summary{justify-content:flex-start}
+      .table-wrap{overflow:auto}
+      table{min-width:920px}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1>Аналитика взаимодействия</h1>
+        <p class="subtitle">Оценивайте аудиторию по всем типам пользовательского контента: сообщества, публикации, товары, услуги, резюме и другое.</p>
+      </div>
+    </header>
+
+    <section class="card filters">
+      <div class="field">
+        <label class="label" for="contentType">Тип контента</label>
+        <select id="contentType"></select>
+      </div>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <section class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Контент</th>
+            <th>Лайки</th>
+            <th>Просмотры</th>
+            <th>Репосты</th>
+            <th>Комментарии</th>
+            <th>Сохранения</th>
+            <th>CTR</th>
+            <th>Вовлеченность</th>
+          </tr>
+        </thead>
+        <tbody id="analyticsBody"></tbody>
+      </table>
+      <div class="empty" id="emptyState" hidden>Для выбранного типа контента пока нет данных.</div>
+    </section>
+  </main>
+
+  <script>
+    const contentAnalytics = {
+      communities: [
+        { title: 'IT-нетворк в Москве', meta: 'Сообщество • обновлено 2 часа назад', likes: 421, views: 9820, reposts: 68, comments: 154, saves: 120, ctr: 9.4 },
+        { title: 'Маркетинг для малого бизнеса', meta: 'Сообщество • обновлено 1 день назад', likes: 312, views: 7154, reposts: 55, comments: 93, saves: 88, ctr: 7.8 }
+      ],
+      publications: [
+        { title: '5 шагов для запуска продукта', meta: 'Публикация • 17 апреля', likes: 285, views: 6021, reposts: 73, comments: 84, saves: 140, ctr: 11.2 },
+        { title: 'Чек-лист упаковки резюме', meta: 'Публикация • 16 апреля', likes: 207, views: 4860, reposts: 42, comments: 51, saves: 117, ctr: 8.9 }
+      ],
+      products: [
+        { title: 'CRM-шаблон для отдела продаж', meta: 'Товар • цифровой', likes: 96, views: 2510, reposts: 13, comments: 37, saves: 74, ctr: 6.2 },
+        { title: 'Финансовая модель SaaS', meta: 'Товар • цифровой', likes: 112, views: 3102, reposts: 19, comments: 24, saves: 98, ctr: 7.1 }
+      ],
+      services: [
+        { title: 'Аудит маркетинговой воронки', meta: 'Услуга • B2B', likes: 64, views: 1978, reposts: 9, comments: 18, saves: 46, ctr: 5.8 },
+        { title: 'Подготовка к интервью PM', meta: 'Услуга • карьерный трек', likes: 88, views: 2281, reposts: 14, comments: 41, saves: 69, ctr: 8.4 }
+      ],
+      resumes: [
+        { title: 'Анна Смирнова — Product Designer', meta: 'Резюме • обновлено сегодня', likes: 45, views: 1710, reposts: 4, comments: 15, saves: 23, ctr: 12.1 },
+        { title: 'Игорь Павлов — Backend Go Developer', meta: 'Резюме • обновлено вчера', likes: 53, views: 1834, reposts: 5, comments: 12, saves: 29, ctr: 10.7 }
+      ],
+      other: [
+        { title: 'Карточка кейса: редизайн лендинга', meta: 'Кейс • пользовательский контент', likes: 129, views: 3305, reposts: 24, comments: 59, saves: 91, ctr: 9.9 }
+      ]
+    };
+
+    const typeLabels = {
+      communities: 'Сообщества',
+      publications: 'Публикации',
+      products: 'Товары',
+      services: 'Услуги',
+      resumes: 'Резюме',
+      other: 'Другой контент'
+    };
+
+    const typeSelect = document.getElementById('contentType');
+    const analyticsBody = document.getElementById('analyticsBody');
+    const summary = document.getElementById('summary');
+    const emptyState = document.getElementById('emptyState');
+
+    Object.entries(typeLabels).forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      typeSelect.appendChild(option);
+    });
+
+    function formatNumber(num) {
+      return new Intl.NumberFormat('ru-RU').format(num);
+    }
+
+    function renderAnalytics(type) {
+      const rows = contentAnalytics[type] || [];
+      analyticsBody.innerHTML = '';
+
+      if (!rows.length) {
+        emptyState.hidden = false;
+        return;
+      }
+
+      emptyState.hidden = true;
+      rows.forEach((item) => {
+        const engagement = item.likes + item.reposts + item.comments + item.saves;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="content-title">${item.title}</div>
+            <div class="content-meta">${item.meta}</div>
+          </td>
+          <td class="metric">${formatNumber(item.likes)}</td>
+          <td>${formatNumber(item.views)}</td>
+          <td>${formatNumber(item.reposts)}</td>
+          <td>${formatNumber(item.comments)}</td>
+          <td>${formatNumber(item.saves)}</td>
+          <td>${item.ctr}%</td>
+          <td class="engagement">${formatNumber(engagement)}</td>
+        `;
+        analyticsBody.appendChild(tr);
+      });
+
+      const totals = rows.reduce((acc, row) => {
+        acc.views += row.views;
+        acc.engagement += row.likes + row.reposts + row.comments + row.saves;
+        return acc;
+      }, { views: 0, engagement: 0 });
+
+      summary.innerHTML = `
+        <span class="pill">${typeLabels[type]}: ${rows.length}</span>
+        <span class="pill">Просмотры: ${formatNumber(totals.views)}</span>
+        <span class="pill">Вовлеченность: ${formatNumber(totals.engagement)}</span>
+      `;
+    }
+
+    typeSelect.addEventListener('change', (event) => renderAnalytics(event.target.value));
+
+    renderAnalytics('publications');
+    typeSelect.value = 'publications';
+  </script>
+</body>
+</html>
