@@ -481,7 +481,7 @@ document.getElementById('feed').innerHTML=CATALOG.map((c,i)=>`
     </div>
     <div class="item-body">${esc(c.desc)}</div>
     <div class="item-footer">
-      <button class="btn-sec" style="padding:5px 12px;font-size:11px">Подробнее</button>
+      <button class="btn-sec js-stub-detail" data-section="Каталог: ${esc(c.name)}" style="padding:5px 12px;font-size:11px">Подробнее</button>
       <button class="btn-pri" style="padding:5px 14px;font-size:11px;margin-left:auto">Запросить КП</button>
     </div>
   </div>`).join('');
@@ -490,6 +490,14 @@ document.getElementById('catList').innerHTML=['Программное обесп
     <span style="font-size:12px;color:var(--t);font-weight:500">${cat}</span>
     <span style="font-size:11px;color:var(--gmt)">${[840,420,310,180,140][i]}</span>
   </div>`).join('');
+
+
+document.querySelectorAll('.js-stub-detail').forEach((btn)=>{
+  btn.addEventListener('click',()=>{
+    const section = btn.dataset.section || 'Детали раздела';
+    window.location.href = `/stub.html?section=${encodeURIComponent(section)}`;
+  });
+});
 
 </script>
 </body>
