@@ -284,9 +284,9 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
   <div class="topbar-gap"></div>
   <div class="profile-col">
     <div class="profile-block" id="profileBlock" onclick="toggleProfile()">
-      <div class="pb-av" id="pbAv">НК</div>
+      <div class="pb-av" id="pbAv">U</div>
       <div class="pb-info">
-        <div class="pb-name" id="pbName">Никита Клишин</div>
+        <div class="pb-name" id="pbName">Загрузка…</div>
         <div class="pb-role" id="pbRole">Участник LASTOP</div>
       </div>
       <svg class="pb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -464,18 +464,18 @@ document.addEventListener('click',e=>{
   const pb=document.getElementById('profileBlock');
   if(pb&&!pb.contains(e.target))pb.classList.remove('open');
 });
-function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login.html';}
+function logout(){localStorage.removeItem('token');localStorage.removeItem('user');sessionStorage.removeItem('token');location.href='/login.html';}
 function showToast(message){
   window.alert(message);
 }
 function populateProfile(user){
   if(!user)return;
-  const name=user.full_name||user.name||'Пользователь';
-  const role=user.role||user.position||'Участник LASTOP';
+  const name=(user.full_name||user.name||'Пользователь').trim();
+  const role=(user.role||user.position||'Участник LASTOP').trim();
   const av=document.getElementById('pbAv');
   const nm=document.getElementById('pbName');
   const rl=document.getElementById('pbRole');
-  if(av)av.textContent=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  if(av)av.textContent=name.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'U';
   if(nm)nm.textContent=name;
   if(rl)rl.textContent=role;
 }
@@ -486,13 +486,14 @@ function populateProfile(user){
   try{
     const r=await fetch(API+'/me',{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
-    const{user={}}=await r.json();
+    const payload=await r.json();
+    const user=payload?.user||payload||{};
     localStorage.setItem('user',JSON.stringify(user));
     populateProfile(user);
   }catch{
     const u=JSON.parse(localStorage.getItem('user')||'{}');
     populateProfile(u);
-    if(!u.id){location.href='/login.html';}
+    if(!u.id){redirectToLogin();}
   }
 })();
 
