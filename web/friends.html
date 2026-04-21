@@ -19,7 +19,7 @@
     <section class="bg-white rounded-xl shadow-sm p-4 space-y-3">
       <h2 class="font-semibold text-lg">Добавить в друзья</h2>
       <div class="flex gap-2">
-        <input id="friendId" class="border rounded-lg px-3 py-2 flex-1" placeholder="UUID пользователя" />
+        <input id="friendName" class="border rounded-lg px-3 py-2 flex-1" placeholder="Имя или e-mail пользователя" />
         <button onclick="sendFriendRequest()" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Отправить заявку</button>
       </div>
       <div id="friendMessage" class="text-sm"></div>
@@ -73,10 +73,10 @@ async function loadFriends() {
 }
 
 async function sendFriendRequest() {
-  const id = document.getElementById('friendId').value.trim();
-  if (!id) return;
+  const name = document.getElementById('friendName').value.trim();
+  if (!name) return;
   try {
-    const data = await api(`/friends/request/${id}`, {method:'POST', headers: auth()});
+    const data = await api('/friends/request-by-name', {method:'POST', headers: auth(), body: JSON.stringify({name})});
     document.getElementById('friendMessage').textContent = data.message || 'Заявка отправлена';
     loadFriends();
   } catch (e) {
