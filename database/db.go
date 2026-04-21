@@ -492,6 +492,26 @@ func CreateTables() error {
 			PRIMARY KEY (project_id, user_id)
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_project_responses_user_id ON project_responses(user_id)`,
+		`CREATE TABLE IF NOT EXISTS catalog_items (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			owner_name VARCHAR(255) NOT NULL,
+			type VARCHAR(20) NOT NULL DEFAULT 'service',
+			category VARCHAR(120) NOT NULL,
+			name VARCHAR(255) NOT NULL,
+			company VARCHAR(255) NOT NULL,
+			price VARCHAR(120) NOT NULL,
+			description TEXT NOT NULL,
+			tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+			rating NUMERIC(3,2),
+			reviews_count INT NOT NULL DEFAULT 0,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_catalog_items_created_at ON catalog_items(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_catalog_items_type ON catalog_items(type)`,
+		`CREATE INDEX IF NOT EXISTS idx_catalog_items_category ON catalog_items(category)`,
+		`CREATE INDEX IF NOT EXISTS idx_catalog_items_owner_id ON catalog_items(owner_id)`,
 		`CREATE TABLE IF NOT EXISTS post_likes (
             post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
             user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

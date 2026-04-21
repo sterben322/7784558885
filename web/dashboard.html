@@ -410,9 +410,7 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 
 <div class="card">
   <div class="block-title">Топ за неделю</div>
-  <div class="stat-row"><span class="stat-lbl">Экспорт стройматериалов</span><span class="stat-val">2.4к</span></div>
-  <div class="stat-row"><span class="stat-lbl">Логистика фармпродукции</span><span class="stat-val">1.8к</span></div>
-  <div class="stat-row"><span class="stat-lbl">Маршруты СНГ–ЕС</span><span class="stat-val">940</span></div>
+  <div id="topList"></div>
 </div>
 <div class="card">
   <div class="block-title">Источники</div>
@@ -520,7 +518,7 @@ function skels(n,h=120){return Array(n).fill(0).map(()=>`
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-const NEWS=[
+let NEWS=[
   {title:'Экспорт стройматериалов вырос на 18% в первом квартале',cat:'Рынок',ago:'2 ч назад',text:'По данным аналитического центра, экспорт строительных материалов из России за первый квартал 2026 года увеличился на 18% по сравнению с аналогичным периодом прошлого года.',views:2400,src:'РБК'},
   {title:'ФТС обновила требования к таможенному декларированию импорта',cat:'Регуляторика',ago:'5 ч назад',text:'Федеральная таможенная служба внесла изменения в порядок декларирования ряда категорий товаров. Новые правила вступают в силу с 1 мая 2026 года.',views:1200,src:'Таможня.ру'},
   {title:'LASTOP Digital запустил новый модуль аналитики TMS',cat:'Технологии',ago:'вчера',text:'Цифровая платформа LASTOP обновила модуль управления транспортными заказами. Добавлены предиктивная аналитика и интеграция с 1С:Логистика.',views:940,src:'LASTOP'},
@@ -587,15 +585,7 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
     document.getElementById('postContent').value='';
     document.getElementById('postTargetId').value='';
     document.getElementById('postAuthorType').value='user';
-    NEWS.unshift({
-      title:title||'Публикация',
-      cat:'Публикации',
-      ago:'только что',
-      text:content,
-      views:0,
-      src:'Вы',
-    });
-    renderNews(NEWS);
+    await loadNewsFromAPI();
     showToast('Публикация добавлена.');
   }catch(error){
     showToast(error?.message&&error.message!=='post_create_failed'
@@ -604,12 +594,51 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
   }
 });
 
-renderNews(NEWS);
-document.getElementById('sourceList').innerHTML=['РБК Логистика','Таможня.ру','LASTOP Медиа','Транспорт России'].map(s=>`
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">
-    <span style="font-size:12px;font-weight:600;color:var(--t)">${s}</span>
-    <button class="btn-sec" style="padding:3px 10px;font-size:11px">Следить</button>
-  </div>`).join('');
+function renderTopWeek(items){
+  const root=document.getElementById('topList');
+  if(!root)return;
+  root.innerHTML=(items||[]).map((it)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:12px;color:var(--t);max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title||'Публикация')}</span>
+      <span style="font-size:11px;color:var(--gmt)">${num(it.views||0)}</span>
+    </div>
+  `).join('') || `<div class="item-sub">Пока нет данных</div>`;
+}
+
+function renderSources(items){
+  const root=document.getElementById('sourceList');
+  if(!root)return;
+  root.innerHTML=(items||[]).map((it)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:12px;font-weight:600;color:var(--t)">${esc(it.source||'Источник')}</span>
+      <span style="font-size:11px;color:var(--gmt)">${num(it.posts||0)} постов</span>
+    </div>`).join('') || `<div class="item-sub">Пока нет источников</div>`;
+}
+
+async function loadNewsFromAPI(){
+  try{
+    const response=await fetch(`${API}/news/dashboard?limit=30`,{headers:{Authorization:'Bearer '+tk()}});
+    if(!response.ok)throw 0;
+    const data=await response.json();
+    NEWS=(data.news||[]).map((n)=>({
+      title:n.title,
+      cat:n.cat||'Публикации',
+      ago:n.ago||'только что',
+      text:n.text||'',
+      views:n.views||0,
+      src:n.src||'LASTOP',
+    }));
+    renderNews(NEWS);
+    renderTopWeek(data.top_week||[]);
+    renderSources(data.sources||[]);
+  }catch{
+    renderNews(NEWS);
+    renderSources([]);
+    renderTopWeek([]);
+  }
+}
+
+loadNewsFromAPI();
 
 </script>
 </body>
