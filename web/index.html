@@ -538,28 +538,67 @@ function renderFeed(posts){
         <div style="width:38px;height:38px;border-radius:50%;background:${COLORS[i%COLORS.length]};
           color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0">
           ${letter(p.author)}
+const HOME_SECTIONS=[
+  {title:'Новости',subtitle:'2 свежие новости из раздела «Новости»',icon:'📰',href:'/dashboard.html',items:[
+    {title:'Экспорт стройматериалов вырос на 12% в Q2',meta:'Сегодня · 09:40',text:'Опубликован свежий обзор по рынку: рост связан с запуском новых контейнерных маршрутов.'},
+    {title:'LASTOP запустил витрину отраслевых аналитик',meta:'Сегодня · 08:15',text:'В разделе новостей добавлены отчёты по логистике, сертификации и таможенным трендам.'},
+  ]},
+  {title:'Проекты',subtitle:'2 последних проекта',icon:'📁',href:'/projects.html',items:[
+    {title:'Digital Freight Control',meta:'Обновлён сегодня',text:'Сервис мониторинга доставки с ETA-прогнозом и контролем SLA по всем рейсам.'},
+    {title:'Supply Chain AI Assistant',meta:'Добавлен вчера',text:'Помощник для планирования поставок и снижения простоев склада на базе прогнозов.'},
+  ]},
+  {title:'Мероприятия',subtitle:'2 ближайших мероприятия',icon:'📅',href:'/events.html',items:[
+    {title:'Форум «Логистика 2026»',meta:'24 апреля · Москва',text:'Панельная дискуссия по цифровой трансформации цепочек поставок и B2B-нетворкинг.'},
+    {title:'Вебинар по таможенному комплаенсу',meta:'26 апреля · Онлайн',text:'Практика подготовки документов и разбор типовых ошибок при международных поставках.'},
+  ]},
+  {title:'Выставки',subtitle:'2 блока из раздела «Выставки»',icon:'🏛️',href:'/exhibitions.html',items:[
+    {title:'LogisticsPro 2026',meta:'Май · Москва',text:'Крупнейшая отраслевая выставка решений для грузоперевозок и складской автоматизации.'},
+    {title:'Industrial Tech Expo',meta:'Июнь · Санкт-Петербург',text:'Экспозиция промышленного ПО, IoT и сервисов управления производственными процессами.'},
+  ]},
+  {title:'Резюме',subtitle:'2 блока из раздела «Резюме»',icon:'💼',href:'/jobs.html',items:[
+    {title:'Руководитель логистики — 8 лет опыта',meta:'Обновлено 2 часа назад',text:'Оптимизация маршрутов, внедрение WMS/TMS, управление распределёнными командами.'},
+    {title:'Специалист ВЭД и таможенного оформления',meta:'Обновлено сегодня',text:'Практика работы с ЕАЭС, сертификацией и международными транспортными документами.'},
+  ]},
+  {title:'Товары и услуги',subtitle:'2 блока из раздела «Товары и услуги»',icon:'🛒',href:'/catalog.html',items:[
+    {title:'Услуга «Экспресс-доставка 24/7»',meta:'ТОП предложение',text:'Срочная доставка с контролем температурного режима и онлайн-трекингом в одном окне.'},
+    {title:'Комплексная складская обработка',meta:'Новая услуга',text:'Приёмка, маркировка, кросс-докинг и отгрузка по SLA с детальной отчётностью.'},
+  ]},
+  {title:'Форум',subtitle:'2 блока из раздела «Форум»',icon:'💬',href:'/forum.html',items:[
+    {title:'Тема: лучшие практики мультимодальных перевозок',meta:'37 ответов',text:'Участники обсуждают снижение транзитных рисков и выбор оптимальных плеч доставки.'},
+    {title:'Тема: как ускорить сертификацию продукции',meta:'19 ответов',text:'Рекомендации по процессу, чек-листы документов и реальные кейсы компаний.'},
+  ]},
+  {title:'Компании',subtitle:'2 блока из раздела «Компании»',icon:'🏢',href:'/companies.html',items:[
+    {title:'NorthBridge Logistics',meta:'Партнёр LASTOP',text:'Международные перевозки, таможенное сопровождение и проектная логистика.'},
+    {title:'Vector Supply',meta:'Новый участник',text:'Цифровые решения для закупок, управления поставщиками и складской инфраструктуры.'},
+  ]},
+  {title:'Сообщества',subtitle:'2 блока из раздела «Сообщества»',icon:'👥',href:'/communities.html',items:[
+    {title:'Логисты СНГ',meta:'2 410 участников',text:'Профессиональное сообщество для обмена практикой в международной логистике.'},
+    {title:'IT в логистике',meta:'1 780 участников',text:'Кейсы автоматизации, интеграций, BI-аналитики и AI-инструментов для отрасли.'},
+  ]},
+];
+function renderFeed(sections){
+  const f=document.getElementById('feed');
+  f.innerHTML=sections.map((section,sectionIndex)=>{
+    const cards=(section.items||[]).slice(0,2).map((item,itemIndex)=>`
+      <article class="item-card" style="animation-delay:${(sectionIndex*2+itemIndex)*.04}s">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;color:var(--t)">${esc(item.title)}</div>
+          <span class="tag" style="font-size:10px;white-space:nowrap">${esc(item.meta)}</span>
         </div>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--t)">${esc(p.author)}</div>
-          <div style="font-size:11px;color:var(--gmt)">${esc(p.role)} · ${esc(p.ago)}</div>
+        <div class="item-body" style="-webkit-line-clamp:3;margin:0">${esc(item.text)}</div>
+      </article>`).join('');
+    return `
+      <section class="card" style="padding:12px 12px 8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
+          <div>
+            <div class="block-title" style="margin-bottom:4px">${section.icon} ${esc(section.title)}</div>
+            <div style="font-size:12px;color:var(--gmt)">${esc(section.subtitle)}</div>
+          </div>
+          <a href="${section.href}" class="btn-sec" style="text-decoration:none;padding:6px 12px;font-size:11px">Перейти</a>
         </div>
-      </div>
-      <div style="font-size:13px;color:var(--tm);line-height:1.6;margin-bottom:12px">${esc(p.text)}</div>
-      <div style="display:flex;align-items:center;gap:14px;padding-top:10px;border-top:1px solid var(--bdr)">
-        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gmt);cursor:pointer">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          ${p.likes}
-        </span>
-        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gmt);cursor:pointer">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          ${p.comments}
-        </span>
-        <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gmt);cursor:pointer">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Поделиться
-        </span>
-      </div>
-    </div>`).join('');
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${cards}</div>
+      </section>`;
+  }).join('');
 }
 document.getElementById('modalCreate')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
 document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
@@ -588,11 +627,14 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
       author:JSON.parse(localStorage.getItem('user')||'{}').full_name||'Вы',
       role:'Участник LASTOP',
       ago:'только что',
+    HOME_SECTIONS[0].items.unshift({
+      title:title||'Новая новость',
+      meta:'Только что',
       text:content,
-      likes:0,
-      comments:0,
     });
     applyFeedFilter(activeFeedFilter);
+    HOME_SECTIONS[0].items=HOME_SECTIONS[0].items.slice(0,2);
+    renderFeed(HOME_SECTIONS);
     showToast('Публикация добавлена.');
   }catch{
     showToast('Не удалось опубликовать. Проверьте авторизацию и попробуйте снова.');
@@ -607,6 +649,7 @@ document.querySelectorAll('.suggest-join-btn').forEach(btn=>{
   btn.addEventListener('click',()=>location.href='/communities.html');
 });
 applyFeedFilter('all');
+renderFeed(HOME_SECTIONS);
 
 </script>
 </body>
