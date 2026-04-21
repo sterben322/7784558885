@@ -337,16 +337,11 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 
 <div class="toolbar">
   <div class="section-toggle">
-    <button class="st active"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Товары</button>
-    <button class="st"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Услуги</button>
+    <button class="st active" data-section="product"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Товары</button>
+    <button class="st" data-section="service"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Услуги</button>
   </div>
-  <div class="filter-tabs">
-    <button class="ftab active">Все</button>
-    <button class="ftab">Программное обеспечение</button>
-    <button class="ftab">Оборудование</button>
-    <button class="ftab">Аутсорсинг</button>
-  </div>
-  <button class="btn-create">
+  <div class="filter-tabs" id="filterTabs"></div>
+  <button class="btn-create" id="addCatalogBtn">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Добавить
   </button>
@@ -359,9 +354,9 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
 
 <div class="card">
   <div class="block-title">Статистика</div>
-  <div class="stat-row"><span class="stat-lbl">Позиций</span><span class="stat-val">4 280</span></div>
-  <div class="stat-row"><span class="stat-lbl">Поставщиков</span><span class="stat-val">840</span></div>
-  <div class="stat-row"><span class="stat-lbl">Новых за месяц</span><span class="stat-val">124</span></div>
+  <div class="stat-row"><span class="stat-lbl">Позиций</span><span class="stat-val" id="statItems">0</span></div>
+  <div class="stat-row"><span class="stat-lbl">Поставщиков</span><span class="stat-val" id="statProviders">0</span></div>
+  <div class="stat-row"><span class="stat-lbl">Новых за месяц</span><span class="stat-val" id="statRecent">0</span></div>
 </div>
 <div class="card">
   <div class="block-title">Категории</div>
@@ -384,6 +379,51 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
   </div>
   <div class="dp-body" id="dpBody"></div>
   <div class="dp-actions" id="dpActions"></div>
+</div>
+<div class="modal-bg" id="catalogModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="catalogModalTitle">Добавить позицию</h3>
+      <button class="modal-x" id="catalogModalClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="catalogForm">
+      <div class="form-grid2">
+        <div class="form-row">
+          <label class="form-label">Тип</label>
+          <select class="form-input" name="type" required>
+            <option value="product">Товар</option>
+            <option value="service">Услуга</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Категория</label>
+          <input class="form-input" name="category" placeholder="Например: Оборудование" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Название</label>
+        <input class="form-input" name="name" placeholder="Название позиции" required>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row">
+          <label class="form-label">Компания</label>
+          <input class="form-input" name="company" placeholder="Название компании" required>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Цена / стоимость</label>
+          <input class="form-input" name="price" placeholder="от 10 000 ₽ / проект" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Описание</label>
+        <textarea class="form-input" name="description" placeholder="Краткое описание предложения" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-sec" id="catalogModalCancel">Отмена</button>
+        <button type="submit" class="btn-pri">Сохранить</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -461,35 +501,163 @@ function skels(n,h=120){return Array(n).fill(0).map(()=>`
 function closePanel(){document.getElementById('detailPanel').classList.remove('open');document.getElementById('panelOverlay').classList.remove('show');}
 function openPanel(){document.getElementById('detailPanel').classList.add('open');document.getElementById('panelOverlay').classList.add('show');}
 
-const CATALOG=[
-  {name:'TMS LASTOP Pro',type:'ПО',company:'LASTOP Digital',price:'от 45 000 ₽/мес',desc:'Полнофункциональная TMS-система для управления транспортными заказами. Интеграция с 1С, маркетплейсами и ЭДО.',rating:4.8,reviews:34},
-  {name:'WMS CloudLogic',type:'ПО',company:'CloudLogic',price:'от 28 000 ₽/мес',desc:'Система управления складом с мобильным приложением для сборщиков. Поддержка ячеечного хранения и FIFO.',rating:4.6,reviews:21},
-  {name:'Аутсорсинг таможенного оформления',type:'Услуга',company:'GlobalFreight',price:'от 8 500 ₽/ДТ',desc:'Полное сопровождение таможенного оформления: от классификации товара до получения разрешительных документов.',rating:4.9,reviews:87},
+const STORAGE_KEY='catalog-items-v1';
+const seedCatalog=[
+  {id:1,name:'TMS LASTOP Pro',type:'product',category:'Программное обеспечение',company:'LASTOP Digital',price:'от 45 000 ₽/мес',description:'Полнофункциональная TMS-система для управления транспортными заказами. Интеграция с 1С, маркетплейсами и ЭДО.',rating:4.8,reviews:34,createdAt:'2026-03-03T10:00:00Z'},
+  {id:2,name:'WMS CloudLogic',type:'product',category:'Программное обеспечение',company:'CloudLogic',price:'от 28 000 ₽/мес',description:'Система управления складом с мобильным приложением для сборщиков. Поддержка ячеечного хранения и FIFO.',rating:4.6,reviews:21,createdAt:'2026-04-06T10:00:00Z'},
+  {id:3,name:'Сканер Zebra TC22',type:'product',category:'Оборудование',company:'WarehouseTech',price:'от 74 000 ₽',description:'Промышленный мобильный терминал для работы на складе и в зоне комплектации с защитой IP65.',rating:4.7,reviews:17,createdAt:'2026-04-10T10:00:00Z'},
+  {id:4,name:'Аутсорсинг таможенного оформления',type:'service',category:'Аутсорсинг',company:'GlobalFreight',price:'от 8 500 ₽/ДТ',description:'Полное сопровождение таможенного оформления: от классификации товара до получения разрешительных документов.',rating:4.9,reviews:87,createdAt:'2026-02-18T10:00:00Z'},
+  {id:5,name:'Складской консалтинг',type:'service',category:'Консалтинг',company:'LogiExpert',price:'от 120 000 ₽/проект',description:'Аудит складских операций, оптимизация маршрутов и внедрение KPI-комплекта для команды.',rating:4.5,reviews:12,createdAt:'2026-04-12T10:00:00Z'}
 ];
-document.getElementById('feed').innerHTML=CATALOG.map((c,i)=>`
-  <div class="item-card" style="animation-delay:${i*.07}s">
+const state={section:'product',category:'Все',search:'',items:[]};
+
+function loadCatalog(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw){state.items=[...seedCatalog];saveCatalog();return;}
+  try{state.items=JSON.parse(raw);}catch{state.items=[...seedCatalog];saveCatalog();}
+}
+function saveCatalog(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.items));}
+function sectionLabel(type){return type==='service'?'Услуга':'Товар';}
+function visibleItems(){
+  return state.items.filter(item=>{
+    if(item.type!==state.section)return false;
+    if(state.category!=='Все'&&item.category!==state.category)return false;
+    if(!state.search)return true;
+    const h=`${item.name} ${item.company} ${item.description} ${item.category}`.toLowerCase();
+    return h.includes(state.search.toLowerCase());
+  });
+}
+function categoriesBySection(type){
+  return [...new Set(state.items.filter(i=>i.type===type).map(i=>i.category))].sort();
+}
+function renderFilters(){
+  const wrap=document.getElementById('filterTabs');
+  const tabs=['Все',...categoriesBySection(state.section)];
+  if(state.category!=='Все'&&!tabs.includes(state.category))state.category='Все';
+  wrap.innerHTML=tabs.map(cat=>`<button class="ftab ${cat===state.category?'active':''}" data-cat="${esc(cat)}">${esc(cat)}</button>`).join('');
+  wrap.querySelectorAll('.ftab').forEach(btn=>btn.addEventListener('click',()=>{
+    state.category=btn.dataset.cat||'Все';renderAll();
+  }));
+}
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  const items=visibleItems();
+  if(!items.length){
+    feed.innerHTML=`<div class="card"><div class="item-title">Ничего не найдено</div><div class="item-sub" style="margin-top:6px">Измените фильтры или добавьте новую позицию.</div></div>`;
+    return;
+  }
+  feed.innerHTML=items.map((c,i)=>`<div class="item-card" data-id="${c.id}" style="animation-delay:${i*.06}s">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
       <div>
-        <span class="tag" style="margin-bottom:6px;display:inline-block">${esc(c.type)}</span>
+        <span class="tag" style="margin-bottom:6px;display:inline-block">${esc(c.category)}</span>
         <div class="item-title">${esc(c.name)}</div>
-        <div class="item-sub">${esc(c.company)}</div>
+        <div class="item-sub">${esc(c.company)} · ${sectionLabel(c.type)}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;margin-left:12px">
         <div style="font-size:13px;font-weight:700;color:var(--g)">${esc(c.price)}</div>
-        <div style="font-size:11px;color:var(--gmt)">⭐ ${c.rating} (${c.reviews})</div>
+        <div style="font-size:11px;color:var(--gmt)">⭐ ${c.rating || 'Новый'}${c.reviews?` (${c.reviews})`:''}</div>
       </div>
     </div>
-    <div class="item-body">${esc(c.desc)}</div>
+    <div class="item-body">${esc(c.description)}</div>
     <div class="item-footer">
       <button class="btn-sec js-stub-detail" data-section="Каталог: ${esc(c.name)}" style="padding:5px 12px;font-size:11px">Подробнее</button>
       <button class="btn-pri" style="padding:5px 14px;font-size:11px;margin-left:auto">Запросить КП</button>
+      <button class="btn-sec" data-action="details">Подробнее</button>
+      <button class="btn-pri" style="margin-left:auto" data-action="request">Запросить КП</button>
     </div>
   </div>`).join('');
-document.getElementById('catList').innerHTML=['Программное обеспечение','Оборудование','Аутсорсинг','Консалтинг','Обучение'].map((cat,i)=>`
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--gp)'" onmouseout="this.style.background=''">
-    <span style="font-size:12px;color:var(--t);font-weight:500">${cat}</span>
-    <span style="font-size:11px;color:var(--gmt)">${[840,420,310,180,140][i]}</span>
-  </div>`).join('');
+}
+function renderStats(){
+  const all=state.items;
+  const uniqueProviders=new Set(all.map(i=>i.company)).size;
+  const start=new Date();start.setDate(start.getDate()-30);
+  const recent=all.filter(i=>new Date(i.createdAt)>=start).length;
+  document.getElementById('statItems').textContent=String(all.length);
+  document.getElementById('statProviders').textContent=String(uniqueProviders);
+  document.getElementById('statRecent').textContent=String(recent);
+}
+function renderCategoryList(){
+  const counts=state.items.reduce((acc,item)=>{acc[item.category]=(acc[item.category]||0)+1;return acc;},{});
+  const cats=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('catList').innerHTML=cats.map(([cat,count])=>`
+    <div class="cat-item" data-cat="${esc(cat)}" style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:var(--rm);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--gp)'" onmouseout="this.style.background=''">
+      <span style="font-size:12px;color:var(--t);font-weight:500">${esc(cat)}</span>
+      <span style="font-size:11px;color:var(--gmt)">${count}</span>
+    </div>`).join('');
+  document.querySelectorAll('.cat-item').forEach(el=>el.addEventListener('click',()=>{
+    const cat=el.dataset.cat;
+    const item=state.items.find(i=>i.category===cat);
+    if(!item)return;
+    state.section=item.type;state.category=cat;
+    syncSectionButtons();renderAll();
+  }));
+}
+function renderAll(){renderFilters();renderFeed();renderStats();renderCategoryList();}
+function syncSectionButtons(){
+  document.querySelectorAll('.st').forEach(btn=>btn.classList.toggle('active',btn.dataset.section===state.section));
+}
+function showDetails(item){
+  document.getElementById('dpLabel').textContent=item.name;
+  document.getElementById('dpBody').innerHTML=`
+    <div class="item-sub" style="margin-bottom:10px">${esc(item.company)} · ${sectionLabel(item.type)}</div>
+    <div class="tag" style="margin-bottom:10px">${esc(item.category)}</div>
+    <div style="font-size:14px;font-weight:700;color:var(--g);margin-bottom:8px">${esc(item.price)}</div>
+    <div style="font-size:13px;color:var(--tm);line-height:1.6">${esc(item.description)}</div>
+  `;
+  document.getElementById('dpActions').innerHTML=`
+    <button class="btn-sec" onclick="closePanel()">Закрыть</button>
+    <button class="btn-pri" id="quickRequestBtn">Запросить КП</button>
+  `;
+  document.getElementById('quickRequestBtn')?.addEventListener('click',()=>alert(`Запрос на КП отправлен поставщику: ${item.company}`));
+  openPanel();
+}
+function openCatalogModal(){document.getElementById('catalogModal').classList.add('open');}
+function closeCatalogModal(){document.getElementById('catalogModal').classList.remove('open');document.getElementById('catalogForm').reset();}
+onSearch=(q)=>{state.search=q;renderFeed();};
+
+loadCatalog();
+renderAll();
+syncSectionButtons();
+
+document.querySelectorAll('.st').forEach(btn=>btn.addEventListener('click',()=>{
+  state.section=btn.dataset.section||'product';
+  state.category='Все';
+  syncSectionButtons();
+  renderAll();
+}));
+document.getElementById('addCatalogBtn').addEventListener('click',openCatalogModal);
+document.getElementById('catalogModalClose').addEventListener('click',closeCatalogModal);
+document.getElementById('catalogModalCancel').addEventListener('click',closeCatalogModal);
+document.getElementById('catalogModal').addEventListener('click',e=>{if(e.target.id==='catalogModal')closeCatalogModal();});
+document.getElementById('catalogForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const item={
+    id:Date.now(),
+    type:fd.get('type'),
+    category:String(fd.get('category')||'').trim(),
+    name:String(fd.get('name')||'').trim(),
+    company:String(fd.get('company')||'').trim(),
+    price:String(fd.get('price')||'').trim(),
+    description:String(fd.get('description')||'').trim(),
+    rating:null,reviews:0,createdAt:new Date().toISOString()
+  };
+  state.items.unshift(item);
+  saveCatalog();
+  state.section=item.type;
+  state.category='Все';
+  syncSectionButtons();
+  renderAll();
+  closeCatalogModal();
+});
+document.getElementById('feed').addEventListener('click',e=>{
+  const card=e.target.closest('.item-card'); if(!card)return;
+  const id=Number(card.dataset.id);
+  const item=state.items.find(i=>i.id===id); if(!item)return;
+  const action=e.target.dataset.action;
+  if(action==='details'){showDetails(item);return;}
+  if(action==='request'){alert(`Запрос на коммерческое предложение отправлен компании ${item.company}`);return;}
+});
 
 
 document.querySelectorAll('.js-stub-detail').forEach((btn)=>{
