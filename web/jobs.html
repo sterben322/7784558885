@@ -980,11 +980,15 @@ function filterByCat(cat){
 /* ── MY ITEMS ── */
 async function loadMyItems(){
   try{
-    const endpoint=mode==='cv'?`${API}/resumes/my`:`${API}/jobs/my`;
+    const endpoint=mode==='cv'?`${API}/resume/me`:`${API}/jobs/my`;
     const r=await fetch(endpoint,{headers:{Authorization:'Bearer '+tk()}});
     if(!r.ok)throw 0;
     const data=await r.json();
-    renderMyItems(data.resumes||data.jobs||[]);
+    if(mode==='cv'){
+      renderMyItems(data.resume?[data.resume]:[]);
+      return;
+    }
+    renderMyItems(data.jobs||[]);
   }catch{renderMyItems([]);}
 }
 function renderMyItems(list){
@@ -1043,7 +1047,7 @@ async function submitCv(){
     }]:[]
   };
   try{
-    const r=await fetch(`${API}/resumes`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
+    const r=await fetch(`${API}/resume`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},body:JSON.stringify(body)});
     if(r.ok){closeModalCv();loadFeed();loadMyItems();loadStats();}
   }catch{closeModalCv();loadFeed();}
   btn.disabled=false;btn.textContent='Опубликовать резюме';

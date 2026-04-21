@@ -379,6 +379,20 @@ textarea.form-input{resize:none;height:90px;line-height:1.55}
       <label class="form-label">Заголовок</label>
       <input class="form-input" id="postTitle" placeholder="Заголовок публикации...">
     </div>
+    <div class="form-grid2">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">Автор</label>
+        <select class="form-input" id="postAuthorType">
+          <option value="user">От моего имени</option>
+          <option value="community">От сообщества</option>
+          <option value="company">От компании</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">ID цели</label>
+        <input class="form-input" id="postTargetId" placeholder="UUID community/company">
+      </div>
+    </div>
     <div class="form-row">
       <label class="form-label">Текст</label>
       <textarea class="form-input" id="postContent" placeholder="Расскажите подробнее..." style="height:120px"></textarea>
@@ -545,13 +559,16 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
   }
   const title=(document.getElementById('postTitle')?.value||'').trim();
   const content=(document.getElementById('postContent')?.value||'').trim();
+  const authorType=(document.getElementById('postAuthorType')?.value||'user').trim();
+  const targetId=(document.getElementById('postTargetId')?.value||'').trim();
   if(!content){
     showToast('Добавьте текст публикации.');
     return;
   }
-  const body={title:title||'Публикация',content};
+  const body={title:title||'Публикация',content,privacy_level:'public'};
+  if((authorType==='community'||authorType==='company') && targetId) body.target_id=targetId;
   try{
-    const response=await fetch(API+'/posts',{
+    const response=await fetch(`${API}/posts?author_type=${encodeURIComponent(authorType)}`,{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk()},
       body:JSON.stringify(body),
@@ -568,6 +585,8 @@ document.getElementById('createPostBtn')?.addEventListener('click', async ()=>{
     createModal.classList.remove('open');
     document.getElementById('postTitle').value='';
     document.getElementById('postContent').value='';
+    document.getElementById('postTargetId').value='';
+    document.getElementById('postAuthorType').value='user';
     NEWS.unshift({
       title:title||'Публикация',
       cat:'Публикации',
